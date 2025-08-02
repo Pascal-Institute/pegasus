@@ -15,3 +15,9 @@ npm install --save electron electron-reload electron-rebuild sharp fs imgkit
 ```
 
 #### imgkit is local module.
+
+## 2. execute
+
+```
+electron .
+```

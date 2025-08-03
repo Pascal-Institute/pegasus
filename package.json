@@ -10,9 +10,9 @@
   },
   "devDependencies": {
     "electron": "^16.2.8",
+    "electron-builder": "^22.14.13",
     "electron-rebuild": "^3.2.9",
-    "electron-reload": "^2.0.0-alpha.1",
-    "electron-builder": "^24.13.3"
+    "electron-reload": "^2.0.0-alpha.1"
   },
   "scripts": {
     "start": "electron .",
@@ -32,13 +32,22 @@
         }
       ]
     },
+    "mac": {
+      "target": []
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "asar": false,
     "files": [
       "**/*",
-      "!dist",
-      "!node_modules"
+      "!output",
+      "assets",
+      "imgkit"
     ],
     "directories": {
-      "output": "dist"
+      "output": "output"
     }
   },
   "author": "volta2030",

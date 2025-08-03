@@ -175,7 +175,6 @@ class ImageLayer {
     this.canvas.addEventListener("mousedown", (event) => {
       ImageLayer.dragFlag = true;
       if (ImageLayer.drawFlag) {
-        this.canvas.style.cursor = "pointer"; // Change cursor to pointer when drawFlag is true
         this.ctx.beginPath();
         this.ctx.moveTo(
           event.clientX - this.canvas.getBoundingClientRect().left,

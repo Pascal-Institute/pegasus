@@ -32,7 +32,6 @@ function createMainWindow() {
   mainWindow.loadFile("index.html");
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
-
   return mainWindow;
 }
 
@@ -239,6 +238,38 @@ app.whenReady().then(() => {
             label: "Save As...",
             click: () => {
               event.sender.send("setExtensionCMD");
+            },
+          },
+        ],
+      },
+      {
+        label: "Debug",
+        submenu: [
+          {
+            label: "Toggle Developer Tools",
+            accelerator: "F12",
+            click: () => {
+              if (mainWindow && !mainWindow.isDestroyed()) {
+                mainWindow.webContents.openDevTools();
+              } else {
+                console.error(
+                  "Main window is not available or has been destroyed."
+                );
+              }
+            },
+          },
+          {
+            label: "Toggle BrowserView Developer Tools",
+            accelerator: "Ctrl+Shift+I",
+            click: () => {
+              if (mainWindow && !mainWindow.isDestroyed()) {
+                const views = mainWindow.getBrowserViews();
+                if (views.length > 0) {
+                  views[0].webContents.openDevTools();
+                } else {
+                  console.error("No BrowserView available.");
+                }
+              }
             },
           },
         ],

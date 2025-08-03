@@ -32,3 +32,23 @@ or
 ```bash
 npm start
 ```
+
+## 3. Application Specification
+
+### Availiable file extension
+
+```bash
+png jpg jpeg webp gif bmp ico
+```
+
+#### extension converting
+
+### Image Processing
+
+#### resize
+
+#### filter
+
+#### rotate
+
+#### paint

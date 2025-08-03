@@ -54,6 +54,25 @@ select#extensionComboBox {
   background: none;
 }
 
+.deleteBtn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background-color: transparent;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  right: 5px;
+  top: 5px;
+  cursor: pointer; /* 클릭 가능 표시 */
+}
+
+.deleteBtn:active {
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+}
+
 .mainColorBox {
   width: 24px;
   height: 86px;

@@ -29,7 +29,7 @@ class ImageLayer {
     this.infoQueue = [];
     this.extensionQueue = [];
     this.i = -1;
-    this.sio = false;
+    this.showImageOnly = false;
 
     //initialize
     this.imgPanel = document.createElement("div");
@@ -40,6 +40,32 @@ class ImageLayer {
     this.canvas.setAttribute("class", "img-canvas");
     this.canvas.className = "previewImg";
     this.canvas.id = "default";
+
+    this.deleteBtn = document.createElement("button");
+    this.deleteBtn.className = "deleteBtn";
+    const img = document.createElement("img");
+    img.src = "assets/close.ico";
+    console.log(img.src);
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "contain";
+    this.deleteBtn.appendChild(img);
+    this.deleteBtn.addEventListener("click", (event) => {
+      const index = parseInt(this.imgPanel.id, 10);
+      if (index >= 0 && index < imageLayerQueue.length) {
+        if (this.imgPanel.parentNode) {
+          this.imgPanel.parentNode.removeChild(this.imgPanel);
+        }
+        imageLayerQueue.splice(index, 1);
+        Parameter.num = Math.max(0, imageLayerQueue.length - 1);
+        if (imageLayerQueue.length > 0) {
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        } else {
+          Parameter.num = 0;
+        }
+      }
+    });
 
     this.mainColorBox = document.createElement("div");
     this.mainColorBox.className = "mainColorBox";
@@ -239,6 +265,7 @@ class ImageLayer {
     });
 
     this.imgPanel.appendChild(this.canvas);
+    this.imgPanel.appendChild(this.deleteBtn);
     this.imgPanel.appendChild(this.mainColorBox);
     this.imgPanel.appendChild(this.imgInfoText);
     this.imgPanel.appendChild(this.extensionComboBox);
@@ -341,7 +368,7 @@ class ImageLayer {
   }
 
   updateSio() {
-    if (this.sio) {
+    if (this.showImageOnly) {
       document.getElementById("showImageOnlyCheckBox").checked = true;
       this.mainColorBox.style.visibility = "hidden";
       this.imgInfoText.style.visibility = "hidden";

@@ -2,9 +2,15 @@ const electron = require("electron");
 const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu } = electron;
 
 //electron refresh (only develop)
-require("electron-reload")(__dirname, {
-  electron: require(`${__dirname}/node_modules/electron`),
-});
+if (process.env.NODE_ENV === "development") {
+  try {
+    require("electron-reload")(__dirname, {
+      electron: require(`${__dirname}/node_modules/electron`),
+    });
+  } catch (e) {
+    console.log("electron-reload not found (this is okay in production)");
+  }
+}
 
 function createMainWindow() {
   // Create the browser window.
@@ -263,7 +269,7 @@ app.whenReady().then(() => {
                 title: "About",
                 buttons: ["Ok"],
                 message:
-                  "Author : humasoft\nVersion : v1.0.0\nLicense : MIT Lisence\n",
+                  "Author : Pascal Institute\nVersion : v1.0.0\nLicense : MIT Lisence\n",
               });
             },
           },

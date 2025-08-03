@@ -4,18 +4,51 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
-    "electron": "^16.0.5",
-    "fs": "0.0.1-security",
+    "fs": "^0.0.1-security",
     "imgkit": "file:imgkit",
     "sharp": "^0.29.3"
   },
   "devDependencies": {
-    "electron-rebuild": "^3.2.5",
+    "electron": "^16.2.8",
+    "electron-builder": "^22.14.13",
+    "electron-rebuild": "^3.2.9",
     "electron-reload": "^2.0.0-alpha.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder",
+    "rebuild": "electron-rebuild -f -w sharp"
+  },
+  "build": {
+    "appId": "com.pascal.institute.pegasus",
+    "productName": "Pegasus",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "mac": {
+      "target": []
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "asar": false,
+    "files": [
+      "**/*",
+      "!output",
+      "assets",
+      "imgkit"
+    ],
+    "directories": {
+      "output": "output"
+    }
   },
   "author": "volta2030",
   "license": "MIT"

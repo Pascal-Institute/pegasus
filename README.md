@@ -10,7 +10,7 @@
 - node.js : v22.18.0 (At least version)
 
 ```bash
-npm install --save electron electron-reload electron-rebuild electron-builder sharp fs imgkit
+npm install --save electron electron-reload electron-rebuild electron-builder sharp sharp-ico sharp-bmp fs imgkit
 ```
 
 ### npm update (Recommended)

@@ -6,7 +6,9 @@
   "dependencies": {
     "fs": "^0.0.1-security",
     "imgkit": "file:imgkit",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "sharp-bmp": "^0.1.5",
+    "sharp-ico": "^0.1.5"
   },
   "devDependencies": {
     "electron": "^37.2.5",

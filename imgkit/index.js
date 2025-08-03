@@ -1,5 +1,8 @@
 const sharp = require("sharp");
+const bmp = require("sharp-bmp");
+const ico = require("sharp-ico");
 var path = require("path");
+const { channel } = require("diagnostics_channel");
 
 // class ImageLayerQueue {
 //   static imageLayerQueue = [];
@@ -125,6 +128,12 @@ class ImageLayer {
     this.gifOption = document.createElement("option");
     this.gifOption.value = "gif";
     this.gifOption.innerText = "gif";
+    this.bmpOption = document.createElement("option");
+    this.bmpOption.value = "bmp";
+    this.bmpOption.innerText = "bmp";
+    this.icoOption = document.createElement("option");
+    this.icoOption.value = "ico";
+    this.icoOption.innerText = "ico";
 
     this.ctx = this.canvas.getContext("2d");
 
@@ -244,23 +253,75 @@ class ImageLayer {
     this.extensionComboBox.appendChild(this.jpegOption);
     this.extensionComboBox.appendChild(this.webpOption);
     this.extensionComboBox.appendChild(this.gifOption);
+    this.extensionComboBox.appendChild(this.bmpOption);
+    this.extensionComboBox.appendChild(this.icoOption);
     this.extensionComboBox.addEventListener("change", (event) => {
       this.extension = event.target.value;
       this.filepath = this.filepath.replace(
         path.extname(this.filepath),
         `.${this.extension}`
       );
-      sharp(this.buffer)
-        .toFormat(this.extension)
-        .toBuffer((err, buf, info) => {
-          this.updatePreviewImg(buf, info);
-          document
-            .getElementById("convert_msg")
-            .animate([{ opacity: "1" }, { opacity: "0" }], {
-              duration: 1800,
-              iterations: 1,
-            });
+
+      if (this.extension === "bmp") {
+        bmp.sharpToBmp(sharp(this.buffer), this.filepath).then(async (info) => {
+          const fs = require("fs").promises;
+          const buf = await fs.readFile(this.filepath);
+          const pngBuffer = await bmp.sharpFromBmp(buf).png().toBuffer();
+          const outputInfo = {
+            format: "png", // 여기 확장자 바꿔줘야 화면에서 잘 뜸
+            size: pngBuffer.length,
+            width: info.width,
+            height: info.height,
+            channels: 4, // PNG RGBA
+            premultiplied: false,
+          };
+          this.updatePreviewImg(pngBuffer, outputInfo);
         });
+
+        document
+          .getElementById("convert_msg")
+          .animate([{ opacity: "1" }, { opacity: "0" }], {
+            duration: 1800,
+            iterations: 1,
+          });
+      } else if (this.extension === "ico") {
+        ico
+          .sharpsToIco([sharp(this.buffer)], this.filepath)
+          .then(async (info) => {
+            const fs = require("fs").promises;
+            const buf = await fs.readFile(this.filepath);
+            const sharpList = ico.sharpsFromIco(buf); // Sharp[] 배열 반환
+            const pngBuffer = await sharpList[0].png().toBuffer();
+            const outputInfo = {
+              format: "png", // 여기 확장자 바꿔줘야 화면에서 잘 뜸
+              size: pngBuffer.length,
+              width: info.width,
+              height: info.height,
+              channels: 4, // PNG RGBA
+              premultiplied: false,
+            };
+            this.updatePreviewImg(pngBuffer, outputInfo);
+          });
+
+        document
+          .getElementById("convert_msg")
+          .animate([{ opacity: "1" }, { opacity: "0" }], {
+            duration: 1800,
+            iterations: 1,
+          });
+      } else {
+        sharp(this.buffer)
+          .toFormat(this.extension)
+          .toBuffer((err, buf, info) => {
+            this.updatePreviewImg(buf, info);
+            document
+              .getElementById("convert_msg")
+              .animate([{ opacity: "1" }, { opacity: "0" }], {
+                duration: 1800,
+                iterations: 1,
+              });
+          });
+      }
     });
   }
 

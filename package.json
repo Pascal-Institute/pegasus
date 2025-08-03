@@ -6,11 +6,11 @@
   "dependencies": {
     "fs": "^0.0.1-security",
     "imgkit": "file:imgkit",
-    "sharp": "^0.29.3"
+    "sharp": "^0.34.3"
   },
   "devDependencies": {
-    "electron": "^16.2.8",
-    "electron-builder": "^22.14.13",
+    "electron": "^37.2.5",
+    "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
     "electron-reload": "^2.0.0-alpha.1"
   },

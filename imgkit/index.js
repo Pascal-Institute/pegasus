@@ -122,6 +122,9 @@ class ImageLayer {
     this.webpOption = document.createElement("option");
     this.webpOption.value = "webp";
     this.webpOption.innerText = "webp";
+    this.gifOption = document.createElement("option");
+    this.gifOption.value = "gif";
+    this.gifOption.innerText = "gif";
 
     this.ctx = this.canvas.getContext("2d");
 
@@ -221,11 +224,11 @@ class ImageLayer {
       }
     });
 
-    this.canvas.addEventListener("mouseup",(event)=>{
-      if(ImageLayer.drawFlag){
+    this.canvas.addEventListener("mouseup", (event) => {
+      if (ImageLayer.drawFlag) {
         //paste
       }
-    })
+    });
 
     this.imgPanel.appendChild(this.canvas);
     this.imgPanel.appendChild(this.mainColorBox);
@@ -241,6 +244,7 @@ class ImageLayer {
     this.extensionComboBox.appendChild(this.jpgOption);
     this.extensionComboBox.appendChild(this.jpegOption);
     this.extensionComboBox.appendChild(this.webpOption);
+    this.extensionComboBox.appendChild(this.gifOption);
     this.extensionComboBox.addEventListener("change", (event) => {
       this.extension = event.target.value;
       this.filepath = this.filepath.replace(

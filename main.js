@@ -269,7 +269,7 @@ app.whenReady().then(() => {
                 title: "About",
                 buttons: ["Ok"],
                 message:
-                  "Author : humasoft\nVersion : v1.0.0\nLicense : MIT Lisence\n",
+                  "Author : Pascal Institute\nVersion : v1.0.0\nLicense : MIT Lisence\n",
               });
             },
           },

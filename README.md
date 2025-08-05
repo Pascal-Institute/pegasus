@@ -38,7 +38,7 @@ npm start
 ### Availiable file extension
 
 ```bash
-png jpg jpeg webp gif bmp ico
+png jpg jpeg webp gif bmp ico tiff tif
 ```
 
 #### extension converting

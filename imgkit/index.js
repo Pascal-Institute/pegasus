@@ -177,6 +177,12 @@ class ImageLayer {
     this.icoOption = document.createElement("option");
     this.icoOption.value = "ico";
     this.icoOption.innerText = "ico";
+    this.tifOption = document.createElement("option");
+    this.tifOption.value = "tif";
+    this.tifOption.innerText = "tif";
+    this.tiffOption = document.createElement("option");
+    this.tiffOption.value = "tiff";
+    this.tiffOption.innerText = "tiff";
 
     this.ctx = this.canvas.getContext("2d");
 
@@ -299,6 +305,8 @@ class ImageLayer {
     this.extensionComboBox.appendChild(this.gifOption);
     this.extensionComboBox.appendChild(this.bmpOption);
     this.extensionComboBox.appendChild(this.icoOption);
+    this.extensionComboBox.appendChild(this.tifOption);
+    this.extensionComboBox.appendChild(this.tiffOption);
     this.extensionComboBox.addEventListener("change", (event) => {
       this.extension = event.target.value;
       this.filepath = this.filepath.replace(
@@ -525,9 +533,18 @@ class ImageLayer {
     }
     this.filepath = filepath;
     this.extension = path.extname(this.filepath).replace(".", "");
-    sharp(filepath).toBuffer((err, buf, info) => {
-      this.updatePreviewImg(buf, info);
-    });
+
+    if (this.extension === "tiff" || this.extension === "tif") {
+      sharp(filepath)
+        .toFormat("png")
+        .toBuffer((err, buf, info) => {
+          this.updatePreviewImg(buf, info);
+        });
+    } else {
+      sharp(filepath).toBuffer((err, buf, info) => {
+        this.updatePreviewImg(buf, info);
+      });
+    }
   }
 
   saveImg(filepath) {

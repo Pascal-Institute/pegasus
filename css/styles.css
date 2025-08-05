@@ -24,6 +24,20 @@ body {
   display: flex;
 }
 
+#toolBox1 button {
+  background-color: #f5f5f5; /* Light background for buttons */
+  border: 1px solid #333; /* Default border for all sides */
+  border-radius: 2px; /* Slightly rounded corners */
+  padding: 2px; /* Padding inside buttons */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: all 0.2s ease; /* Smooth transition for hover and active states */
+}
+
+#toolBox1 button:hover {
+  background-color: #e0e0e0; /* Slightly darker background on hover */
+  border-color: #555; /* Darker border on hover */
+}
+
 #toolBox2 {
   position: fixed;
   top: 122px;

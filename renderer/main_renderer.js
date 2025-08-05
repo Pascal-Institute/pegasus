@@ -6,15 +6,22 @@ var path = require("path");
 var fullScreenFlag = false;
 var lineWidth = 1;
 
-["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"].forEach(
-  (item, index, arr) => {
-    document.getElementById(item).addEventListener("click", (event) => {
-      ipcRenderer.send(`${item.replace("Btn", "")}ImgREQ`);
-      ImageLayer.cropFlag = false;
-      ImageLayer.drawFlag = false;
+const buttons = ["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"];
+
+buttons.forEach((btnId) => {
+  const btn = document.getElementById(btnId);
+  btn.addEventListener("click", (event) => {
+    buttons.forEach((id) => {
+      document.getElementById(id).style.borderBottom = "2px solid #333";
     });
-  }
-);
+
+    event.currentTarget.style.borderBottom = "none";
+
+    ipcRenderer.send(`${btnId.replace("Btn", "")}ImgREQ`);
+    ImageLayer.cropFlag = false;
+    ImageLayer.drawFlag = false;
+  });
+});
 
 ipcRenderer.send("showMenuREQ", "ping");
 

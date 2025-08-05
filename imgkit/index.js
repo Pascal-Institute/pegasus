@@ -35,6 +35,7 @@ class ImageLayer {
     this.imgPanel = document.createElement("div");
     this.imgPanel.className = "imgPanel";
     this.imgPanel.id = Parameter.num;
+    this.imgPanel.tabIndex = 0; //enable focus
 
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("class", "img-canvas");
@@ -50,7 +51,7 @@ class ImageLayer {
     img.style.height = "100%";
     img.style.objectFit = "contain";
     this.deleteBtn.appendChild(img);
-    this.deleteBtn.addEventListener("click", (event) => {
+    const deleteImagePanel = () => {
       const index = parseInt(this.imgPanel.id, 10);
       if (index >= 0 && index < imageLayerQueue.length) {
         if (this.imgPanel.parentNode) {
@@ -64,6 +65,14 @@ class ImageLayer {
         } else {
           Parameter.num = 0;
         }
+      }
+    };
+
+    this.deleteBtn.addEventListener("click", deleteImagePanel);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Delete" && document.activeElement === this.imgPanel) {
+        deleteImagePanel();
       }
     });
 

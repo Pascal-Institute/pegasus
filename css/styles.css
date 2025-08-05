@@ -121,6 +121,18 @@ select#extensionComboBox {
   right: 0px;
 }
 
+#undoBtn {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+}
+
+#redoBtn {
+  position: fixed;
+  bottom: 10px;
+  left: 54px;
+}
+
 #showImageOnlyLabel {
   position: fixed;
   bottom: 10px;

@@ -78,7 +78,7 @@ class ImageLayer {
     this.deleteBtn.addEventListener("click", deleteImagePanel);
 
     this.nameSpan = document.createElement("span");
-    this.nameSpan.className = "nameSpan";
+    this.nameSpan.id = "nameSpan";
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Delete" && document.activeElement === this.imgPanel) {

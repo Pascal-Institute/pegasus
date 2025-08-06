@@ -87,7 +87,7 @@ select#extensionComboBox {
   transform: translateY(1px);
 }
 
-.nameSpan {
+#nameSpan {
   position: absolute;
   top: 8px;
   left: 8px;

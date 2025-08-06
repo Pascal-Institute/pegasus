@@ -54,7 +54,6 @@ class ImageLayer {
     this.deleteBtn.className = "deleteBtn";
     const img = document.createElement("img");
     img.src = "assets/close.ico";
-    console.log(img.src);
     img.style.width = "100%";
     img.style.height = "100%";
     img.style.objectFit = "contain";
@@ -77,6 +76,9 @@ class ImageLayer {
     };
 
     this.deleteBtn.addEventListener("click", deleteImagePanel);
+
+    this.nameSpan = document.createElement("span");
+    this.nameSpan.className = "nameSpan";
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Delete" && document.activeElement === this.imgPanel) {
@@ -306,6 +308,7 @@ class ImageLayer {
 
     this.imgPanel.appendChild(this.canvas);
     this.imgPanel.appendChild(this.deleteBtn);
+    this.imgPanel.appendChild(this.nameSpan);
     this.imgPanel.appendChild(this.mainColorBox);
     this.imgPanel.appendChild(this.imgInfoText);
     this.imgPanel.appendChild(this.extensionComboBox);
@@ -412,11 +415,13 @@ class ImageLayer {
   updateSio() {
     if (this.showImageOnly) {
       document.getElementById("showImageOnlyCheckBox").checked = true;
+      this.nameSpan.style.visibility = "hidden";
       this.mainColorBox.style.visibility = "hidden";
       this.imgInfoText.style.visibility = "hidden";
       this.extensionComboBox.style.visibility = "hidden";
     } else {
       document.getElementById("showImageOnlyCheckBox").checked = false;
+      this.nameSpan.style.visibility = "visible";
       this.mainColorBox.style.visibility = "visible";
       this.imgInfoText.style.visibility = "visible";
       this.extensionComboBox.style.visibility = "visible";
@@ -550,7 +555,9 @@ class ImageLayer {
     }
     this.filepath = filepath;
     this.extension = path.extname(this.filepath).replace(".", "");
-
+    this.nameSpan.textContent = path
+      .basename(this.filepath)
+      .replace("." + this.extension, "");
     if (this.extension === "tiff" || this.extension === "tif") {
       sharp(filepath)
         .toFormat("png")

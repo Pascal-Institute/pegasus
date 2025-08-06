@@ -87,6 +87,12 @@ select#extensionComboBox {
   transform: translateY(1px);
 }
 
+.nameSpan {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
 .mainColorBox {
   width: 24px;
   height: 86px;

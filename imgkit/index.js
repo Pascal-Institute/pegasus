@@ -51,7 +51,7 @@ class ImageLayer {
     this.canvas.id = "default";
 
     this.deleteBtn = document.createElement("button");
-    this.deleteBtn.className = "deleteBtn";
+    this.deleteBtn.id = "deleteBtn";
     const img = document.createElement("img");
     img.src = "assets/close.ico";
     img.style.width = "100%";
@@ -414,11 +414,13 @@ class ImageLayer {
 
   updateSio() {
     if (this.showImageOnly) {
+      this.deleteBtn.style.visibility = "hidden";
       this.nameSpan.style.visibility = "hidden";
       this.mainColorBox.style.visibility = "hidden";
       this.imgInfoText.style.visibility = "hidden";
       this.extensionComboBox.style.visibility = "hidden";
     } else {
+      this.deleteBtn.style.visibility = "visible";
       this.nameSpan.style.visibility = "visible";
       this.mainColorBox.style.visibility = "visible";
       this.imgInfoText.style.visibility = "visible";

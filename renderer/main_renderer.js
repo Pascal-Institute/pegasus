@@ -171,6 +171,7 @@ var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
 
 sioCheckBox.addEventListener("click", (event) => {
   if (sioCheckBox.checked) {
+    imageLayerQueue[Parameter.num].deleteBtn.style.visibility = "hidden";
     imageLayerQueue[Parameter.num].nameSpan.style.visibility = "hidden";
     imageLayerQueue[Parameter.num].mainColorBox.style.visibility = "hidden";
     imageLayerQueue[Parameter.num].imgInfoText.style.visibility = "hidden";
@@ -178,6 +179,7 @@ sioCheckBox.addEventListener("click", (event) => {
       "hidden";
     imageLayerQueue[Parameter.num].sio = true;
   } else {
+    imageLayerQueue[Parameter.num].deleteBtn.style.visibility = "visible";
     imageLayerQueue[Parameter.num].nameSpan.style.visibility = "visible";
     imageLayerQueue[Parameter.num].mainColorBox.style.visibility = "visible";
     imageLayerQueue[Parameter.num].imgInfoText.style.visibility = "visible";

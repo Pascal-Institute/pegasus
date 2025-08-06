@@ -68,7 +68,7 @@ select#extensionComboBox {
   background: none;
 }
 
-.deleteBtn {
+#deleteBtn {
   width: 24px;
   height: 24px;
   border: none;

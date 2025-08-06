@@ -414,13 +414,11 @@ class ImageLayer {
 
   updateSio() {
     if (this.showImageOnly) {
-      document.getElementById("showImageOnlyCheckBox").checked = true;
       this.nameSpan.style.visibility = "hidden";
       this.mainColorBox.style.visibility = "hidden";
       this.imgInfoText.style.visibility = "hidden";
       this.extensionComboBox.style.visibility = "hidden";
     } else {
-      document.getElementById("showImageOnlyCheckBox").checked = false;
       this.nameSpan.style.visibility = "visible";
       this.mainColorBox.style.visibility = "visible";
       this.imgInfoText.style.visibility = "visible";

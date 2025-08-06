@@ -25,6 +25,7 @@
     "appId": "com.pascal.institute.pegasus",
     "productName": "Pegasus",
     "win": {
+      "icon": "assets/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -41,16 +42,22 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     },
-    "asar": false,
     "files": [
       "**/*",
-      "!output",
-      "assets",
-      "imgkit"
+      "!output"
     ],
     "directories": {
       "output": "output"
-    }
+    },
+    "extraResources": [
+      {
+        "from": "assets/",
+        "to": "../assets/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   },
   "author": "volta2030",
   "license": "MIT"

@@ -227,7 +227,24 @@ class ImageLayer {
         document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
         imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
       }
-      this.openImg(event.dataTransfer.files[0]["path"]);
+
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
+
+      if (!file.path) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const arrayBuffer = e.target.result;
+          const buffer = Buffer.from(arrayBuffer);
+
+          sharp(buffer).toBuffer((err, buf, info) => {
+            this.updatePreviewImg(buf, info);
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        this.openImg(file.path);
+      }
     });
 
     this.canvas.addEventListener("mousedown", (event) => {

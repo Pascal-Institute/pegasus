@@ -7,9 +7,16 @@
 ## 1. Requirements
 
 - IDE : Visual Studio Code (Recommemded)
+- node.js : v22.18.0 (At least version)
 
 ```bash
-npm install --save electron electron-reload electron-rebuild electron-builder sharp fs imgkit
+npm install --save electron electron-reload electron-rebuild electron-builder sharp sharp-ico sharp-bmp fs imgkit
+```
+
+### npm update (Recommended)
+
+```bash
+npm update
 ```
 
 #### imgkit is local module.
@@ -25,3 +32,23 @@ or
 ```bash
 npm start
 ```
+
+## 3. Application Specification
+
+### Availiable file extension
+
+```bash
+png jpg jpeg webp gif bmp ico tiff tif
+```
+
+#### extension converting
+
+### Image Processing
+
+#### resize
+
+#### filter
+
+#### rotate
+
+#### paint

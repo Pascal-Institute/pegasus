@@ -1,16 +1,18 @@
 {
   "name": "pegasus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "main.js",
   "dependencies": {
     "fs": "^0.0.1-security",
     "imgkit": "file:imgkit",
-    "sharp": "^0.29.3"
+    "sharp": "^0.34.3",
+    "sharp-bmp": "^0.1.5",
+    "sharp-ico": "^0.1.5"
   },
   "devDependencies": {
-    "electron": "^16.2.8",
-    "electron-builder": "^22.14.13",
+    "electron": "^37.2.5",
+    "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
     "electron-reload": "^2.0.0-alpha.1"
   },
@@ -23,6 +25,7 @@
     "appId": "com.pascal.institute.pegasus",
     "productName": "Pegasus",
     "win": {
+      "icon": "assets/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -39,17 +42,23 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     },
-    "asar": false,
     "files": [
       "**/*",
-      "!output",
-      "assets",
-      "imgkit"
+      "!output"
     ],
     "directories": {
       "output": "output"
-    }
+    },
+    "extraResources": [
+      {
+        "from": "assets/",
+        "to": "../assets/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   },
-  "author": "volta2030",
+  "author": "Pascal Institute",
   "license": "MIT"
 }

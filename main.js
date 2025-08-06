@@ -32,7 +32,6 @@ function createMainWindow() {
   mainWindow.loadFile("index.html");
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
-
   return mainWindow;
 }
 
@@ -48,26 +47,10 @@ function createView(type, mainWindow) {
     },
   });
 
-  const view2 = new BrowserView({
-    resizable: true,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
-      // devTools: true,
-      //   preload: path.join(__dirname, "preload.js"),
-    },
-  });
-
-  view.setBounds({ x: 0, y: 32, width: 1280, height: 90 });
+  view.setBounds({ x: 0, y: 33, width: 1280, height: 90 });
   view.setAutoResize({ width: true, height: false });
   view.webContents.loadFile(`./pages/_panel.html`);
   mainWindow.addBrowserView(view);
-
-  view2.setBounds({ x: 0, y: 150, width: 90, height: 200 });
-  view2.setAutoResize({ width: true, height: false });
-  view2.webContents.loadFile(`./pages/imagelist_panel.html`);
-  mainWindow.addBrowserView(view2);
   // view.webContents.openDevTools();
 }
 
@@ -223,6 +206,7 @@ app.whenReady().then(() => {
 
   // main
   ipcMain.on("showMenuREQ", (event) => {
+    const isDev = process.env.NODE_ENV === "development" || !app.isPackaged;
     const template = [
       {
         label: "File",
@@ -259,6 +243,42 @@ app.whenReady().then(() => {
           },
         ],
       },
+      ...(isDev
+        ? [
+            {
+              label: "Debug",
+              submenu: [
+                {
+                  label: "Toggle Developer Tools",
+                  accelerator: "F12",
+                  click: () => {
+                    if (mainWindow && !mainWindow.isDestroyed()) {
+                      mainWindow.webContents.openDevTools();
+                    } else {
+                      console.error(
+                        "Main window is not available or has been destroyed."
+                      );
+                    }
+                  },
+                },
+                {
+                  label: "Toggle BrowserView Developer Tools",
+                  accelerator: "Ctrl+Shift+I",
+                  click: () => {
+                    if (mainWindow && !mainWindow.isDestroyed()) {
+                      const views = mainWindow.getBrowserViews();
+                      if (views.length > 0) {
+                        views[0].webContents.openDevTools();
+                      } else {
+                        console.error("No BrowserView available.");
+                      }
+                    }
+                  },
+                },
+              ],
+            },
+          ]
+        : []),
       {
         label: "Help",
         submenu: [
@@ -276,6 +296,7 @@ app.whenReady().then(() => {
         ],
       },
     ];
+
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
     createView("", mainWindow);

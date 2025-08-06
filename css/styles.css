@@ -24,6 +24,20 @@ body {
   display: flex;
 }
 
+#toolBox1 button {
+  background-color: #f5f5f5; /* Light background for buttons */
+  border: 1px solid #333; /* Default border for all sides */
+  border-radius: 2px; /* Slightly rounded corners */
+  padding: 2px; /* Padding inside buttons */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: all 0.2s ease; /* Smooth transition for hover and active states */
+}
+
+#toolBox1 button:hover {
+  background-color: #e0e0e0; /* Slightly darker background on hover */
+  border-color: #555; /* Darker border on hover */
+}
+
 #toolBox2 {
   position: fixed;
   top: 122px;
@@ -52,6 +66,25 @@ select#extensionComboBox {
   left: 45px;
   font-size: 15px;
   background: none;
+}
+
+.deleteBtn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background-color: transparent;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  right: 5px;
+  top: 5px;
+  cursor: pointer; /* 클릭 가능 표시 */
+}
+
+.deleteBtn:active {
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
 }
 
 .mainColorBox {
@@ -86,6 +119,18 @@ select#extensionComboBox {
   position: fixed;
   top: 122px;
   right: 0px;
+}
+
+#undoBtn {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+}
+
+#redoBtn {
+  position: fixed;
+  bottom: 10px;
+  left: 54px;
 }
 
 #showImageOnlyLabel {

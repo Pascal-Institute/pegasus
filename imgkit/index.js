@@ -1,5 +1,8 @@
 const sharp = require("sharp");
+const bmp = require("sharp-bmp");
+const ico = require("sharp-ico");
 var path = require("path");
+const { channel } = require("diagnostics_channel");
 
 // class ImageLayerQueue {
 //   static imageLayerQueue = [];
@@ -26,17 +29,60 @@ class ImageLayer {
     this.infoQueue = [];
     this.extensionQueue = [];
     this.i = -1;
-    this.sio = false;
+    this.showImageOnly = false;
+
+    document.getElementById("undoBtn").addEventListener("click", (event) => {
+      this.undoPreviewImg();
+    });
+
+    document.getElementById("redoBtn").addEventListener("click", (event) => {
+      this.redoPreviewImg();
+    });
 
     //initialize
     this.imgPanel = document.createElement("div");
     this.imgPanel.className = "imgPanel";
     this.imgPanel.id = Parameter.num;
+    this.imgPanel.tabIndex = 0; //enable focus
 
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("class", "img-canvas");
     this.canvas.className = "previewImg";
     this.canvas.id = "default";
+
+    this.deleteBtn = document.createElement("button");
+    this.deleteBtn.className = "deleteBtn";
+    const img = document.createElement("img");
+    img.src = "assets/close.ico";
+    console.log(img.src);
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "contain";
+    this.deleteBtn.appendChild(img);
+    const deleteImagePanel = () => {
+      const index = parseInt(this.imgPanel.id, 10);
+      if (index >= 0 && index < imageLayerQueue.length) {
+        if (this.imgPanel.parentNode) {
+          this.imgPanel.parentNode.removeChild(this.imgPanel);
+        }
+        imageLayerQueue.splice(index, 1);
+        Parameter.num = Math.max(0, imageLayerQueue.length - 1);
+        if (imageLayerQueue.length > 0) {
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        } else {
+          Parameter.num = 0;
+        }
+      }
+    };
+
+    this.deleteBtn.addEventListener("click", deleteImagePanel);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Delete" && document.activeElement === this.imgPanel) {
+        deleteImagePanel();
+      }
+    });
 
     this.mainColorBox = document.createElement("div");
     this.mainColorBox.className = "mainColorBox";
@@ -122,6 +168,21 @@ class ImageLayer {
     this.webpOption = document.createElement("option");
     this.webpOption.value = "webp";
     this.webpOption.innerText = "webp";
+    this.gifOption = document.createElement("option");
+    this.gifOption.value = "gif";
+    this.gifOption.innerText = "gif";
+    this.bmpOption = document.createElement("option");
+    this.bmpOption.value = "bmp";
+    this.bmpOption.innerText = "bmp";
+    this.icoOption = document.createElement("option");
+    this.icoOption.value = "ico";
+    this.icoOption.innerText = "ico";
+    this.tifOption = document.createElement("option");
+    this.tifOption.value = "tif";
+    this.tifOption.innerText = "tif";
+    this.tiffOption = document.createElement("option");
+    this.tiffOption.value = "tiff";
+    this.tiffOption.innerText = "tiff";
 
     this.ctx = this.canvas.getContext("2d");
 
@@ -166,13 +227,29 @@ class ImageLayer {
         document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
         imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
       }
-      this.openImg(event.dataTransfer.files[0]["path"]);
+
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
+
+      if (!file.path) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const arrayBuffer = e.target.result;
+          const buffer = Buffer.from(arrayBuffer);
+
+          sharp(buffer).toBuffer((err, buf, info) => {
+            this.updatePreviewImg(buf, info);
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        this.openImg(file.path);
+      }
     });
 
     this.canvas.addEventListener("mousedown", (event) => {
       ImageLayer.dragFlag = true;
       if (ImageLayer.drawFlag) {
-        // console.log( ImageLayer.drawFlag);
         this.ctx.beginPath();
         this.ctx.moveTo(
           event.clientX - this.canvas.getBoundingClientRect().left,
@@ -221,13 +298,14 @@ class ImageLayer {
       }
     });
 
-    this.canvas.addEventListener("mouseup",(event)=>{
-      if(ImageLayer.drawFlag){
+    this.canvas.addEventListener("mouseup", (event) => {
+      if (ImageLayer.drawFlag) {
         //paste
       }
-    })
+    });
 
     this.imgPanel.appendChild(this.canvas);
+    this.imgPanel.appendChild(this.deleteBtn);
     this.imgPanel.appendChild(this.mainColorBox);
     this.imgPanel.appendChild(this.imgInfoText);
     this.imgPanel.appendChild(this.extensionComboBox);
@@ -241,23 +319,78 @@ class ImageLayer {
     this.extensionComboBox.appendChild(this.jpgOption);
     this.extensionComboBox.appendChild(this.jpegOption);
     this.extensionComboBox.appendChild(this.webpOption);
+    this.extensionComboBox.appendChild(this.gifOption);
+    this.extensionComboBox.appendChild(this.bmpOption);
+    this.extensionComboBox.appendChild(this.icoOption);
+    this.extensionComboBox.appendChild(this.tifOption);
+    this.extensionComboBox.appendChild(this.tiffOption);
     this.extensionComboBox.addEventListener("change", (event) => {
       this.extension = event.target.value;
       this.filepath = this.filepath.replace(
         path.extname(this.filepath),
         `.${this.extension}`
       );
-      sharp(this.buffer)
-        .toFormat(this.extension)
-        .toBuffer((err, buf, info) => {
-          this.updatePreviewImg(buf, info);
-          document
-            .getElementById("convert_msg")
-            .animate([{ opacity: "1" }, { opacity: "0" }], {
-              duration: 1800,
-              iterations: 1,
-            });
+
+      if (this.extension === "bmp") {
+        bmp.sharpToBmp(sharp(this.buffer), this.filepath).then(async (info) => {
+          const fs = require("fs").promises;
+          const buf = await fs.readFile(this.filepath);
+          const pngBuffer = await bmp.sharpFromBmp(buf).png().toBuffer();
+          const outputInfo = {
+            format: "png", // 여기 확장자 바꿔줘야 화면에서 잘 뜸
+            size: pngBuffer.length,
+            width: info.width,
+            height: info.height,
+            channels: 4, // PNG RGBA
+            premultiplied: false,
+          };
+          this.updatePreviewImg(pngBuffer, outputInfo);
         });
+
+        document
+          .getElementById("convert_msg")
+          .animate([{ opacity: "1" }, { opacity: "0" }], {
+            duration: 1800,
+            iterations: 1,
+          });
+      } else if (this.extension === "ico") {
+        ico
+          .sharpsToIco([sharp(this.buffer)], this.filepath)
+          .then(async (info) => {
+            const fs = require("fs").promises;
+            const buf = await fs.readFile(this.filepath);
+            const sharpList = ico.sharpsFromIco(buf); // Sharp[] 배열 반환
+            const pngBuffer = await sharpList[0].png().toBuffer();
+            const outputInfo = {
+              format: "png", // 여기 확장자 바꿔줘야 화면에서 잘 뜸
+              size: pngBuffer.length,
+              width: info.width,
+              height: info.height,
+              channels: 4, // PNG RGBA
+              premultiplied: false,
+            };
+            this.updatePreviewImg(pngBuffer, outputInfo);
+          });
+
+        document
+          .getElementById("convert_msg")
+          .animate([{ opacity: "1" }, { opacity: "0" }], {
+            duration: 1800,
+            iterations: 1,
+          });
+      } else {
+        sharp(this.buffer)
+          .toFormat(this.extension)
+          .toBuffer((err, buf, info) => {
+            this.updatePreviewImg(buf, info);
+            document
+              .getElementById("convert_msg")
+              .animate([{ opacity: "1" }, { opacity: "0" }], {
+                duration: 1800,
+                iterations: 1,
+              });
+          });
+      }
     });
   }
 
@@ -277,7 +410,7 @@ class ImageLayer {
   }
 
   updateSio() {
-    if (this.sio) {
+    if (this.showImageOnly) {
       document.getElementById("showImageOnlyCheckBox").checked = true;
       this.mainColorBox.style.visibility = "hidden";
       this.imgInfoText.style.visibility = "hidden";
@@ -417,9 +550,18 @@ class ImageLayer {
     }
     this.filepath = filepath;
     this.extension = path.extname(this.filepath).replace(".", "");
-    sharp(filepath).toBuffer((err, buf, info) => {
-      this.updatePreviewImg(buf, info);
-    });
+
+    if (this.extension === "tiff" || this.extension === "tif") {
+      sharp(filepath)
+        .toFormat("png")
+        .toBuffer((err, buf, info) => {
+          this.updatePreviewImg(buf, info);
+        });
+    } else {
+      sharp(filepath).toBuffer((err, buf, info) => {
+        this.updatePreviewImg(buf, info);
+      });
+    }
   }
 
   saveImg(filepath) {

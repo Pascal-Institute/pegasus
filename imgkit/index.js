@@ -95,52 +95,22 @@ class ImageLayer {
     this.mainColor3.className = "mainColor3";
     this.mainColor3.className = "colorBox";
 
-    this.mainColor1.addEventListener("click", (event) => {
-      const text = document.createElement("textarea");
-      this.imgPanel.appendChild(text);
-      text.value = this.mainColor1.title;
-      text.select();
-      document.execCommand("Copy");
-      this.imgPanel.removeChild(text);
+    [this.mainColor1, this.mainColor2, this.mainColor3].forEach((mainColor) => {
+      mainColor.addEventListener("click", (event) => {
+        const text = document.createElement("textarea");
+        this.imgPanel.appendChild(text);
+        text.value = this.mainColor1.title;
+        text.select();
+        document.execCommand("Copy");
+        this.imgPanel.removeChild(text);
 
-      document
-        .getElementById("copy_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
-    });
-
-    this.mainColor2.addEventListener("click", (event) => {
-      const text = document.createElement("textarea");
-      this.imgPanel.appendChild(text);
-      text.value = this.mainColor2.title;
-      text.select();
-      document.execCommand("Copy");
-      this.imgPanel.removeChild(text);
-
-      document
-        .getElementById("copy_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
-    });
-
-    this.mainColor3.addEventListener("click", (event) => {
-      const text = document.createElement("textarea");
-      this.imgPanel.appendChild(text);
-      text.value = this.mainColor3.title;
-      text.select();
-      document.execCommand("Copy");
-      this.imgPanel.removeChild(text);
-
-      document
-        .getElementById("copy_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
+        document
+          .getElementById("copy_msg")
+          .animate([{ opacity: "1" }, { opacity: "0" }], {
+            duration: 1800,
+            iterations: 1,
+          });
+      });
     });
 
     //

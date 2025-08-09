@@ -564,6 +564,20 @@ class ImageLayer {
         .toBuffer((err, buf, info) => {
           this.updatePreviewImg(buf, info);
         });
+    } else if (this.extension === "ico") {
+      ico
+        .sharpsFromIco(this.filepath)
+        .png()
+        .toBuffer((err, buf, info) => {
+          this.updatePreviewImg(buf, info);
+        });
+    } else if (this.extension === "bmp") {
+      bmp
+        .sharpFromBmp(this.filepath)
+        .png()
+        .toBuffer((err, buf, info) => {
+          this.updatePreviewImg(buf, info);
+        });
     } else {
       sharp(filepath).toBuffer((err, buf, info) => {
         this.updatePreviewImg(buf, info);

@@ -2,12 +2,6 @@ const sharp = require("sharp");
 const bmp = require("sharp-bmp");
 const ico = require("sharp-ico");
 var path = require("path");
-const { channel } = require("diagnostics_channel");
-
-// class ImageLayerQueue {
-//   static imageLayerQueue = [];
-//   static num = 0;
-// }
 
 const imageLayerQueue = [];
 

@@ -120,8 +120,6 @@ class ImageLayer {
     this.extensionComboBox = document.createElement("select");
     this.extensionComboBox.id = "extensionComboBox";
 
-    this.defaultOption = document.createElement("option");
-    this.defaultOption.value = "default";
     this.pngOption = document.createElement("option");
     this.pngOption.value = "png";
     this.pngOption.innerText = "png";
@@ -281,7 +279,6 @@ class ImageLayer {
     this.mainColorBox.appendChild(this.mainColor2);
     this.mainColorBox.appendChild(this.mainColor3);
 
-    this.extensionComboBox.appendChild(this.defaultOption);
     this.extensionComboBox.appendChild(this.pngOption);
     this.extensionComboBox.appendChild(this.jpgOption);
     this.extensionComboBox.appendChild(this.jpegOption);

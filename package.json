@@ -11,7 +11,7 @@
     "sharp-ico": "^0.1.5"
   },
   "devDependencies": {
-    "electron": "^37.2.5",
+    "electron": "^37.2.6",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
     "electron-reload": "^2.0.0-alpha.1"

@@ -330,6 +330,7 @@ class ImageLayer {
       } else {
         sharp(this.buffer)
           .toFormat(this.extension)
+          .png()
           .toBuffer((err, buf, info) => {
             this.updatePreviewImg(buf, info);
             document

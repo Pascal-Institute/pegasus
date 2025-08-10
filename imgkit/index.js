@@ -67,7 +67,10 @@ class ImageLayer {
     this.nameSpan.id = "nameSpan";
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Delete" && document.activeElement === this.imgPanel) {
+      if (
+        (event.ctrlKey && event.key === "d") ||
+        (event.key === "Delete" && document.activeElement === this.imgPanel)
+      ) {
         deleteImagePanel();
       }
     });

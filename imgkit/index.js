@@ -24,7 +24,7 @@ class ImageLayer {
     this.extensionQueue = [];
     this.i = -1;
     this.showImageOnly = false;
-
+    this.totalImageWidth = 0;
     //initialize
     this.imgPanel = document.createElement("div");
     this.imgPanel.className = "imgPanel";
@@ -59,6 +59,11 @@ class ImageLayer {
           Parameter.num = 0;
         }
       }
+      requestAnimationFrame(() => {
+        const contentWidth = document.body.scrollWidth;
+        const totalWidthWithMargin = Math.floor(contentWidth * 0.87);
+        document.body.style.width = totalWidthWithMargin + "px";
+      });
     };
 
     this.deleteBtn.addEventListener("click", deleteImagePanel);
@@ -527,30 +532,32 @@ class ImageLayer {
     this.nameSpan.textContent = path
       .basename(this.filepath)
       .replace("." + this.extension, "");
+
+    const afterLoad = (buf, info) => {
+      this.updatePreviewImg(buf, info);
+      requestAnimationFrame(() => {
+        const contentWidth = document.body.scrollWidth;
+        const totalWidthWithMargin = Math.floor(contentWidth * 1.15);
+        document.body.style.width = totalWidthWithMargin + "px";
+      });
+    };
+
     if (this.extension === "tiff" || this.extension === "tif") {
       sharp(filepath)
         .toFormat("png")
-        .toBuffer((err, buf, info) => {
-          this.updatePreviewImg(buf, info);
-        });
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else if (this.extension === "ico") {
       ico
         .sharpsFromIco(this.filepath)
         .png()
-        .toBuffer((err, buf, info) => {
-          this.updatePreviewImg(buf, info);
-        });
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else if (this.extension === "bmp") {
       bmp
         .sharpFromBmp(this.filepath)
         .png()
-        .toBuffer((err, buf, info) => {
-          this.updatePreviewImg(buf, info);
-        });
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else {
-      sharp(filepath).toBuffer((err, buf, info) => {
-        this.updatePreviewImg(buf, info);
-      });
+      sharp(filepath).toBuffer((err, buf, info) => afterLoad(buf, info));
     }
   }
 

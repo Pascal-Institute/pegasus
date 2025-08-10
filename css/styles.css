@@ -68,7 +68,7 @@ select#extensionComboBox {
   background: none;
 }
 
-.deleteBtn {
+#deleteBtn {
   width: 24px;
   height: 24px;
   border: none;
@@ -85,6 +85,12 @@ select#extensionComboBox {
 .deleteBtn:active {
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   transform: translateY(1px);
+}
+
+#nameSpan {
+  position: absolute;
+  top: 8px;
+  left: 8px;
 }
 
 .mainColorBox {

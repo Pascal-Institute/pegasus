@@ -2,12 +2,6 @@ const sharp = require("sharp");
 const bmp = require("sharp-bmp");
 const ico = require("sharp-ico");
 var path = require("path");
-const { channel } = require("diagnostics_channel");
-
-// class ImageLayerQueue {
-//   static imageLayerQueue = [];
-//   static num = 0;
-// }
 
 const imageLayerQueue = [];
 
@@ -31,14 +25,6 @@ class ImageLayer {
     this.i = -1;
     this.showImageOnly = false;
 
-    document.getElementById("undoBtn").addEventListener("click", (event) => {
-      this.undoPreviewImg();
-    });
-
-    document.getElementById("redoBtn").addEventListener("click", (event) => {
-      this.redoPreviewImg();
-    });
-
     //initialize
     this.imgPanel = document.createElement("div");
     this.imgPanel.className = "imgPanel";
@@ -51,10 +37,9 @@ class ImageLayer {
     this.canvas.id = "default";
 
     this.deleteBtn = document.createElement("button");
-    this.deleteBtn.className = "deleteBtn";
+    this.deleteBtn.id = "deleteBtn";
     const img = document.createElement("img");
     img.src = "assets/close.ico";
-    console.log(img.src);
     img.style.width = "100%";
     img.style.height = "100%";
     img.style.objectFit = "contain";
@@ -78,8 +63,14 @@ class ImageLayer {
 
     this.deleteBtn.addEventListener("click", deleteImagePanel);
 
+    this.nameSpan = document.createElement("span");
+    this.nameSpan.id = "nameSpan";
+
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Delete" && document.activeElement === this.imgPanel) {
+      if (
+        (event.ctrlKey && event.key === "d") ||
+        (event.key === "Delete" && document.activeElement === this.imgPanel)
+      ) {
         deleteImagePanel();
       }
     });
@@ -99,52 +90,22 @@ class ImageLayer {
     this.mainColor3.className = "mainColor3";
     this.mainColor3.className = "colorBox";
 
-    this.mainColor1.addEventListener("click", (event) => {
-      const text = document.createElement("textarea");
-      this.imgPanel.appendChild(text);
-      text.value = this.mainColor1.title;
-      text.select();
-      document.execCommand("Copy");
-      this.imgPanel.removeChild(text);
+    [this.mainColor1, this.mainColor2, this.mainColor3].forEach((mainColor) => {
+      mainColor.addEventListener("click", (event) => {
+        const text = document.createElement("textarea");
+        this.imgPanel.appendChild(text);
+        text.value = this.mainColor1.title;
+        text.select();
+        document.execCommand("Copy");
+        this.imgPanel.removeChild(text);
 
-      document
-        .getElementById("copy_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
-    });
-
-    this.mainColor2.addEventListener("click", (event) => {
-      const text = document.createElement("textarea");
-      this.imgPanel.appendChild(text);
-      text.value = this.mainColor2.title;
-      text.select();
-      document.execCommand("Copy");
-      this.imgPanel.removeChild(text);
-
-      document
-        .getElementById("copy_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
-    });
-
-    this.mainColor3.addEventListener("click", (event) => {
-      const text = document.createElement("textarea");
-      this.imgPanel.appendChild(text);
-      text.value = this.mainColor3.title;
-      text.select();
-      document.execCommand("Copy");
-      this.imgPanel.removeChild(text);
-
-      document
-        .getElementById("copy_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
+        document
+          .getElementById("copy_msg")
+          .animate([{ opacity: "1" }, { opacity: "0" }], {
+            duration: 1800,
+            iterations: 1,
+          });
+      });
     });
 
     //
@@ -154,8 +115,6 @@ class ImageLayer {
     this.extensionComboBox = document.createElement("select");
     this.extensionComboBox.id = "extensionComboBox";
 
-    this.defaultOption = document.createElement("option");
-    this.defaultOption.value = "default";
     this.pngOption = document.createElement("option");
     this.pngOption.value = "png";
     this.pngOption.innerText = "png";
@@ -306,6 +265,7 @@ class ImageLayer {
 
     this.imgPanel.appendChild(this.canvas);
     this.imgPanel.appendChild(this.deleteBtn);
+    this.imgPanel.appendChild(this.nameSpan);
     this.imgPanel.appendChild(this.mainColorBox);
     this.imgPanel.appendChild(this.imgInfoText);
     this.imgPanel.appendChild(this.extensionComboBox);
@@ -314,7 +274,6 @@ class ImageLayer {
     this.mainColorBox.appendChild(this.mainColor2);
     this.mainColorBox.appendChild(this.mainColor3);
 
-    this.extensionComboBox.appendChild(this.defaultOption);
     this.extensionComboBox.appendChild(this.pngOption);
     this.extensionComboBox.appendChild(this.jpgOption);
     this.extensionComboBox.appendChild(this.jpegOption);
@@ -335,16 +294,11 @@ class ImageLayer {
         bmp.sharpToBmp(sharp(this.buffer), this.filepath).then(async (info) => {
           const fs = require("fs").promises;
           const buf = await fs.readFile(this.filepath);
-          const pngBuffer = await bmp.sharpFromBmp(buf).png().toBuffer();
-          const outputInfo = {
-            format: "png", // 여기 확장자 바꿔줘야 화면에서 잘 뜸
-            size: pngBuffer.length,
-            width: info.width,
-            height: info.height,
-            channels: 4, // PNG RGBA
-            premultiplied: false,
-          };
-          this.updatePreviewImg(pngBuffer, outputInfo);
+          const pngBuffer = await sharpList[0]
+            .png()
+            .toBuffer((err, buf, info) => {
+              this.updatePreviewImg(buf, info);
+            });
         });
 
         document
@@ -359,17 +313,12 @@ class ImageLayer {
           .then(async (info) => {
             const fs = require("fs").promises;
             const buf = await fs.readFile(this.filepath);
-            const sharpList = ico.sharpsFromIco(buf); // Sharp[] 배열 반환
-            const pngBuffer = await sharpList[0].png().toBuffer();
-            const outputInfo = {
-              format: "png", // 여기 확장자 바꿔줘야 화면에서 잘 뜸
-              size: pngBuffer.length,
-              width: info.width,
-              height: info.height,
-              channels: 4, // PNG RGBA
-              premultiplied: false,
-            };
-            this.updatePreviewImg(pngBuffer, outputInfo);
+            const sharpList = ico.sharpsFromIco(buf);
+            const pngBuffer = await sharpList[0]
+              .png()
+              .toBuffer((err, buf, info) => {
+                this.updatePreviewImg(buf, info);
+              });
           });
 
         document
@@ -381,6 +330,7 @@ class ImageLayer {
       } else {
         sharp(this.buffer)
           .toFormat(this.extension)
+          .png()
           .toBuffer((err, buf, info) => {
             this.updatePreviewImg(buf, info);
             document
@@ -411,12 +361,14 @@ class ImageLayer {
 
   updateSio() {
     if (this.showImageOnly) {
-      document.getElementById("showImageOnlyCheckBox").checked = true;
+      this.deleteBtn.style.visibility = "hidden";
+      this.nameSpan.style.visibility = "hidden";
       this.mainColorBox.style.visibility = "hidden";
       this.imgInfoText.style.visibility = "hidden";
       this.extensionComboBox.style.visibility = "hidden";
     } else {
-      document.getElementById("showImageOnlyCheckBox").checked = false;
+      this.deleteBtn.style.visibility = "visible";
+      this.nameSpan.style.visibility = "visible";
       this.mainColorBox.style.visibility = "visible";
       this.imgInfoText.style.visibility = "visible";
       this.extensionComboBox.style.visibility = "visible";
@@ -457,6 +409,28 @@ class ImageLayer {
     this.bufferQueue.push(buf);
     this.infoQueue.push(info);
     this.extensionQueue.push(this.extension);
+
+    setTimeout(() => {
+      const panels = document.querySelectorAll(".imgPanel"); // imgPanel 클래스 이름 확인 필요
+      let maxRight = 0;
+      let maxBottom = 0;
+
+      panels.forEach((panel) => {
+        const rect = panel.getBoundingClientRect();
+        const right = rect.left + rect.width + window.scrollX;
+        const bottom = rect.top + rect.height + window.scrollY;
+
+        if (right > maxRight) maxRight = right;
+        if (bottom > maxBottom) maxBottom = bottom;
+      });
+
+      if (maxRight > document.body.scrollWidth) {
+        document.body.style.width = maxRight + 50 + "px"; // 여유 공간 포함
+      }
+      if (maxBottom > document.body.scrollHeight) {
+        document.body.style.height = maxBottom + 50 + "px";
+      }
+    }, 100); // 100ms 후에 실행
   }
 
   updateImgInfoText(info) {
@@ -550,10 +524,26 @@ class ImageLayer {
     }
     this.filepath = filepath;
     this.extension = path.extname(this.filepath).replace(".", "");
-
+    this.nameSpan.textContent = path
+      .basename(this.filepath)
+      .replace("." + this.extension, "");
     if (this.extension === "tiff" || this.extension === "tif") {
       sharp(filepath)
         .toFormat("png")
+        .toBuffer((err, buf, info) => {
+          this.updatePreviewImg(buf, info);
+        });
+    } else if (this.extension === "ico") {
+      ico
+        .sharpsFromIco(this.filepath)
+        .png()
+        .toBuffer((err, buf, info) => {
+          this.updatePreviewImg(buf, info);
+        });
+    } else if (this.extension === "bmp") {
+      bmp
+        .sharpFromBmp(this.filepath)
+        .png()
         .toBuffer((err, buf, info) => {
           this.updatePreviewImg(buf, info);
         });

@@ -294,16 +294,11 @@ class ImageLayer {
         bmp.sharpToBmp(sharp(this.buffer), this.filepath).then(async (info) => {
           const fs = require("fs").promises;
           const buf = await fs.readFile(this.filepath);
-          const pngBuffer = await bmp.sharpFromBmp(buf).png().toBuffer();
-          const outputInfo = {
-            format: "png", // 여기 확장자 바꿔줘야 화면에서 잘 뜸
-            size: pngBuffer.length,
-            width: info.width,
-            height: info.height,
-            channels: 4, // PNG RGBA
-            premultiplied: false,
-          };
-          this.updatePreviewImg(pngBuffer, outputInfo);
+          const pngBuffer = await sharpList[0]
+            .png()
+            .toBuffer((err, buf, info) => {
+              this.updatePreviewImg(buf, info);
+            });
         });
 
         document
@@ -318,17 +313,12 @@ class ImageLayer {
           .then(async (info) => {
             const fs = require("fs").promises;
             const buf = await fs.readFile(this.filepath);
-            const sharpList = ico.sharpsFromIco(buf); // Sharp[] 배열 반환
-            const pngBuffer = await sharpList[0].png().toBuffer();
-            const outputInfo = {
-              format: "png", // 여기 확장자 바꿔줘야 화면에서 잘 뜸
-              size: pngBuffer.length,
-              width: info.width,
-              height: info.height,
-              channels: 4, // PNG RGBA
-              premultiplied: false,
-            };
-            this.updatePreviewImg(pngBuffer, outputInfo);
+            const sharpList = ico.sharpsFromIco(buf);
+            const pngBuffer = await sharpList[0]
+              .png()
+              .toBuffer((err, buf, info) => {
+                this.updatePreviewImg(buf, info);
+              });
           });
 
         document
@@ -418,6 +408,28 @@ class ImageLayer {
     this.bufferQueue.push(buf);
     this.infoQueue.push(info);
     this.extensionQueue.push(this.extension);
+
+    setTimeout(() => {
+      const panels = document.querySelectorAll(".imgPanel"); // imgPanel 클래스 이름 확인 필요
+      let maxRight = 0;
+      let maxBottom = 0;
+
+      panels.forEach((panel) => {
+        const rect = panel.getBoundingClientRect();
+        const right = rect.left + rect.width + window.scrollX;
+        const bottom = rect.top + rect.height + window.scrollY;
+
+        if (right > maxRight) maxRight = right;
+        if (bottom > maxBottom) maxBottom = bottom;
+      });
+
+      if (maxRight > document.body.scrollWidth) {
+        document.body.style.width = maxRight + 50 + "px"; // 여유 공간 포함
+      }
+      if (maxBottom > document.body.scrollHeight) {
+        document.body.style.height = maxBottom + 50 + "px";
+      }
+    }, 100); // 100ms 후에 실행
   }
 
   updateImgInfoText(info) {

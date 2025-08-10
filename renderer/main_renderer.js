@@ -267,6 +267,14 @@ ipcRenderer.on("saveAsImgCMD", (event, res) => {
   imageLayerQueue[Parameter.num].saveImg(res);
 });
 
+document.getElementById("undoBtn").addEventListener("click", (event) => {
+  imageLayerQueue[Parameter.num].undoPreviewImg();
+});
+
+document.getElementById("redoBtn").addEventListener("click", (event) => {
+  imageLayerQueue[Parameter.num].redoPreviewImg();
+});
+
 document.addEventListener("keydown", function (event) {
   if (event.ctrlKey && event.key === "z") {
     imageLayerQueue[Parameter.num].undoPreviewImg();

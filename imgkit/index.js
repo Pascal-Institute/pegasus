@@ -25,14 +25,6 @@ class ImageLayer {
     this.i = -1;
     this.showImageOnly = false;
 
-    document.getElementById("undoBtn").addEventListener("click", (event) => {
-      this.undoPreviewImg();
-    });
-
-    document.getElementById("redoBtn").addEventListener("click", (event) => {
-      this.redoPreviewImg();
-    });
-
     //initialize
     this.imgPanel = document.createElement("div");
     this.imgPanel.className = "imgPanel";

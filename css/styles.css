@@ -156,3 +156,7 @@ select#extensionComboBox {
   bottom: 15px;
   text-align: center;
 }
+
+#delete_msg {
+  background-color: #f29999;
+}

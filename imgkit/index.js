@@ -64,6 +64,12 @@ class ImageLayer {
         const totalWidthWithMargin = Math.floor(contentWidth * 0.87);
         document.body.style.width = totalWidthWithMargin + "px";
       });
+      document
+        .getElementById("delete_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
     };
 
     this.deleteBtn.addEventListener("click", deleteImagePanel);

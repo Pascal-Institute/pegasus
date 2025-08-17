@@ -21,7 +21,7 @@ npm update
 
 #### imgkit is local module.
 
-## 2. How to execute
+## 2-1. How to execute
 
 ```bash
 electron .
@@ -31,6 +31,12 @@ or
 
 ```bash
 npm start
+```
+
+## 2-2. How to build
+
+```bash
+npm run build
 ```
 
 ## 3. Application Specification

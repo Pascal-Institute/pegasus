@@ -173,15 +173,13 @@ select#extensionComboBox {
 
 #scroll-container {
   position: relative;
-  width: 100%;
+  width: auto !important;
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 32px;
   box-sizing: border-box;
-  padding: 32px 48px 48px 48px;
+  padding: 48px 48px 48px 48px;
   scroll-behavior: smooth;
 }

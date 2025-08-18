@@ -175,8 +175,6 @@ class ImageLayer {
       Parameter.num = this.imgPanel.id;
       this.updateFocus();
       this.updateSio();
-      // console.log(this.imgPanel.id);
-      // console.log(Parameter.num);
     });
     // this.ctx.lineWidth = 1;
     this.canvas.addEventListener("drag", function (event) {}, false);
@@ -192,28 +190,48 @@ class ImageLayer {
     this.canvas.addEventListener("drop", (event) => {
       event.preventDefault();
       if (this.canvas.id !== "full") {
-        Parameter.num++;
-        imageLayerQueue.push(new ImageLayer());
-        document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-        imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
-      }
+        // Try to open the image first, only add if successful
+        const file = event.dataTransfer.files[0];
+        if (!file) return;
 
-      const file = event.dataTransfer.files[0];
-      if (!file) return;
-
-      if (!file.path) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const arrayBuffer = e.target.result;
-          const buffer = Buffer.from(arrayBuffer);
-
-          sharp(buffer).toBuffer((err, buf, info) => {
-            this.updatePreviewImg(buf, info);
+        const tryOpenImg = (filepathOrBuffer) => {
+          // Try to load image using sharp to check validity
+          sharp(filepathOrBuffer).metadata((err, info) => {
+            if (err) {
+              // Invalid image, do not add
+              document
+                .getElementById("error_msg")
+                ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                  duration: 1800,
+                  iterations: 1,
+                });
+              return;
+            }
+            // Valid image, add new layer
+            imageLayerQueue[Parameter.num].openImg(
+              typeof filepathOrBuffer === "string"
+                ? filepathOrBuffer
+                : file.path || ""
+            );
+            Parameter.num++;
+            imageLayerQueue.push(new ImageLayer());
+            document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+            imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
           });
         };
-        reader.readAsArrayBuffer(file);
-      } else {
-        this.openImg(file.path);
+
+        if (!file.path) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const arrayBuffer = e.target.result;
+            const buffer = Buffer.from(arrayBuffer);
+            tryOpenImg(buffer);
+          };
+          reader.readAsArrayBuffer(file);
+        } else {
+          tryOpenImg(file.path);
+        }
+        return;
       }
     });
 

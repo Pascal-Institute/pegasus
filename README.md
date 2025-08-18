@@ -13,6 +13,11 @@
 npm install --save electron electron-reload electron-rebuild electron-builder sharp sharp-ico sharp-bmp fs imgkit
 ```
 
+### when electron is not working
+```bash
+ npm install -g electron
+```
+
 ### npm update (Recommended)
 
 ```bash

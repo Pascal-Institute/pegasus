@@ -23,7 +23,7 @@
   },
   "build": {
     "appId": "com.pascal.institute.pegasus",
-    "productName": "Pegasus",
+    "productName": "pegasus",
     "win": {
       "icon": "assets/icon.ico",
       "target": [

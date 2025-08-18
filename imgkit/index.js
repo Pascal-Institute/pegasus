@@ -59,11 +59,7 @@ class ImageLayer {
           Parameter.num = 0;
         }
       }
-      requestAnimationFrame(() => {
-        const contentWidth = document.body.scrollWidth;
-        const totalWidthWithMargin = Math.floor(contentWidth * 0.87);
-        document.body.style.width = totalWidthWithMargin + "px";
-      });
+
       document
         .getElementById("delete_msg")
         .animate([{ opacity: "1" }, { opacity: "0" }], {
@@ -559,11 +555,6 @@ class ImageLayer {
 
     const afterLoad = (buf, info) => {
       this.updatePreviewImg(buf, info);
-      requestAnimationFrame(() => {
-        const contentWidth = document.body.scrollWidth;
-        const totalWidthWithMargin = Math.floor(contentWidth * 1.15);
-        document.body.style.width = totalWidthWithMargin + "px";
-      });
     };
 
     if (this.extension === "tiff" || this.extension === "tif") {

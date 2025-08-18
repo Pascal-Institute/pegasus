@@ -5,6 +5,82 @@ var path = require("path");
 
 const imageLayerQueue = [];
 
+const scrollContainer = document.createElement("div");
+scrollContainer.id = "scroll-container";
+document.body.appendChild(scrollContainer);
+
+const scrollLeftBtn = document.createElement("button");
+scrollLeftBtn.innerText = "<";
+scrollLeftBtn.style.position = "fixed";
+scrollLeftBtn.style.left = "16px";
+scrollLeftBtn.style.top = "50%";
+scrollLeftBtn.style.transform = "translateY(-50%)";
+scrollLeftBtn.style.zIndex = "1000";
+scrollLeftBtn.style.fontSize = "2em";
+scrollLeftBtn.style.background = "#fff";
+scrollLeftBtn.style.border = "1px solid #ccc";
+scrollLeftBtn.style.borderRadius = "50%";
+scrollLeftBtn.style.width = "48px";
+scrollLeftBtn.style.height = "48px";
+scrollLeftBtn.style.opacity = "0.8";
+scrollLeftBtn.style.cursor = "pointer";
+document.body.appendChild(scrollLeftBtn);
+
+const scrollRightBtn = document.createElement("button");
+scrollRightBtn.innerText = ">";
+scrollRightBtn.style.position = "fixed";
+scrollRightBtn.style.right = "16px";
+scrollRightBtn.style.top = "50%";
+scrollRightBtn.style.transform = "translateY(-50%)";
+scrollRightBtn.style.zIndex = "1000";
+scrollRightBtn.style.fontSize = "2em";
+scrollRightBtn.style.background = "#fff";
+scrollRightBtn.style.border = "1px solid #ccc";
+scrollRightBtn.style.borderRadius = "50%";
+scrollRightBtn.style.width = "48px";
+scrollRightBtn.style.height = "48px";
+scrollRightBtn.style.opacity = "0.8";
+scrollRightBtn.style.cursor = "pointer";
+document.body.appendChild(scrollRightBtn);
+
+function updateScrollUI() {
+  imageLayerQueue.forEach((layer) => {
+    if (layer.imgPanel.parentNode !== scrollContainer) {
+      try {
+        document.body.removeChild(layer.imgPanel);
+      } catch (e) {}
+      scrollContainer.appendChild(layer.imgPanel);
+    }
+    // Flex item settings to prevent overlap
+    layer.imgPanel.style.display = "flex";
+    layer.imgPanel.style.flexDirection = "column";
+    layer.imgPanel.style.flexShrink = "0";
+    layer.imgPanel.style.flexGrow = "0";
+    layer.imgPanel.style.flexBasis = "auto";
+    layer.imgPanel.style.alignItems = "center";
+    layer.imgPanel.style.justifyContent = "center";
+    layer.imgPanel.style.margin = "0"; // gap handles spacing
+    layer.imgPanel.style.maxWidth = "";
+    layer.imgPanel.style.minWidth = "";
+    layer.imgPanel.style.boxSizing = "border-box";
+  });
+  scrollLeftBtn.disabled = scrollContainer.scrollLeft <= 0;
+  scrollRightBtn.disabled =
+    scrollContainer.scrollLeft + scrollContainer.clientWidth >=
+    scrollContainer.scrollWidth - 2;
+}
+
+scrollLeftBtn.addEventListener("click", () => {
+  scrollContainer.scrollBy({ left: -400, behavior: "smooth" });
+  setTimeout(updateScrollUI, 400);
+});
+scrollRightBtn.addEventListener("click", () => {
+  scrollContainer.scrollBy({ left: 400, behavior: "smooth" });
+  setTimeout(updateScrollUI, 400);
+});
+
+scrollContainer.addEventListener("scroll", updateScrollUI);
+
 class Parameter {
   static num = 0;
 }
@@ -164,6 +240,11 @@ class ImageLayer {
     this.filepath;
 
     this.build();
+    setTimeout(() => {
+      updateScrollUI();
+      // Automatically scroll to the right when a new image is added
+      scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+    }, 0);
   }
 
   build() {
@@ -288,6 +369,7 @@ class ImageLayer {
       }
     });
 
+    this.imgPanel.style.position = "relative";
     this.imgPanel.appendChild(this.canvas);
     this.imgPanel.appendChild(this.deleteBtn);
     this.imgPanel.appendChild(this.nameSpan);
@@ -409,7 +491,9 @@ class ImageLayer {
     this.image.src =
       `data:image/${this.extension};base64, ` + buf.toString("base64");
     this.image.onload = () => {
-      this.ctx.drawImage(this.image, 0, 0, info.width, info.height);
+      // Display only at original size (no resize)
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.drawImage(this.image, 0, 0);
     };
 
     this.updateImgInfoText(info);
@@ -436,7 +520,7 @@ class ImageLayer {
     this.extensionQueue.push(this.extension);
 
     setTimeout(() => {
-      const panels = document.querySelectorAll(".imgPanel"); // imgPanel 클래스 이름 확인 필요
+      const panels = document.querySelectorAll(".imgPanel");
       let maxRight = 0;
       let maxBottom = 0;
 
@@ -450,12 +534,12 @@ class ImageLayer {
       });
 
       if (maxRight > document.body.scrollWidth) {
-        document.body.style.width = maxRight + 50 + "px"; // 여유 공간 포함
+        document.body.style.width = maxRight + 50 + "px";
       }
       if (maxBottom > document.body.scrollHeight) {
         document.body.style.height = maxBottom + 50 + "px";
       }
-    }, 100); // 100ms 후에 실행
+    }, 100);
   }
 
   updateImgInfoText(info) {
@@ -555,6 +639,9 @@ class ImageLayer {
 
     const afterLoad = (buf, info) => {
       this.updatePreviewImg(buf, info);
+      updateScrollUI();
+      // Automatically scroll to the right when a new image is opened
+      scrollContainer.scrollLeft = scrollContainer.scrollWidth;
     };
 
     if (this.extension === "tiff" || this.extension === "tif") {

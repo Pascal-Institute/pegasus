@@ -59,13 +59,16 @@ body {
 }
 
 select#extensionComboBox {
-  border: none;
   position: absolute;
-  color: rgba(0, 0, 0, 0.8);
-  bottom: 45px;
-  left: 45px;
-  font-size: 15px;
-  background: none;
+  left: 8px;
+  bottom: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  border: none;
+  outline: none;
 }
 
 #deleteBtn {
@@ -106,9 +109,15 @@ select#extensionComboBox {
 }
 
 #imgInfoText {
-  text-align: right;
-  margin-top: 3px;
-  color: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  pointer-events: none;
 }
 
 .previewImg {
@@ -160,4 +169,18 @@ select#extensionComboBox {
 #delete_msg,
 #error_msg {
   background-color: #f29999;
+}
+
+#scrollContainer {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  box-sizing: border-box;
+  padding: 32px 48px 48px 48px;
+  scroll-behavior: smooth;
 }

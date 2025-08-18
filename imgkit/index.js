@@ -7,16 +7,6 @@ const imageLayerQueue = [];
 
 const scrollContainer = document.createElement("div");
 scrollContainer.id = "scroll-container";
-scrollContainer.style.display = "flex";
-scrollContainer.style.flexDirection = "row";
-scrollContainer.style.alignItems = "center";
-scrollContainer.style.overflowX = "auto";
-scrollContainer.style.overflowY = "hidden";
-scrollContainer.style.width = "100%";
-scrollContainer.style.gap = "32px";
-scrollContainer.style.boxSizing = "border-box";
-scrollContainer.style.padding = "32px 48px 48px 48px";
-scrollContainer.style.scrollBehavior = "smooth";
 document.body.appendChild(scrollContainer);
 
 const scrollLeftBtn = document.createElement("button");

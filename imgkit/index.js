@@ -298,11 +298,14 @@ class ImageLayer {
               return;
             }
             // Valid image, add new layer
-            imageLayerQueue[Parameter.num].openImg(
-              typeof filepathOrBuffer === "string"
-                ? filepathOrBuffer
-                : file.path || ""
-            );
+            if (typeof filepathOrBuffer === "string") {
+              imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
+            } else {
+              imageLayerQueue[Parameter.num].openImgBuffer(
+                filepathOrBuffer,
+                file.name
+              );
+            }
             Parameter.num++;
             imageLayerQueue.push(new ImageLayer());
             document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
@@ -673,6 +676,40 @@ class ImageLayer {
         .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else {
       sharp(filepath).toBuffer((err, buf, info) => afterLoad(buf, info));
+    }
+  }
+
+  openImgBuffer(buffer, name) {
+    this.canvas.id = "full";
+    this.filepath = name;
+    this.extension = path.extname(name).replace(".", "");
+    this.nameSpan.textContent = path
+      .basename(name)
+      .replace("." + this.extension, "");
+
+    const afterLoad = (buf, info) => {
+      this.updatePreviewImg(buf, info);
+      updateScrollUI();
+      scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+    };
+
+    // sharp는 buffer 입력도 지원
+    if (this.extension === "tiff" || this.extension === "tif") {
+      sharp(buffer)
+        .toFormat("png")
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
+    } else if (this.extension === "ico") {
+      ico
+        .sharpsFromIco(buffer)
+        .png()
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
+    } else if (this.extension === "bmp") {
+      bmp
+        .sharpFromBmp(buffer)
+        .png()
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
+    } else {
+      sharp(buffer).toBuffer((err, buf, info) => afterLoad(buf, info));
     }
   }
 

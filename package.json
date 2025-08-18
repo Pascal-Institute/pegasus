@@ -1,6 +1,6 @@
 {
   "name": "pegasus",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "main.js",
   "dependencies": {
@@ -11,7 +11,7 @@
     "sharp-ico": "^0.1.5"
   },
   "devDependencies": {
-    "electron": "^37.2.6",
+    "electron": "^37.3.0",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
     "electron-reload": "^2.0.0-alpha.1"
@@ -23,7 +23,7 @@
   },
   "build": {
     "appId": "com.pascal.institute.pegasus",
-    "productName": "Pegasus",
+    "productName": "pegasus",
     "win": {
       "icon": "assets/icon.ico",
       "target": [

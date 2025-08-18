@@ -1,4 +1,5 @@
 const electron = require("electron");
+const pkg = require("./package.json");
 const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu } = electron;
 
 //electron refresh (only develop)
@@ -288,8 +289,7 @@ app.whenReady().then(() => {
               dialog.showMessageBox({
                 title: "About",
                 buttons: ["Ok"],
-                message:
-                  "Author : Pascal Institute\nVersion : v1.0.0\nLicense : MIT Lisence\n",
+                message: `Author : Pascal Institute\nVersion : v${pkg.version}\nLicense : MIT License\n`,
               });
             },
           },

@@ -2,7 +2,8 @@
 
 #### The Image Processing Tool based on Electron framework & sharp npm package
 
-![image](https://user-images.githubusercontent.com/65960990/150795299-103af483-4d5b-46ff-b00f-61f4cd5ca130.png)
+<img width="2556" height="1387" alt="image" src="https://github.com/user-attachments/assets/5d760047-deae-43a0-b227-58052a5fcfb4" />
+
 
 ## 1. Requirements
 
@@ -13,6 +14,11 @@
 npm install --save electron electron-reload electron-rebuild electron-builder sharp sharp-ico sharp-bmp fs imgkit
 ```
 
+### when electron is not working
+```bash
+ npm install -g electron
+```
+
 ### npm update (Recommended)
 
 ```bash
@@ -21,7 +27,7 @@ npm update
 
 #### imgkit is local module.
 
-## 2. How to execute
+## 2-1. How to execute
 
 ```bash
 electron .
@@ -31,6 +37,12 @@ or
 
 ```bash
 npm start
+```
+
+## 2-2. How to build
+
+```bash
+npm run build
 ```
 
 ## 3. Application Specification

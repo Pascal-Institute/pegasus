@@ -5,6 +5,95 @@ var path = require("path");
 
 const imageLayerQueue = [];
 
+const scrollContainer = document.createElement("div");
+scrollContainer.id = "scroll-container";
+document.body.appendChild(scrollContainer);
+
+const scrollLeftBtn = document.createElement("button");
+scrollLeftBtn.innerText = "<";
+scrollLeftBtn.style.position = "fixed";
+scrollLeftBtn.style.left = "16px";
+scrollLeftBtn.style.top = "50%";
+scrollLeftBtn.style.transform = "translateY(-50%)";
+scrollLeftBtn.style.zIndex = "1000";
+scrollLeftBtn.style.fontSize = "2em";
+scrollLeftBtn.style.background = "#fff";
+scrollLeftBtn.style.border = "1px solid #ccc";
+scrollLeftBtn.style.borderRadius = "50%";
+scrollLeftBtn.style.width = "48px";
+scrollLeftBtn.style.height = "48px";
+scrollLeftBtn.style.opacity = "0.8";
+scrollLeftBtn.style.cursor = "pointer";
+document.body.appendChild(scrollLeftBtn);
+
+const scrollRightBtn = document.createElement("button");
+scrollRightBtn.innerText = ">";
+scrollRightBtn.style.position = "fixed";
+scrollRightBtn.style.right = "16px";
+scrollRightBtn.style.top = "50%";
+scrollRightBtn.style.transform = "translateY(-50%)";
+scrollRightBtn.style.zIndex = "1000";
+scrollRightBtn.style.fontSize = "2em";
+scrollRightBtn.style.background = "#fff";
+scrollRightBtn.style.border = "1px solid #ccc";
+scrollRightBtn.style.borderRadius = "50%";
+scrollRightBtn.style.width = "48px";
+scrollRightBtn.style.height = "48px";
+scrollRightBtn.style.opacity = "0.8";
+scrollRightBtn.style.cursor = "pointer";
+document.body.appendChild(scrollRightBtn);
+
+function updateScrollUI() {
+  imageLayerQueue.forEach((layer, idx) => {
+    // Always insert in order for horizontal layout
+    if (layer.imgPanel.parentNode !== scrollContainer) {
+      try {
+        document.body.removeChild(layer.imgPanel);
+      } catch (e) {}
+      if (idx >= scrollContainer.children.length) {
+        scrollContainer.appendChild(layer.imgPanel);
+      } else {
+        scrollContainer.insertBefore(
+          layer.imgPanel,
+          scrollContainer.children[idx]
+        );
+      }
+    } else if (scrollContainer.children[idx] !== layer.imgPanel) {
+      scrollContainer.insertBefore(
+        layer.imgPanel,
+        scrollContainer.children[idx]
+      );
+    }
+    // Flex item settings to prevent overlap
+    layer.imgPanel.style.display = "flex";
+    layer.imgPanel.style.flexDirection = "column";
+    layer.imgPanel.style.flexShrink = "0";
+    layer.imgPanel.style.flexGrow = "0";
+    layer.imgPanel.style.flexBasis = "auto";
+    layer.imgPanel.style.alignItems = "center";
+    layer.imgPanel.style.justifyContent = "center";
+    layer.imgPanel.style.margin = "0"; // gap handles spacing
+    layer.imgPanel.style.maxWidth = "";
+    layer.imgPanel.style.minWidth = "";
+    layer.imgPanel.style.boxSizing = "border-box";
+  });
+  scrollLeftBtn.disabled = scrollContainer.scrollLeft <= 0;
+  scrollRightBtn.disabled =
+    scrollContainer.scrollLeft + scrollContainer.clientWidth >=
+    scrollContainer.scrollWidth - 2;
+}
+
+scrollLeftBtn.addEventListener("click", () => {
+  scrollContainer.scrollBy({ left: -400, behavior: "smooth" });
+  setTimeout(updateScrollUI, 400);
+});
+scrollRightBtn.addEventListener("click", () => {
+  scrollContainer.scrollBy({ left: 400, behavior: "smooth" });
+  setTimeout(updateScrollUI, 400);
+});
+
+scrollContainer.addEventListener("scroll", updateScrollUI);
+
 class Parameter {
   static num = 0;
 }
@@ -24,7 +113,7 @@ class ImageLayer {
     this.extensionQueue = [];
     this.i = -1;
     this.showImageOnly = false;
-
+    this.totalImageWidth = 0;
     //initialize
     this.imgPanel = document.createElement("div");
     this.imgPanel.className = "imgPanel";
@@ -59,6 +148,13 @@ class ImageLayer {
           Parameter.num = 0;
         }
       }
+
+      document
+        .getElementById("delete_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
     };
 
     this.deleteBtn.addEventListener("click", deleteImagePanel);
@@ -157,6 +253,11 @@ class ImageLayer {
     this.filepath;
 
     this.build();
+    setTimeout(() => {
+      updateScrollUI();
+      // Automatically scroll to the right when a new image is added
+      scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+    }, 0);
   }
 
   build() {
@@ -164,8 +265,6 @@ class ImageLayer {
       Parameter.num = this.imgPanel.id;
       this.updateFocus();
       this.updateSio();
-      // console.log(this.imgPanel.id);
-      // console.log(Parameter.num);
     });
     // this.ctx.lineWidth = 1;
     this.canvas.addEventListener("drag", function (event) {}, false);
@@ -181,28 +280,51 @@ class ImageLayer {
     this.canvas.addEventListener("drop", (event) => {
       event.preventDefault();
       if (this.canvas.id !== "full") {
-        Parameter.num++;
-        imageLayerQueue.push(new ImageLayer());
-        document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-        imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
-      }
+        // Try to open the image first, only add if successful
+        const file = event.dataTransfer.files[0];
+        if (!file) return;
 
-      const file = event.dataTransfer.files[0];
-      if (!file) return;
-
-      if (!file.path) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const arrayBuffer = e.target.result;
-          const buffer = Buffer.from(arrayBuffer);
-
-          sharp(buffer).toBuffer((err, buf, info) => {
-            this.updatePreviewImg(buf, info);
+        const tryOpenImg = (filepathOrBuffer) => {
+          // Try to load image using sharp to check validity
+          sharp(filepathOrBuffer).metadata((err, info) => {
+            if (err) {
+              // Invalid image, do not add
+              document
+                .getElementById("error_msg")
+                ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                  duration: 1800,
+                  iterations: 1,
+                });
+              return;
+            }
+            // Valid image, add new layer
+            if (typeof filepathOrBuffer === "string") {
+              imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
+            } else {
+              imageLayerQueue[Parameter.num].openImgBuffer(
+                filepathOrBuffer,
+                file.name
+              );
+            }
+            Parameter.num++;
+            imageLayerQueue.push(new ImageLayer());
+            document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+            imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
           });
         };
-        reader.readAsArrayBuffer(file);
-      } else {
-        this.openImg(file.path);
+
+        if (!file.path) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const arrayBuffer = e.target.result;
+            const buffer = Buffer.from(arrayBuffer);
+            tryOpenImg(buffer);
+          };
+          reader.readAsArrayBuffer(file);
+        } else {
+          tryOpenImg(file.path);
+        }
+        return;
       }
     });
 
@@ -263,6 +385,7 @@ class ImageLayer {
       }
     });
 
+    this.imgPanel.style.position = "relative";
     this.imgPanel.appendChild(this.canvas);
     this.imgPanel.appendChild(this.deleteBtn);
     this.imgPanel.appendChild(this.nameSpan);
@@ -384,7 +507,9 @@ class ImageLayer {
     this.image.src =
       `data:image/${this.extension};base64, ` + buf.toString("base64");
     this.image.onload = () => {
-      this.ctx.drawImage(this.image, 0, 0, info.width, info.height);
+      // Display only at original size (no resize)
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.drawImage(this.image, 0, 0);
     };
 
     this.updateImgInfoText(info);
@@ -411,7 +536,7 @@ class ImageLayer {
     this.extensionQueue.push(this.extension);
 
     setTimeout(() => {
-      const panels = document.querySelectorAll(".imgPanel"); // imgPanel 클래스 이름 확인 필요
+      const panels = document.querySelectorAll(".imgPanel");
       let maxRight = 0;
       let maxBottom = 0;
 
@@ -425,12 +550,12 @@ class ImageLayer {
       });
 
       if (maxRight > document.body.scrollWidth) {
-        document.body.style.width = maxRight + 50 + "px"; // 여유 공간 포함
+        document.body.style.width = maxRight + 50 + "px";
       }
       if (maxBottom > document.body.scrollHeight) {
         document.body.style.height = maxBottom + 50 + "px";
       }
-    }, 100); // 100ms 후에 실행
+    }, 100);
   }
 
   updateImgInfoText(info) {
@@ -527,30 +652,64 @@ class ImageLayer {
     this.nameSpan.textContent = path
       .basename(this.filepath)
       .replace("." + this.extension, "");
+
+    const afterLoad = (buf, info) => {
+      this.updatePreviewImg(buf, info);
+      updateScrollUI();
+      // Automatically scroll to the right when a new image is opened
+      scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+    };
+
     if (this.extension === "tiff" || this.extension === "tif") {
       sharp(filepath)
         .toFormat("png")
-        .toBuffer((err, buf, info) => {
-          this.updatePreviewImg(buf, info);
-        });
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else if (this.extension === "ico") {
       ico
         .sharpsFromIco(this.filepath)
         .png()
-        .toBuffer((err, buf, info) => {
-          this.updatePreviewImg(buf, info);
-        });
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else if (this.extension === "bmp") {
       bmp
         .sharpFromBmp(this.filepath)
         .png()
-        .toBuffer((err, buf, info) => {
-          this.updatePreviewImg(buf, info);
-        });
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else {
-      sharp(filepath).toBuffer((err, buf, info) => {
-        this.updatePreviewImg(buf, info);
-      });
+      sharp(filepath).toBuffer((err, buf, info) => afterLoad(buf, info));
+    }
+  }
+
+  openImgBuffer(buffer, name) {
+    this.canvas.id = "full";
+    this.filepath = name;
+    this.extension = path.extname(name).replace(".", "");
+    this.nameSpan.textContent = path
+      .basename(name)
+      .replace("." + this.extension, "");
+
+    const afterLoad = (buf, info) => {
+      this.updatePreviewImg(buf, info);
+      updateScrollUI();
+      scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+    };
+
+    // sharp는 buffer 입력도 지원
+    if (this.extension === "tiff" || this.extension === "tif") {
+      sharp(buffer)
+        .toFormat("png")
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
+    } else if (this.extension === "ico") {
+      ico
+        .sharpsFromIco(buffer)
+        .png()
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
+    } else if (this.extension === "bmp") {
+      bmp
+        .sharpFromBmp(buffer)
+        .png()
+        .toBuffer((err, buf, info) => afterLoad(buf, info));
+    } else {
+      sharp(buffer).toBuffer((err, buf, info) => afterLoad(buf, info));
     }
   }
 

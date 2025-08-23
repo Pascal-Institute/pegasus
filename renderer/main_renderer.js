@@ -26,8 +26,9 @@ buttons.forEach((btnId) => {
 ipcRenderer.send("showMenuREQ", "ping");
 
 ipcRenderer.on("resizeImgCMD", (event, res) => {
+  const newWidth = Math.floor(imageLayerQueue[Parameter.num].canvas.width * res);
   sharp(imageLayerQueue[Parameter.num].buffer)
-    .resize({ width: imageLayerQueue[Parameter.num].canvas.width * res })
+    .resize({ width: newWidth })
     .toBuffer((err, buf, info) => {
       imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
     });

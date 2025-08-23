@@ -168,6 +168,22 @@ class ImageLayer {
         (event.key === "Delete" && document.activeElement === this.imgPanel)
       ) {
         deleteImagePanel();
+      } else if (
+        document.activeElement === this.imgPanel &&
+        (event.key === "ArrowLeft" || event.key === "ArrowRight")
+      ) {
+        let idx = imageLayerQueue.findIndex(l => l.imgPanel === this.imgPanel);
+        if (event.key === "ArrowLeft" && idx > 0) {
+          imageLayerQueue[idx - 1].imgPanel.focus();
+          Parameter.num = imageLayerQueue[idx - 1].imgPanel.id;
+          imageLayerQueue[idx - 1].updateFocus();
+          imageLayerQueue[idx - 1].updateSio();
+        } else if (event.key === "ArrowRight" && idx < imageLayerQueue.length - 1) {
+          imageLayerQueue[idx + 1].imgPanel.focus();
+          Parameter.num = imageLayerQueue[idx + 1].imgPanel.id;
+          imageLayerQueue[idx + 1].updateFocus();
+          imageLayerQueue[idx + 1].updateSio();
+        }
       }
     });
 

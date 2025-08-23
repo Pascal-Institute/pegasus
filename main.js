@@ -289,7 +289,7 @@ app.whenReady().then(() => {
               dialog.showMessageBox({
                 title: "About",
                 buttons: ["Ok"],
-                message: `Author : Pascal Institute\nVersion : v${pkg.version}\nLicense : MIT License\n`,
+                message: `Author : ${pkg.author}\nVersion : v${pkg.version}\nLicense : ${pkg.license}\n`,
               });
             },
           },

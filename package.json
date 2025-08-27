@@ -1,6 +1,6 @@
 {
   "name": "pegasus",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "main.js",
   "dependencies": {
@@ -38,6 +38,10 @@
     "mac": {
       "target": []
     },
+    "linux": {
+      "icon": "assets/icon.png",
+      "target": ["AppImage", "deb", "rpm"]
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
@@ -59,6 +63,9 @@
       }
     ]
   },
-  "author": "Pascal Institute",
+  "author": {
+    "name": "Pascal Institute",
+    "email": "volta2030@gmail.com"
+  },
   "license": "MIT"
 }

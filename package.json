@@ -39,7 +39,7 @@
       "target": []
     },
     "linux": {
-      "icon": "assets/icon.png",
+      "icon": "assets/icon.ico",
       "target": ["AppImage", "deb", "rpm"]
     },
     "nsis": {

@@ -1,16 +1,17 @@
 const { ipcRenderer } = require("electron");
-const { ImageLayer, Parameter, imageLayerQueue, drawFlag } = require("imgkit");
+const { ImageLayer, Parameter, imageLayerQueue} = require("imgkit");
 var { num } = require("imgkit");
 const sharp = require("sharp");
 var path = require("path");
 var fullScreenFlag = false;
 var lineWidth = 1;
 
-const buttons = ["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"];
+const buttons = ["resizeBtn", "cropBtn", "filterBtn", "rotateBtn", "paintBtn"];
 
 buttons.forEach((btnId) => {
   const btn = document.getElementById(btnId);
   btn.addEventListener("click", (event) => {
+    document.body.style.cursor = "default";
     buttons.forEach((id) => {
       document.getElementById(id).style.borderBottom = "2px solid #333";
     });
@@ -140,16 +141,8 @@ ipcRenderer.on("tintImgCMD", (event, res) => {
 });
 
 ipcRenderer.on("cropImgCMD", (event, res) => {
-  ImageLayer.cropFlag = res;
-  ImageLayer.dragFlag = false;
-  // initialX = initialY = cropWidth = cropHeight = 0;
-  if (ImageLayer.cropFlag) {
     imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", false);
     document.body.style.cursor = "crosshair";
-  } else {
-    imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", true);
-    document.body.style.cursor = "default";
-  }
 });
 
 ipcRenderer.on("drawImgCMD", (event, res) => {

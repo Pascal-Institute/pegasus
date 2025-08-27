@@ -78,7 +78,7 @@ app.whenReady().then(() => {
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 
-  ["resizeImgREQ", "filterImgREQ", "rotateImgREQ", "paintImgREQ"].forEach(
+  ["resizeImgREQ", "cropImgREQ",  "filterImgREQ", "rotateImgREQ", "paintImgREQ"].forEach(
     (item, index, arr) => {
       ipcMain.on(item, (event) => {
         mainWindow

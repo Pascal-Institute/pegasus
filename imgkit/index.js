@@ -353,7 +353,7 @@ class ImageLayer {
           event.clientY - this.canvas.getBoundingClientRect().top
         );
         this.canvas.addEventListener("mousemove", (evt) => {
-          if (ImageLayer.dragFlag && ImageLayer.drawFlag) {
+          if (ImageLayer.dragFlag) {
             this.ctx.lineTo(
               evt.x - this.canvas.getBoundingClientRect().left,
               evt.y - this.canvas.getBoundingClientRect().top
@@ -364,7 +364,7 @@ class ImageLayer {
         this.ctx.closePath();
       }
 
-      if (ImageLayer.cropFlag) {
+      if (window.getComputedStyle(this.canvas).cursor === "crosshair") {
         var ctxs = this.canvas.getContext("2d");
         this.realPosX = event.clientX;
         this.realPosY = event.clientY;
@@ -374,7 +374,7 @@ class ImageLayer {
         ctxs.setLineDash([2]);
 
         this.canvas.addEventListener("mousemove", (evt) => {
-          if (ImageLayer.dragFlag && ImageLayer.cropFlag) {
+          if (window.getComputedStyle(this.canvas).cursor === "crosshair") {
             ctxs.clearRect(
               0,
               0,
@@ -396,8 +396,32 @@ class ImageLayer {
     });
 
     this.canvas.addEventListener("mouseup", (event) => {
-      if (ImageLayer.drawFlag) {
-        //paste
+      if (window.getComputedStyle(this.canvas).cursor === "crosshair") {
+        const rect = this.canvas.getBoundingClientRect();
+        const cropX = Math.round(this.initialX);
+        const cropY = Math.round(this.initialY);
+        const cropW = Math.round(this.cropWidth);
+        const cropH = Math.round(this.cropHeight);
+
+        if (
+          cropW > 0 &&
+          cropH > 0 &&
+          this.buffer &&
+          this.information &&
+          (cropX + cropW) <= this.information.width &&
+          (cropY + cropH) <= this.information.height
+        ) {
+          sharp(this.buffer)
+            .extract({ left: cropX, top: cropY, width: cropW, height: cropH })
+            .toBuffer((err, buf, info) => {
+              if (!err && buf && info) {
+                this.updatePreviewImg(buf, info);
+              }
+            });
+        }
+        ImageLayer.dragFlag = false;
+        this.canvas.style.cursor = "default";
+        this.canvas.onmousemove = null;
       }
     });
 

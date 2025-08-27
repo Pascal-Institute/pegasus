@@ -19,7 +19,6 @@ buttons.forEach((btnId) => {
     event.currentTarget.style.borderBottom = "none";
 
     ipcRenderer.send(`${btnId.replace("Btn", "")}ImgREQ`);
-    ImageLayer.cropFlag = false;
     ImageLayer.drawFlag = false;
   });
 });
@@ -180,45 +179,6 @@ sioCheckBox.addEventListener("click", (event) => {
     imageLayerQueue[Parameter.num].extensionComboBox.style.visibility =
       "visible";
     imageLayerQueue[Parameter.num].sio = false;
-  }
-});
-
-document.body.addEventListener("mouseup", (event) => {
-  ImageLayer.dragFlag = false;
-  if (
-    ImageLayer.cropFlag &&
-    event.x - imageLayerQueue[Parameter.num].realPosX <
-      imageLayerQueue[Parameter.num].canvas.clientWidth &&
-    event.y - imageLayerQueue[Parameter.num].realPosY <
-      imageLayerQueue[Parameter.num].canvas.clientHeight
-  ) {
-    if (
-      imageLayerQueue[Parameter.num].cropWidth < 0 ||
-      imageLayerQueue[Parameter.num].cropHeight < 0 ||
-      imageLayerQueue[Parameter.num].cropWidth >
-        imageLayerQueue[Parameter.num].canvas.clientWidth ||
-      imageLayerQueue[Parameter.num].cropHeight >
-        imageLayerQueue[Parameter.num].canvas.clientHeight
-    ) {
-      this.ctx.clearRect(
-        0,
-        0,
-        imageLayerQueue[Parameter.num].canvas.clientWidth,
-        imageLayerQueue[Parameter.num].canvas.clientHeight
-      );
-      this.ctx.drawImage(imageLayerQueue[Parameter.num].image, 0, 0);
-    } else {
-      sharp(imageLayerQueue[Parameter.num].buffer)
-        .extract({
-          left: parseInt(imageLayerQueue[Parameter.num].initialX),
-          top: parseInt(imageLayerQueue[Parameter.num].initialY),
-          width: parseInt(imageLayerQueue[Parameter.num].cropWidth),
-          height: parseInt(imageLayerQueue[Parameter.num].cropHeight),
-        })
-        .toBuffer((err, buf, info) => {
-          imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-        });
-    }
   }
 });
 

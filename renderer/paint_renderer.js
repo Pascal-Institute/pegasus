@@ -1,5 +1,5 @@
 const { ipcRenderer } = require("electron");
-var { drawFlag, cropFlag } = require("imgkit");
+var { drawFlag} = require("imgkit");
 
 var rgb = { r: "123", g: "123", b: "123" };
 
@@ -7,7 +7,7 @@ document.getElementById("drawBtn").addEventListener("click", () => {
   if (!drawFlag) {
     drawFlag = true;
     document.getElementById("drawBtn").style.backgroundColor = "gray";
-    if (cropFlag) cropFlag = false;
+
   } else {
     drawFlag = false;
     document.getElementById("drawBtn").style.backgroundColor = "#efefef";

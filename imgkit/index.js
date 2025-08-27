@@ -100,7 +100,6 @@ class Parameter {
 
 class ImageLayer {
   static drawFlag = false;
-  static cropFlag = false;
   static dragFlag = false;
 
   constructor() {
@@ -364,40 +363,45 @@ class ImageLayer {
         this.ctx.closePath();
       }
 
-      if (window.getComputedStyle(this.canvas).cursor === "crosshair") {
+      if (document.body.style.cursor === "crosshair") {
         var ctxs = this.canvas.getContext("2d");
-        this.realPosX = event.clientX;
-        this.realPosY = event.clientY;
-        this.initialX =
-          event.clientX - this.canvas.getBoundingClientRect().left;
-        this.initialY = event.clientY - this.canvas.getBoundingClientRect().top;
+        const rect = this.canvas.getBoundingClientRect();
+        const startX = event.clientX - rect.left;
+        const startY = event.clientY - rect.top;
+        this.initialX = startX;
+        this.initialY = startY;
         ctxs.setLineDash([2]);
 
-        this.canvas.addEventListener("mousemove", (evt) => {
-          if (window.getComputedStyle(this.canvas).cursor === "crosshair") {
-            ctxs.clearRect(
-              0,
-              0,
-              this.canvas.clientWidth,
-              this.canvas.clientHeight
-            );
-            this.cropWidth = evt.clientX - event.clientX;
-            this.cropHeight = evt.clientY - event.clientY;
-            ctxs.drawImage(this.image, 0, 0);
-            ctxs.strokeRect(
-              this.initialX,
-              this.initialY,
-              this.cropWidth,
-              this.cropHeight
-            );
-          }
-        });
+        const mouseMoveHandler = (evt) => {
+          ctxs.clearRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
+          ctxs.drawImage(this.image, 0, 0);
+          const currX = evt.clientX - rect.left;
+          const currY = evt.clientY - rect.top;
+          // Calculate top-left and width/height regardless of drag direction
+          const x = Math.min(startX, currX);
+          const y = Math.min(startY, currY);
+          const w = Math.abs(currX - startX);
+          const h = Math.abs(currY - startY);
+          this.initialX = x;
+          this.initialY = y;
+          this.cropWidth = w;
+          this.cropHeight = h;
+          ctxs.strokeRect(x, y, w, h);
+        };
+        const mouseUpHandler = (evt) => {
+          this.canvas.removeEventListener("mousemove", mouseMoveHandler);
+          document.removeEventListener("mouseup", mouseUpHandler);
+          ImageLayer.dragFlag = false;
+        };
+        this.canvas.addEventListener("mousemove", mouseMoveHandler);
+        document.addEventListener("mouseup", mouseUpHandler);
       }
     });
 
     this.canvas.addEventListener("mouseup", (event) => {
-      if (window.getComputedStyle(this.canvas).cursor === "crosshair") {
-        const rect = this.canvas.getBoundingClientRect();
+      ImageLayer.dragFlag = false;
+      if (document.body.style.cursor === "crosshair") {
+        // cropWidth/cropHeight는 항상 양수, initialX/initialY는 항상 좌상단
         const cropX = Math.round(this.initialX);
         const cropY = Math.round(this.initialY);
         const cropW = Math.round(this.cropWidth);
@@ -419,9 +423,6 @@ class ImageLayer {
               }
             });
         }
-        ImageLayer.dragFlag = false;
-        this.canvas.style.cursor = "default";
-        this.canvas.onmousemove = null;
       }
     });
 
@@ -833,7 +834,6 @@ module.exports = {
   ImageLayer: ImageLayer,
   Parameter: Parameter,
   drawFlag: ImageLayer.drawFlag,
-  cropFlag: ImageLayer.cropFlag,
   dragFlag: ImageLayer.dragFlag,
   imageLayerQueue: imageLayerQueue,
 };

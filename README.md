@@ -47,17 +47,19 @@ npm run build
 
 ## 3. Application Specification
 
-### Availiable file extension
+### 3-1. Availiable file extension
 
 ```bash
 png jpg jpeg webp gif bmp ico tiff tif
 ```
 
-#### extension converting
+#### 3-2. extension converting
 
-### Image Processing
+### 3-3. Image Processing
 
 #### resize
+
+#### crop
 
 #### filter
 

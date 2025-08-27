@@ -171,17 +171,16 @@ class ImageLayer {
         document.activeElement === this.imgPanel &&
         (event.key === "ArrowLeft" || event.key === "ArrowRight")
       ) {
-        let idx = imageLayerQueue.findIndex(l => l.imgPanel === this.imgPanel);
-        if (event.key === "ArrowLeft" && idx > 0) {
-          imageLayerQueue[idx - 1].imgPanel.focus();
-          Parameter.num = imageLayerQueue[idx - 1].imgPanel.id;
-          imageLayerQueue[idx - 1].updateFocus();
-          imageLayerQueue[idx - 1].updateSio();
-        } else if (event.key === "ArrowRight" && idx < imageLayerQueue.length - 1) {
-          imageLayerQueue[idx + 1].imgPanel.focus();
-          Parameter.num = imageLayerQueue[idx + 1].imgPanel.id;
-          imageLayerQueue[idx + 1].updateFocus();
-          imageLayerQueue[idx + 1].updateSio();
+        if (event.key === "ArrowLeft" && Parameter.num > 0) {
+          Parameter.num--;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        } else if (event.key === "ArrowRight" && Parameter.num < imageLayerQueue.length - 1) {
+          Parameter.num++;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
         }
       }
     });

@@ -163,25 +163,35 @@ class ImageLayer {
 
     document.addEventListener("keydown", (event) => {
       if (
-        (event.ctrlKey && event.key === "d") ||
-        (event.key === "Delete" && document.activeElement === this.imgPanel)
+      (event.ctrlKey && event.key === "d") ||
+      (event.key === "Delete" && document.activeElement === this.imgPanel)
       ) {
-        deleteImagePanel();
+      deleteImagePanel();
       } else if (
-        document.activeElement === this.imgPanel &&
-        (event.key === "ArrowLeft" || event.key === "ArrowRight")
+      document.activeElement === this.imgPanel &&
+      (event.key === "ArrowLeft" || event.key === "ArrowRight")
       ) {
-        if (event.key === "ArrowLeft" && Parameter.num > 0) {
-          Parameter.num--;
-          imageLayerQueue[Parameter.num].imgPanel.focus();
-          imageLayerQueue[Parameter.num].updateFocus();
-          imageLayerQueue[Parameter.num].updateSio();
-        } else if (event.key === "ArrowRight" && Parameter.num < imageLayerQueue.length - 1) {
-          Parameter.num++;
-          imageLayerQueue[Parameter.num].imgPanel.focus();
-          imageLayerQueue[Parameter.num].updateFocus();
-          imageLayerQueue[Parameter.num].updateSio();
-        }
+      if (event.ctrlKey && event.key === "ArrowLeft") {
+        Parameter.num = 0;
+        imageLayerQueue[Parameter.num].imgPanel.focus();
+        imageLayerQueue[Parameter.num].updateFocus();
+        imageLayerQueue[Parameter.num].updateSio();
+      } else if (event.ctrlKey && event.key === "ArrowRight") {
+        Parameter.num = imageLayerQueue.length - 1;
+        imageLayerQueue[Parameter.num].imgPanel.focus();
+        imageLayerQueue[Parameter.num].updateFocus();
+        imageLayerQueue[Parameter.num].updateSio();
+      } else if (event.key === "ArrowLeft" && Parameter.num > 0) {
+        Parameter.num--;
+        imageLayerQueue[Parameter.num].imgPanel.focus();
+        imageLayerQueue[Parameter.num].updateFocus();
+        imageLayerQueue[Parameter.num].updateSio();
+      } else if (event.key === "ArrowRight" && Parameter.num < imageLayerQueue.length - 1) {
+        Parameter.num++;
+        imageLayerQueue[Parameter.num].imgPanel.focus();
+        imageLayerQueue[Parameter.num].updateFocus();
+        imageLayerQueue[Parameter.num].updateSio();
+      }
       }
     });
 

@@ -295,7 +295,10 @@ document.addEventListener("keydown", function (event) {
 
 document.addEventListener("wheel", function (event) {
   if (event.ctrlKey) {
+    event.preventDefault(); // Prevent browser zoom
+    
     if (ImageLayer.drawFlag) {
+      // Original functionality: change line width when drawing
       if (event.deltaY > 0 || event.detail < 0) {
         // scroll up
         lineWidth++;
@@ -306,6 +309,57 @@ document.addEventListener("wheel", function (event) {
         }
       }
       imageLayerQueue[Parameter.num].ctx.lineWidth = lineWidth;
+    } else {
+      // New functionality: scale image when not drawing
+      if (imageLayerQueue[Parameter.num] && imageLayerQueue[Parameter.num].buffer) {
+        const currentLayer = imageLayerQueue[Parameter.num];
+        const scaleStep = 0.1;
+        const minScale = 0.1;
+        const maxScale = 5.0;
+        
+        if (event.deltaY > 0) {
+          // scroll down - scale down
+          currentLayer.scaleFactor = Math.max(minScale, currentLayer.scaleFactor - scaleStep);
+        } else {
+          // scroll up - scale up
+          currentLayer.scaleFactor = Math.min(maxScale, currentLayer.scaleFactor + scaleStep);
+        }
+        
+        // Apply the scaling using existing resize mechanism
+        if (currentLayer.originalBuffer && currentLayer.originalInformation) {
+          sharp(currentLayer.originalBuffer)
+            .resize({ 
+              width: Math.round(currentLayer.originalInformation.width * currentLayer.scaleFactor),
+              height: Math.round(currentLayer.originalInformation.height * currentLayer.scaleFactor)
+            })
+            .toBuffer((err, buf, info) => {
+              if (!err) {
+                // Update the canvas size and redraw
+                currentLayer.canvas.width = info.width;
+                currentLayer.canvas.height = info.height;
+                
+                const tempImage = new Image();
+                tempImage.src = `data:image/${currentLayer.extension};base64, ` + buf.toString("base64");
+                tempImage.onload = () => {
+                  currentLayer.ctx.clearRect(0, 0, currentLayer.canvas.width, currentLayer.canvas.height);
+                  currentLayer.ctx.drawImage(tempImage, 0, 0);
+                };
+                
+                // Update current information but not original
+                currentLayer.information = info;
+                
+                // Update info text to show current scale
+                currentLayer.updateImgInfoText({
+                  width: info.width,
+                  height: info.height,
+                  originalWidth: currentLayer.originalInformation.width,
+                  originalHeight: currentLayer.originalInformation.height,
+                  scale: currentLayer.scaleFactor
+                });
+              }
+            });
+        }
+      }
     }
   }
 });

@@ -106,7 +106,9 @@ class ImageLayer {
   constructor() {
     this.filepath = null;
     this.buffer;
+    this.originalBuffer;
     this.information;
+    this.originalInformation;
     this.extension;
     this.bufferQueue = [];
     this.infoQueue = [];
@@ -114,6 +116,7 @@ class ImageLayer {
     this.i = -1;
     this.showImageOnly = false;
     this.totalImageWidth = 0;
+    this.scaleFactor = 1.0;
     //initialize
     this.imgPanel = document.createElement("div");
     this.imgPanel.className = "imgPanel";
@@ -501,6 +504,13 @@ class ImageLayer {
   updatePreviewImg(buf, info) {
     this.buffer = buf;
     this.information = info;
+    
+    // Store original dimensions and buffer when scale factor is 1.0 (first load or reset)
+    if (this.scaleFactor === 1.0 || !this.originalInformation) {
+      this.originalInformation = { ...info };
+      this.originalBuffer = buf;
+    }
+    
     this.canvas.width = info.width;
     this.canvas.height = info.height;
 
@@ -559,7 +569,11 @@ class ImageLayer {
   }
 
   updateImgInfoText(info) {
-    this.imgInfoText.innerText = `${info.width} x ${info.height}`;
+    if (info.scale && info.originalWidth && info.originalHeight) {
+      this.imgInfoText.innerText = `${info.width} x ${info.height} (${Math.round(info.scale * 100)}%)`;
+    } else {
+      this.imgInfoText.innerText = `${info.width} x ${info.height}`;
+    }
   }
 
   extractMainColors(buffer, info) {

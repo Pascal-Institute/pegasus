@@ -124,6 +124,9 @@ select#extensionComboBox {
   /* background-color: white; */
   box-shadow: var(--main-shadow);
   position: inherit;
+  /* Ensure smooth scaling for responsive display */
+  max-width: none;
+  height: auto;
 }
 
 #dummyCanvas {

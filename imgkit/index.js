@@ -498,16 +498,43 @@ class ImageLayer {
     }
   }
 
+  calculateDisplaySize(imageWidth, imageHeight) {
+    const maxDisplayWidth = 400;  // Maximum display width in pixels
+    const maxDisplayHeight = 300; // Maximum display height in pixels
+    
+    let displayWidth = imageWidth;
+    let displayHeight = imageHeight;
+    
+    // Scale down if image is larger than max display size
+    if (imageWidth > maxDisplayWidth || imageHeight > maxDisplayHeight) {
+      const widthRatio = maxDisplayWidth / imageWidth;
+      const heightRatio = maxDisplayHeight / imageHeight;
+      const scale = Math.min(widthRatio, heightRatio);
+      
+      displayWidth = Math.round(imageWidth * scale);
+      displayHeight = Math.round(imageHeight * scale);
+    }
+    
+    return { width: displayWidth, height: displayHeight };
+  }
+
   updatePreviewImg(buf, info) {
     this.buffer = buf;
     this.information = info;
     this.canvas.width = info.width;
     this.canvas.height = info.height;
 
+    // Calculate display size for responsive scaling in scroll view
+    const displaySize = this.calculateDisplaySize(info.width, info.height);
+    
+    // Set CSS display size for consistent scroll experience
+    this.canvas.style.width = displaySize.width + 'px';
+    this.canvas.style.height = displaySize.height + 'px';
+
     this.image.src =
       `data:image/${this.extension};base64, ` + buf.toString("base64");
     this.image.onload = () => {
-      // Display only at original size (no resize)
+      // Clear and draw at full resolution (canvas internal size = actual image size)
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.drawImage(this.image, 0, 0);
     };
@@ -747,6 +774,13 @@ class ImageLayer {
       this.canvas.width = this.infoQueue[this.i].width;
       this.canvas.height = this.infoQueue[this.i].height;
 
+      // Calculate display size for responsive scaling in scroll view
+      const displaySize = this.calculateDisplaySize(this.infoQueue[this.i].width, this.infoQueue[this.i].height);
+      
+      // Set CSS display size for consistent scroll experience
+      this.canvas.style.width = displaySize.width + 'px';
+      this.canvas.style.height = displaySize.height + 'px';
+
       this.image.src =
         `data:image/${this.extension};base64, ` +
         this.buffer.toString("base64");
@@ -772,6 +806,13 @@ class ImageLayer {
 
       this.canvas.width = this.infoQueue[this.i].width;
       this.canvas.height = this.infoQueue[this.i].height;
+
+      // Calculate display size for responsive scaling in scroll view
+      const displaySize = this.calculateDisplaySize(this.infoQueue[this.i].width, this.infoQueue[this.i].height);
+      
+      // Set CSS display size for consistent scroll experience
+      this.canvas.style.width = displaySize.width + 'px';
+      this.canvas.style.height = displaySize.height + 'px';
 
       this.image.src =
         `data:image/${this.extension};base64, ` +

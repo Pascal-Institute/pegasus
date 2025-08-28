@@ -14,7 +14,8 @@
     "electron": "^37.3.0",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
-    "electron-reload": "^2.0.0-alpha.1"
+    "electron-reload": "^2.0.0-alpha.1",
+    "jsdom": "^26.1.0"
   },
   "scripts": {
     "start": "electron .",

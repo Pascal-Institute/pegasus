@@ -409,6 +409,30 @@ class ImageLayer {
 
     this.canvas.addEventListener("mouseup", (event) => {
       ImageLayer.dragFlag = false;
+      
+      // Save canvas state after completing a drawing stroke
+      if (ImageLayer.drawFlag) {
+        // Convert canvas to buffer and save as undo point
+        this.canvas.toBlob((blob) => {
+          if (blob) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const arrayBuffer = reader.result;
+              const buffer = Buffer.from(arrayBuffer);
+              // Create info object with current canvas dimensions
+              const info = {
+                width: this.canvas.width,
+                height: this.canvas.height,
+                channels: 4, // RGBA
+                format: 'png'
+              };
+              this.updatePreviewImg(buffer, info);
+            };
+            reader.readAsArrayBuffer(blob);
+          }
+        }, 'image/png');
+      }
+      
       if (document.body.style.cursor === "crosshair") {
         // cropWidth/cropHeight는 항상 양수, initialX/initialY는 항상 좌상단
         const cropX = Math.round(this.initialX);

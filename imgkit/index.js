@@ -426,7 +426,8 @@ class ImageLayer {
                 channels: 4, // RGBA
                 format: 'png'
               };
-              this.updatePreviewImg(buffer, info);
+              // Use updateBufferOnly to avoid redrawing canvas after drawing
+              this.updateBufferOnly(buffer, info);
             };
             reader.readAsArrayBuffer(blob);
           }
@@ -572,19 +573,68 @@ class ImageLayer {
     }
   }
 
+  // Update internal buffers without redrawing canvas (for drawing operations)
+  updateBufferOnly(buf, info) {
+    this.buffer = buf;
+    this.information = info;
+    
+    this.updateImgInfoText(info);
+    this.extractMainColors(buf, info);
+    this.updateExtension();
+
+    this.i++;
+
+    if (this.i > 10) {
+      this.bufferQueue.shift();
+      this.infoQueue.shift();
+      this.extensionQueue.shift();
+      this.i--;
+    } else {
+      if (this.bufferQueue[this.i + 1] !== null) {
+        this.bufferQueue = this.bufferQueue.slice(0, this.i);
+        this.infoQueue = this.infoQueue.slice(0, this.i);
+        this.extensionQueue = this.extensionQueue.slice(0, this.i);
+      }
+    }
+    this.bufferQueue.push(buf);
+    this.infoQueue.push(info);
+    this.extensionQueue.push(this.extension);
+  }
+
   updatePreviewImg(buf, info) {
     this.buffer = buf;
     this.information = info;
-    this.canvas.width = info.width;
-    this.canvas.height = info.height;
+    
+    // Only resize canvas if dimensions actually changed to avoid unnecessary clearing
+    const needsResize = this.canvas.width !== info.width || this.canvas.height !== info.height;
+    
+    if (needsResize) {
+      // Use offscreen canvas to prepare image without flickering
+      const offscreenCanvas = document.createElement('canvas');
+      const offscreenCtx = offscreenCanvas.getContext('2d');
+      offscreenCanvas.width = info.width;
+      offscreenCanvas.height = info.height;
 
-    this.image.src =
-      `data:image/${this.extension};base64, ` + buf.toString("base64");
-    this.image.onload = () => {
-      // Display only at original size (no resize)
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.drawImage(this.image, 0, 0);
-    };
+      this.image.src = `data:image/${this.extension};base64, ` + buf.toString("base64");
+      this.image.onload = () => {
+        // Draw to offscreen canvas first
+        offscreenCtx.drawImage(this.image, 0, 0);
+        
+        // Resize main canvas and quickly copy from offscreen
+        this.canvas.width = info.width;
+        this.canvas.height = info.height;
+        this.ctx.drawImage(offscreenCanvas, 0, 0);
+      };
+    } else {
+      // No resize needed, just redraw the image
+      this.image.src = `data:image/${this.extension};base64, ` + buf.toString("base64");
+      this.image.onload = () => {
+        // Use requestAnimationFrame for smoother redraw
+        requestAnimationFrame(() => {
+          this.ctx.drawImage(this.image, 0, 0);
+        });
+      };
+    }
 
     this.updateImgInfoText(info);
     this.extractMainColors(buf, info);
@@ -818,15 +868,37 @@ class ImageLayer {
       this.information = this.infoQueue[this.i];
       this.extension = this.extensionQueue[this.i];
 
-      this.canvas.width = this.infoQueue[this.i].width;
-      this.canvas.height = this.infoQueue[this.i].height;
+      const needsResize = this.canvas.width !== this.infoQueue[this.i].width || 
+                         this.canvas.height !== this.infoQueue[this.i].height;
 
-      this.image.src =
-        `data:image/${this.extension};base64, ` +
-        this.buffer.toString("base64");
-      this.image.onload = () => {
-        this.ctx.drawImage(this.image, 0, 0);
+      // Load image data
+      const tempImage = new Image();
+      tempImage.onload = () => {
+        if (needsResize) {
+          // Create offscreen canvas for smooth transition
+          const offscreenCanvas = document.createElement('canvas');
+          const offscreenCtx = offscreenCanvas.getContext('2d');
+          offscreenCanvas.width = this.infoQueue[this.i].width;
+          offscreenCanvas.height = this.infoQueue[this.i].height;
+          
+          // Draw to offscreen canvas
+          offscreenCtx.drawImage(tempImage, 0, 0);
+          
+          // Resize and copy in one smooth operation
+          requestAnimationFrame(() => {
+            this.canvas.width = this.infoQueue[this.i].width;
+            this.canvas.height = this.infoQueue[this.i].height;
+            this.ctx.drawImage(offscreenCanvas, 0, 0);
+          });
+        } else {
+          // No resize needed, just redraw smoothly
+          requestAnimationFrame(() => {
+            this.ctx.drawImage(tempImage, 0, 0);
+          });
+        }
       };
+      
+      tempImage.src = `data:image/${this.extension};base64, ` + this.buffer.toString("base64");
 
       this.updateImgInfoText(this.information);
       this.extractMainColors(this.buffer, this.information);
@@ -844,15 +916,37 @@ class ImageLayer {
       this.information = this.infoQueue[this.i];
       this.extension = this.extensionQueue[this.i];
 
-      this.canvas.width = this.infoQueue[this.i].width;
-      this.canvas.height = this.infoQueue[this.i].height;
+      const needsResize = this.canvas.width !== this.infoQueue[this.i].width || 
+                         this.canvas.height !== this.infoQueue[this.i].height;
 
-      this.image.src =
-        `data:image/${this.extension};base64, ` +
-        this.buffer.toString("base64");
-      this.image.onload = () => {
-        this.ctx.drawImage(this.image, 0, 0);
+      // Load image data
+      const tempImage = new Image();
+      tempImage.onload = () => {
+        if (needsResize) {
+          // Create offscreen canvas for smooth transition
+          const offscreenCanvas = document.createElement('canvas');
+          const offscreenCtx = offscreenCanvas.getContext('2d');
+          offscreenCanvas.width = this.infoQueue[this.i].width;
+          offscreenCanvas.height = this.infoQueue[this.i].height;
+          
+          // Draw to offscreen canvas
+          offscreenCtx.drawImage(tempImage, 0, 0);
+          
+          // Resize and copy in one smooth operation
+          requestAnimationFrame(() => {
+            this.canvas.width = this.infoQueue[this.i].width;
+            this.canvas.height = this.infoQueue[this.i].height;
+            this.ctx.drawImage(offscreenCanvas, 0, 0);
+          });
+        } else {
+          // No resize needed, just redraw smoothly
+          requestAnimationFrame(() => {
+            this.ctx.drawImage(tempImage, 0, 0);
+          });
+        }
       };
+      
+      tempImage.src = `data:image/${this.extension};base64, ` + this.buffer.toString("base64");
 
       this.updateImgInfoText(this.information);
       this.extractMainColors(this.buffer, this.information);

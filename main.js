@@ -78,7 +78,7 @@ app.whenReady().then(() => {
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 
-  ["resizeImgREQ", "filterImgREQ", "rotateImgREQ", "paintImgREQ"].forEach(
+  ["resizeImgREQ", "cropImgREQ",  "filterImgREQ", "rotateImgREQ", "paintImgREQ"].forEach(
     (item, index, arr) => {
       ipcMain.on(item, (event) => {
         mainWindow
@@ -289,7 +289,7 @@ app.whenReady().then(() => {
               dialog.showMessageBox({
                 title: "About",
                 buttons: ["Ok"],
-                message: `Author : Pascal Institute\nVersion : v${pkg.version}\nLicense : MIT License\n`,
+                message: `Author : ${pkg.author}\nVersion : v${pkg.version}\nLicense : ${pkg.license}\n`,
               });
             },
           },

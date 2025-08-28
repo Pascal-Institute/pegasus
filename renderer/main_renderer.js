@@ -1,16 +1,17 @@
 const { ipcRenderer } = require("electron");
-const { ImageLayer, Parameter, imageLayerQueue, drawFlag } = require("imgkit");
+const { ImageLayer, Parameter, imageLayerQueue} = require("imgkit");
 var { num } = require("imgkit");
 const sharp = require("sharp");
 var path = require("path");
 var fullScreenFlag = false;
 var lineWidth = 1;
 
-const buttons = ["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"];
+const buttons = ["resizeBtn", "cropBtn", "filterBtn", "rotateBtn", "paintBtn"];
 
 buttons.forEach((btnId) => {
   const btn = document.getElementById(btnId);
   btn.addEventListener("click", (event) => {
+    document.body.style.cursor = "default";
     buttons.forEach((id) => {
       document.getElementById(id).style.borderBottom = "2px solid #333";
     });
@@ -18,7 +19,6 @@ buttons.forEach((btnId) => {
     event.currentTarget.style.borderBottom = "none";
 
     ipcRenderer.send(`${btnId.replace("Btn", "")}ImgREQ`);
-    ImageLayer.cropFlag = false;
     ImageLayer.drawFlag = false;
   });
 });
@@ -26,8 +26,9 @@ buttons.forEach((btnId) => {
 ipcRenderer.send("showMenuREQ", "ping");
 
 ipcRenderer.on("resizeImgCMD", (event, res) => {
+  const newWidth = Math.floor(imageLayerQueue[Parameter.num].canvas.width * res);
   sharp(imageLayerQueue[Parameter.num].buffer)
-    .resize({ width: imageLayerQueue[Parameter.num].canvas.width * res })
+    .resize({ width: newWidth })
     .toBuffer((err, buf, info) => {
       imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
     });
@@ -139,16 +140,8 @@ ipcRenderer.on("tintImgCMD", (event, res) => {
 });
 
 ipcRenderer.on("cropImgCMD", (event, res) => {
-  ImageLayer.cropFlag = res;
-  ImageLayer.dragFlag = false;
-  // initialX = initialY = cropWidth = cropHeight = 0;
-  if (ImageLayer.cropFlag) {
     imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", false);
     document.body.style.cursor = "crosshair";
-  } else {
-    imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", true);
-    document.body.style.cursor = "default";
-  }
 });
 
 ipcRenderer.on("drawImgCMD", (event, res) => {
@@ -186,45 +179,6 @@ sioCheckBox.addEventListener("click", (event) => {
     imageLayerQueue[Parameter.num].extensionComboBox.style.visibility =
       "visible";
     imageLayerQueue[Parameter.num].sio = false;
-  }
-});
-
-document.body.addEventListener("mouseup", (event) => {
-  ImageLayer.dragFlag = false;
-  if (
-    ImageLayer.cropFlag &&
-    event.x - imageLayerQueue[Parameter.num].realPosX <
-      imageLayerQueue[Parameter.num].canvas.clientWidth &&
-    event.y - imageLayerQueue[Parameter.num].realPosY <
-      imageLayerQueue[Parameter.num].canvas.clientHeight
-  ) {
-    if (
-      imageLayerQueue[Parameter.num].cropWidth < 0 ||
-      imageLayerQueue[Parameter.num].cropHeight < 0 ||
-      imageLayerQueue[Parameter.num].cropWidth >
-        imageLayerQueue[Parameter.num].canvas.clientWidth ||
-      imageLayerQueue[Parameter.num].cropHeight >
-        imageLayerQueue[Parameter.num].canvas.clientHeight
-    ) {
-      this.ctx.clearRect(
-        0,
-        0,
-        imageLayerQueue[Parameter.num].canvas.clientWidth,
-        imageLayerQueue[Parameter.num].canvas.clientHeight
-      );
-      this.ctx.drawImage(imageLayerQueue[Parameter.num].image, 0, 0);
-    } else {
-      sharp(imageLayerQueue[Parameter.num].buffer)
-        .extract({
-          left: parseInt(imageLayerQueue[Parameter.num].initialX),
-          top: parseInt(imageLayerQueue[Parameter.num].initialY),
-          width: parseInt(imageLayerQueue[Parameter.num].cropWidth),
-          height: parseInt(imageLayerQueue[Parameter.num].cropHeight),
-        })
-        .toBuffer((err, buf, info) => {
-          imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-        });
-    }
   }
 });
 

@@ -130,11 +130,6 @@ select#extensionComboBox {
   background-color: transparent;
 }
 
-#cropBtn {
-  position: fixed;
-  top: 122px;
-  right: 0px;
-}
 
 #undoBtn {
   position: fixed;

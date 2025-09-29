@@ -163,35 +163,38 @@ class ImageLayer {
 
     document.addEventListener("keydown", (event) => {
       if (
-      (event.ctrlKey && event.key === "d") ||
-      (event.key === "Delete" && document.activeElement === this.imgPanel)
+        (event.ctrlKey && event.key === "d") ||
+        (event.key === "Delete" && document.activeElement === this.imgPanel)
       ) {
-      deleteImagePanel();
+        deleteImagePanel();
       } else if (
-      document.activeElement === this.imgPanel &&
-      (event.key === "ArrowLeft" || event.key === "ArrowRight")
+        document.activeElement === this.imgPanel &&
+        (event.key === "ArrowLeft" || event.key === "ArrowRight")
       ) {
-      if (event.ctrlKey && event.key === "ArrowLeft") {
-        Parameter.num = 0;
-        imageLayerQueue[Parameter.num].imgPanel.focus();
-        imageLayerQueue[Parameter.num].updateFocus();
-        imageLayerQueue[Parameter.num].updateSio();
-      } else if (event.ctrlKey && event.key === "ArrowRight") {
-        Parameter.num = imageLayerQueue.length - 1;
-        imageLayerQueue[Parameter.num].imgPanel.focus();
-        imageLayerQueue[Parameter.num].updateFocus();
-        imageLayerQueue[Parameter.num].updateSio();
-      } else if (event.key === "ArrowLeft" && Parameter.num > 0) {
-        Parameter.num--;
-        imageLayerQueue[Parameter.num].imgPanel.focus();
-        imageLayerQueue[Parameter.num].updateFocus();
-        imageLayerQueue[Parameter.num].updateSio();
-      } else if (event.key === "ArrowRight" && Parameter.num < imageLayerQueue.length - 1) {
-        Parameter.num++;
-        imageLayerQueue[Parameter.num].imgPanel.focus();
-        imageLayerQueue[Parameter.num].updateFocus();
-        imageLayerQueue[Parameter.num].updateSio();
-      }
+        if (event.ctrlKey && event.key === "ArrowLeft") {
+          Parameter.num = 0;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        } else if (event.ctrlKey && event.key === "ArrowRight") {
+          Parameter.num = imageLayerQueue.length - 1;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        } else if (event.key === "ArrowLeft" && Parameter.num > 0) {
+          Parameter.num--;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        } else if (
+          event.key === "ArrowRight" &&
+          Parameter.num < imageLayerQueue.length - 1
+        ) {
+          Parameter.num++;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        }
       }
     });
 
@@ -290,8 +293,22 @@ class ImageLayer {
       this.updateFocus();
       this.updateSio();
     });
-    // this.ctx.lineWidth = 1;
-    this.canvas.addEventListener("drag", function (event) {}, false);
+
+    this.imgPanel.addEventListener(
+      "mouseover",
+      function (event) {
+        document.body.style.cursor = "pointer";
+      },
+      false
+    );
+
+    this.imgPanel.addEventListener(
+      "mouseout",
+      function (event) {
+        document.body.style.cursor = "default";
+      },
+      false
+    );
 
     this.canvas.addEventListener(
       "dragover",
@@ -382,7 +399,12 @@ class ImageLayer {
         ctxs.setLineDash([2]);
 
         const mouseMoveHandler = (evt) => {
-          ctxs.clearRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
+          ctxs.clearRect(
+            0,
+            0,
+            this.canvas.clientWidth,
+            this.canvas.clientHeight
+          );
           ctxs.drawImage(this.image, 0, 0);
           const currX = evt.clientX - rect.left;
           const currY = evt.clientY - rect.top;
@@ -421,8 +443,8 @@ class ImageLayer {
           cropH > 0 &&
           this.buffer &&
           this.information &&
-          (cropX + cropW) <= this.information.width &&
-          (cropY + cropH) <= this.information.height
+          cropX + cropW <= this.information.width &&
+          cropY + cropH <= this.information.height
         ) {
           sharp(this.buffer)
             .extract({ left: cropX, top: cropY, width: cropW, height: cropH })

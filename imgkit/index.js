@@ -326,7 +326,62 @@ class ImageLayer {
         if (!file) return;
 
         const tryOpenImg = (filepathOrBuffer) => {
-          // Try to load image using sharp to check validity
+          // Get file extension for special handling
+          const fileName = typeof filepathOrBuffer === "string" ? filepathOrBuffer : file.name;
+          const extension = path.extname(fileName).replace(".", "").toLowerCase();
+          
+          // Handle .ico files specially since Sharp cannot read them directly
+          if (extension === "ico") {
+            try {
+              if (typeof filepathOrBuffer === "string") {
+                ico.sharpsFromIco(filepathOrBuffer)[0].metadata((err, info) => {
+                  if (err) {
+                    document
+                      .getElementById("error_msg")
+                      ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                        duration: 1800,
+                        iterations: 1,
+                      });
+                    return;
+                  }
+                  // Valid .ico file, add new layer
+                  imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
+                  Parameter.num++;
+                  imageLayerQueue.push(new ImageLayer());
+                  document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+                  imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+                });
+              } else {
+                ico.sharpsFromIco(filepathOrBuffer)[0].metadata((err, info) => {
+                  if (err) {
+                    document
+                      .getElementById("error_msg")
+                      ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                        duration: 1800,
+                        iterations: 1,
+                      });
+                    return;
+                  }
+                  // Valid .ico file, add new layer
+                  imageLayerQueue[Parameter.num].openImgBuffer(filepathOrBuffer, file.name);
+                  Parameter.num++;
+                  imageLayerQueue.push(new ImageLayer());
+                  document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+                  imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+                });
+              }
+            } catch (error) {
+              document
+                .getElementById("error_msg")
+                ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                  duration: 1800,
+                  iterations: 1,
+                });
+            }
+            return;
+          }
+          
+          // Try to load image using sharp to check validity for other formats
           sharp(filepathOrBuffer).metadata((err, info) => {
             if (err) {
               // Invalid image, do not add

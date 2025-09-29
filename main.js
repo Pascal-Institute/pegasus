@@ -221,7 +221,7 @@ app.whenReady().then(() => {
                   filters: [
                     {
                       name: "Image file",
-                      extensions: ["png", "jpg", "jpeg", "webp"],
+                      extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "tif"],
                     },
                   ],
                 })

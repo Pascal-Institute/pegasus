@@ -9,39 +9,7 @@ const scrollContainer = document.createElement("div");
 scrollContainer.id = "scroll-container";
 document.body.appendChild(scrollContainer);
 
-const scrollLeftBtn = document.createElement("button");
-scrollLeftBtn.innerText = "<";
-scrollLeftBtn.style.position = "fixed";
-scrollLeftBtn.style.left = "16px";
-scrollLeftBtn.style.top = "50%";
-scrollLeftBtn.style.transform = "translateY(-50%)";
-scrollLeftBtn.style.zIndex = "1000";
-scrollLeftBtn.style.fontSize = "2em";
-scrollLeftBtn.style.background = "#fff";
-scrollLeftBtn.style.border = "1px solid #ccc";
-scrollLeftBtn.style.borderRadius = "50%";
-scrollLeftBtn.style.width = "48px";
-scrollLeftBtn.style.height = "48px";
-scrollLeftBtn.style.opacity = "0.8";
-scrollLeftBtn.style.cursor = "pointer";
-document.body.appendChild(scrollLeftBtn);
 
-const scrollRightBtn = document.createElement("button");
-scrollRightBtn.innerText = ">";
-scrollRightBtn.style.position = "fixed";
-scrollRightBtn.style.right = "16px";
-scrollRightBtn.style.top = "50%";
-scrollRightBtn.style.transform = "translateY(-50%)";
-scrollRightBtn.style.zIndex = "1000";
-scrollRightBtn.style.fontSize = "2em";
-scrollRightBtn.style.background = "#fff";
-scrollRightBtn.style.border = "1px solid #ccc";
-scrollRightBtn.style.borderRadius = "50%";
-scrollRightBtn.style.width = "48px";
-scrollRightBtn.style.height = "48px";
-scrollRightBtn.style.opacity = "0.8";
-scrollRightBtn.style.cursor = "pointer";
-document.body.appendChild(scrollRightBtn);
 
 function updateScrollUI() {
   imageLayerQueue.forEach((layer, idx) => {
@@ -77,20 +45,9 @@ function updateScrollUI() {
     layer.imgPanel.style.minWidth = "";
     layer.imgPanel.style.boxSizing = "border-box";
   });
-  scrollLeftBtn.disabled = scrollContainer.scrollLeft <= 0;
-  scrollRightBtn.disabled =
-    scrollContainer.scrollLeft + scrollContainer.clientWidth >=
-    scrollContainer.scrollWidth - 2;
 }
 
-scrollLeftBtn.addEventListener("click", () => {
-  scrollContainer.scrollBy({ left: -400, behavior: "smooth" });
-  setTimeout(updateScrollUI, 400);
-});
-scrollRightBtn.addEventListener("click", () => {
-  scrollContainer.scrollBy({ left: 400, behavior: "smooth" });
-  setTimeout(updateScrollUI, 400);
-});
+
 
 scrollContainer.addEventListener("scroll", updateScrollUI);
 

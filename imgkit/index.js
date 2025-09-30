@@ -707,79 +707,38 @@ class ImageLayer {
       this.canvas.id = "full";
     }
     this.filepath = filepath;
-    this.extension = path.extname(this.filepath).replace(".", "");
-    this.nameSpan.textContent = path
-      .basename(this.filepath)
-      .replace("." + this.extension, "");
+    this.extension = path.extname(filepath).replace(".", "");
+    this.nameSpan.textContent = path.basename(filepath, path.extname(filepath));
 
     const afterLoad = (buf, info) => {
       this.updatePreviewImg(buf, info);
       updateScrollUI();
-      // Automatically scroll to the right when a new image is opened
       scrollContainer.scrollLeft = scrollContainer.scrollWidth;
     };
 
-    if (this.extension === "tiff" || this.extension === "tif") {
-      sharp(filepath)
-        .png()
-        .toBuffer((err, buf, info) => {
-          if (err) {
-            document
-              .getElementById("error_msg")
-              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-                duration: 1800,
-                iterations: 1,
-              });
-            return;
-          }
-          afterLoad(buf, info);
-        });
+    let loader;
+    if (["tiff", "tif"].includes(this.extension)) {
+      loader = sharp(filepath).png();
     } else if (this.extension === "ico") {
-      ico
-        .sharpsFromIco(this.filepath)[0]
-        .png()
-        .toBuffer((err, buf, info) => {
-          if (err) {
-            document
-              .getElementById("error_msg")
-              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-                duration: 1800,
-                iterations: 1,
-              });
-            return;
-          }
-          afterLoad(buf, info);
-        });
+      loader = ico.sharpsFromIco(filepath)[0].png();
     } else if (this.extension === "bmp") {
-      bmp
-        .sharpFromBmp(this.filepath)
-        .png()
-        .toBuffer((err, buf, info) => {
-          if (err) {
-            document
-              .getElementById("error_msg")
-              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-                duration: 1800,
-                iterations: 1,
-              });
-            return;
-          }
-          afterLoad(buf, info);
-        });
+      loader = bmp.sharpFromBmp(filepath).png();
     } else {
-      sharp(filepath).toBuffer((err, buf, info) => {
-        if (err) {
-          document
-            .getElementById("error_msg")
-            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-              duration: 1800,
-              iterations: 1,
-            });
-          return;
-        }
-        afterLoad(buf, info);
-      });
+      loader = sharp(filepath);
     }
+
+    loader.toBuffer((err, buf, info) => {
+      if (err) {
+        document
+          .getElementById("error_msg")
+          ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+            duration: 1800,
+            iterations: 1,
+          });
+        return;
+      }
+      afterLoad(buf, info);
+    });
   }
 
   openImgBuffer(buffer, name) {
@@ -796,67 +755,29 @@ class ImageLayer {
       scrollContainer.scrollLeft = scrollContainer.scrollWidth;
     };
 
-    if (this.extension === "tiff" || this.extension === "tif") {
-      sharp(buffer)
-        .png()
-        .toBuffer((err, buf, info) => {
-          if (err) {
-            document
-              .getElementById("error_msg")
-              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-                duration: 1800,
-                iterations: 1,
-              });
-            return;
-          }
-          afterLoad(buf, info);
-        });
+    let loader;
+    if (["tiff", "tif"].includes(this.extension)) {
+      loader = sharp(buffer).png();
     } else if (this.extension === "ico") {
-      ico
-        .sharpsFromIco(buffer)[0]
-        .png()
-        .toBuffer((err, buf, info) => {
-          if (err) {
-            document
-              .getElementById("error_msg")
-              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-                duration: 1800,
-                iterations: 1,
-              });
-            return;
-          }
-          afterLoad(buf, info);
-        });
+      loader = ico.sharpsFromIco(filepath)[0].png();
     } else if (this.extension === "bmp") {
-      bmp
-        .sharpFromBmp(buffer)
-        .png()
-        .toBuffer((err, buf, info) => {
-          if (err) {
-            document
-              .getElementById("error_msg")
-              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-                duration: 1800,
-                iterations: 1,
-              });
-            return;
-          }
-          afterLoad(buf, info);
-        });
+      loader = bmp.sharpFromBmp(filepath).png();
     } else {
-      sharp(buffer).toBuffer((err, buf, info) => {
-        if (err) {
-          document
-            .getElementById("error_msg")
-            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-              duration: 1800,
-              iterations: 1,
-            });
-          return;
-        }
-        afterLoad(buf, info);
-      });
+      loader = sharp(filepath);
     }
+
+    loader.toBuffer((err, buf, info) => {
+      if (err) {
+        document
+          .getElementById("error_msg")
+          ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+            duration: 1800,
+            iterations: 1,
+          });
+        return;
+      }
+      afterLoad(buf, info);
+    });
   }
 
   saveImg(filepath) {

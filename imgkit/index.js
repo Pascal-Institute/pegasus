@@ -326,32 +326,19 @@ class ImageLayer {
         if (!file) return;
 
         const tryOpenImg = (filepathOrBuffer) => {
-          // Try to load image using sharp to check validity
-          sharp(filepathOrBuffer).metadata((err, info) => {
-            if (err) {
-              // Invalid image, do not add
-              document
-                .getElementById("error_msg")
-                ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-                  duration: 1800,
-                  iterations: 1,
-                });
-              return;
-            }
-            // Valid image, add new layer
-            if (typeof filepathOrBuffer === "string") {
-              imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
-            } else {
-              imageLayerQueue[Parameter.num].openImgBuffer(
-                filepathOrBuffer,
-                file.name
-              );
-            }
-            Parameter.num++;
-            imageLayerQueue.push(new ImageLayer());
-            document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-            imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
-          });
+          // Valid image, add new layer
+          if (typeof filepathOrBuffer === "string") {
+            imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
+          } else {
+            imageLayerQueue[Parameter.num].openImgBuffer(
+              filepathOrBuffer,
+              file.name
+            );
+          }
+          Parameter.num++;
+          imageLayerQueue.push(new ImageLayer());
+          document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+          imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
         };
 
         if (!file.path) {
@@ -735,19 +722,63 @@ class ImageLayer {
     if (this.extension === "tiff" || this.extension === "tif") {
       sharp(filepath)
         .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+        .toBuffer((err, buf, info) => {
+          if (err) {
+            document
+              .getElementById("error_msg")
+              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                duration: 1800,
+                iterations: 1,
+              });
+            return;
+          }
+          afterLoad(buf, info);
+        });
     } else if (this.extension === "ico") {
       ico
         .sharpsFromIco(this.filepath)[0]
         .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+        .toBuffer((err, buf, info) => {
+          if (err) {
+            document
+              .getElementById("error_msg")
+              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                duration: 1800,
+                iterations: 1,
+              });
+            return;
+          }
+          afterLoad(buf, info);
+        });
     } else if (this.extension === "bmp") {
       bmp
         .sharpFromBmp(this.filepath)
         .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+        .toBuffer((err, buf, info) => {
+          if (err) {
+            document
+              .getElementById("error_msg")
+              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                duration: 1800,
+                iterations: 1,
+              });
+            return;
+          }
+          afterLoad(buf, info);
+        });
     } else {
-      sharp(filepath).toBuffer((err, buf, info) => afterLoad(buf, info));
+      sharp(filepath).toBuffer((err, buf, info) => {
+        if (err) {
+          document
+            .getElementById("error_msg")
+            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+              duration: 1800,
+              iterations: 1,
+            });
+          return;
+        }
+        afterLoad(buf, info);
+      });
     }
   }
 
@@ -768,19 +799,63 @@ class ImageLayer {
     if (this.extension === "tiff" || this.extension === "tif") {
       sharp(buffer)
         .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+        .toBuffer((err, buf, info) => {
+          if (err) {
+            document
+              .getElementById("error_msg")
+              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                duration: 1800,
+                iterations: 1,
+              });
+            return;
+          }
+          afterLoad(buf, info);
+        });
     } else if (this.extension === "ico") {
       ico
         .sharpsFromIco(buffer)[0]
         .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+        .toBuffer((err, buf, info) => {
+          if (err) {
+            document
+              .getElementById("error_msg")
+              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                duration: 1800,
+                iterations: 1,
+              });
+            return;
+          }
+          afterLoad(buf, info);
+        });
     } else if (this.extension === "bmp") {
       bmp
         .sharpFromBmp(buffer)
         .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+        .toBuffer((err, buf, info) => {
+          if (err) {
+            document
+              .getElementById("error_msg")
+              ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+                duration: 1800,
+                iterations: 1,
+              });
+            return;
+          }
+          afterLoad(buf, info);
+        });
     } else {
-      sharp(buffer).toBuffer((err, buf, info) => afterLoad(buf, info));
+      sharp(buffer).toBuffer((err, buf, info) => {
+        if (err) {
+          document
+            .getElementById("error_msg")
+            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+              duration: 1800,
+              iterations: 1,
+            });
+          return;
+        }
+        afterLoad(buf, info);
+      });
     }
   }
 

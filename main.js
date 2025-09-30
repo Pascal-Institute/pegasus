@@ -78,17 +78,21 @@ app.whenReady().then(() => {
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 
-  ["resizeImgREQ", "cropImgREQ",  "filterImgREQ", "rotateImgREQ", "paintImgREQ"].forEach(
-    (item, index, arr) => {
-      ipcMain.on(item, (event) => {
-        mainWindow
-          .getBrowserViews()[0]
-          .webContents.loadFile(
-            `./pages/${item.replace("ImgREQ", "")}_panel.html`
-          );
-      });
-    }
-  );
+  [
+    "resizeImgREQ",
+    "cropImgREQ",
+    "filterImgREQ",
+    "rotateImgREQ",
+    "paintImgREQ",
+  ].forEach((item, index, arr) => {
+    ipcMain.on(item, (event) => {
+      mainWindow
+        .getBrowserViews()[0]
+        .webContents.loadFile(
+          `./pages/${item.replace("ImgREQ", "")}_panel.html`
+        );
+    });
+  });
 
   ipcMain.on("resizeValueSEND", (event, res) => {
     mainWindow.webContents.send("resizeImgCMD", res);
@@ -221,7 +225,15 @@ app.whenReady().then(() => {
                   filters: [
                     {
                       name: "Image file",
-                      extensions: ["png", "jpg", "jpeg", "webp"],
+                      extensions: [
+                        "png",
+                        "jpg",
+                        "jpeg",
+                        "webp",
+                        "ico",
+                        "tiff",
+                        "tif",
+                      ],
                     },
                   ],
                 })

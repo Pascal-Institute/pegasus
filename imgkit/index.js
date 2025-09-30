@@ -734,11 +734,11 @@ class ImageLayer {
 
     if (this.extension === "tiff" || this.extension === "tif") {
       sharp(filepath)
-        .toFormat("png")
+        .png()
         .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else if (this.extension === "ico") {
       ico
-        .sharpsFromIco(this.filepath)
+        .sharpsFromIco(this.filepath)[0]
         .png()
         .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else if (this.extension === "bmp") {
@@ -765,14 +765,13 @@ class ImageLayer {
       scrollContainer.scrollLeft = scrollContainer.scrollWidth;
     };
 
-    // sharp는 buffer 입력도 지원
     if (this.extension === "tiff" || this.extension === "tif") {
       sharp(buffer)
-        .toFormat("png")
+        .png()
         .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else if (this.extension === "ico") {
       ico
-        .sharpsFromIco(buffer)
+        .sharpsFromIco(buffer)[0]
         .png()
         .toBuffer((err, buf, info) => afterLoad(buf, info));
     } else if (this.extension === "bmp") {

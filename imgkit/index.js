@@ -328,7 +328,7 @@ class ImageLayer {
         const tryOpenImg = (filepathOrBuffer) => {
           // Valid image, add new layer
           if (typeof filepathOrBuffer === "string") {
-            imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
+            return imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
           } else {
             imageLayerQueue[Parameter.num].openImgBuffer(
               filepathOrBuffer,
@@ -706,9 +706,6 @@ class ImageLayer {
     if (filepath !== "./assets/addImage.png") {
       this.canvas.id = "full";
     }
-    this.filepath = filepath;
-    this.extension = path.extname(filepath).replace(".", "");
-    this.nameSpan.textContent = path.basename(filepath, path.extname(filepath));
 
     const afterLoad = (buf, info) => {
       this.updatePreviewImg(buf, info);
@@ -727,27 +724,32 @@ class ImageLayer {
       loader = sharp(filepath);
     }
 
-    loader.toBuffer((err, buf, info) => {
-      if (err) {
-        document
-          .getElementById("error_msg")
-          ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-            duration: 1800,
-            iterations: 1,
-          });
-        return;
-      }
-      afterLoad(buf, info);
+    return new Promise((resolve) => {
+      loader.toBuffer((err, buf, info) => {
+        if (err) {
+          document
+            .getElementById("error_msg")
+            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+              duration: 1800,
+              iterations: 1,
+            });
+          resolve(false);
+          return;
+        }
+        this.filepath = filepath;
+        this.extension = path.extname(filepath).replace(".", "");
+        this.nameSpan.textContent = path.basename(
+          filepath,
+          path.extname(filepath)
+        );
+        afterLoad(buf, info);
+        resolve(true);
+      });
     });
   }
 
   openImgBuffer(buffer, name) {
     this.canvas.id = "full";
-    this.filepath = name;
-    this.extension = path.extname(name).replace(".", "");
-    this.nameSpan.textContent = path
-      .basename(name)
-      .replace("." + this.extension, "");
 
     const afterLoad = (buf, info) => {
       this.updatePreviewImg(buf, info);
@@ -766,17 +768,26 @@ class ImageLayer {
       loader = sharp(filepath);
     }
 
-    loader.toBuffer((err, buf, info) => {
-      if (err) {
-        document
-          .getElementById("error_msg")
-          ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-            duration: 1800,
-            iterations: 1,
-          });
-        return;
-      }
-      afterLoad(buf, info);
+    return new Promise((resolve) => {
+      loader.toBuffer((err, buf, info) => {
+        if (err) {
+          document
+            .getElementById("error_msg")
+            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+              duration: 1800,
+              iterations: 1,
+            });
+          resolve(false);
+          return;
+        }
+        this.filepath = name;
+        this.extension = path.extname(name).replace(".", "");
+        this.nameSpan.textContent = path
+          .basename(name)
+          .replace("." + this.extension, "");
+        afterLoad(buf, info);
+        resolve(true);
+      });
     });
   }
 
@@ -791,7 +802,6 @@ class ImageLayer {
       if (err) {
         // console.log("failed to save");
       } else {
-        // console.log("saved successfully");
         document
           .getElementById("save_msg")
           .animate([{ opacity: "1" }, { opacity: "0" }], {

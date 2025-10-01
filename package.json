@@ -17,6 +17,7 @@
     "electron-reload": "^2.0.0-alpha.1"
   },
   "scripts": {
+    "postinstall": "electron-builder install-app-deps",
     "start": "electron .",
     "build": "electron-builder",
     "rebuild": "electron-rebuild -f -w sharp"
@@ -39,8 +40,11 @@
       "target": []
     },
     "linux": {
-      "icon": "assets/icon.ico",
-      "target": ["AppImage", "deb", "rpm"]
+      "icon": "assets/icon.png",
+      "target": [
+        "deb",
+        "AppImage"
+      ]
     },
     "nsis": {
       "oneClick": false,

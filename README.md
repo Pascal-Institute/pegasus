@@ -29,6 +29,7 @@ npm update
 
 ## 2-1. How to execute
 
+### window
 ```bash
 electron .
 ```
@@ -37,6 +38,11 @@ or
 
 ```bash
 npm start
+```
+
+### linux line-up
+```bash
+electron . --ozone-platform=x11
 ```
 
 ## 2-2. How to build

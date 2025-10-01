@@ -703,6 +703,7 @@ class ImageLayer {
   }
 
   openImg(filepath) {
+    this.extension = path.extname(filepath).replace(".", "");
     if (filepath !== "./assets/addImage.png") {
       this.canvas.id = "full";
     }
@@ -737,7 +738,6 @@ class ImageLayer {
           return;
         }
         this.filepath = filepath;
-        this.extension = path.extname(filepath).replace(".", "");
         this.nameSpan.textContent = path.basename(
           filepath,
           path.extname(filepath)
@@ -749,6 +749,7 @@ class ImageLayer {
   }
 
   openImgBuffer(buffer, name) {
+    this.extension = path.extname(name).replace(".", "");
     this.canvas.id = "full";
 
     const afterLoad = (buf, info) => {
@@ -761,11 +762,11 @@ class ImageLayer {
     if (["tiff", "tif"].includes(this.extension)) {
       loader = sharp(buffer).png();
     } else if (this.extension === "ico") {
-      loader = ico.sharpsFromIco(filepath)[0].png();
+      loader = ico.sharpsFromIco(buffer)[0].png();
     } else if (this.extension === "bmp") {
-      loader = bmp.sharpFromBmp(filepath).png();
+      loader = bmp.sharpFromBmp(buffer).png();
     } else {
-      loader = sharp(filepath);
+      loader = sharp(buffer);
     }
 
     return new Promise((resolve) => {
@@ -781,7 +782,6 @@ class ImageLayer {
           return;
         }
         this.filepath = name;
-        this.extension = path.extname(name).replace(".", "");
         this.nameSpan.textContent = path
           .basename(name)
           .replace("." + this.extension, "");

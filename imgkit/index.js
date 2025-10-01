@@ -163,35 +163,38 @@ class ImageLayer {
 
     document.addEventListener("keydown", (event) => {
       if (
-      (event.ctrlKey && event.key === "d") ||
-      (event.key === "Delete" && document.activeElement === this.imgPanel)
+        (event.ctrlKey && event.key === "d") ||
+        (event.key === "Delete" && document.activeElement === this.imgPanel)
       ) {
-      deleteImagePanel();
+        deleteImagePanel();
       } else if (
-      document.activeElement === this.imgPanel &&
-      (event.key === "ArrowLeft" || event.key === "ArrowRight")
+        document.activeElement === this.imgPanel &&
+        (event.key === "ArrowLeft" || event.key === "ArrowRight")
       ) {
-      if (event.ctrlKey && event.key === "ArrowLeft") {
-        Parameter.num = 0;
-        imageLayerQueue[Parameter.num].imgPanel.focus();
-        imageLayerQueue[Parameter.num].updateFocus();
-        imageLayerQueue[Parameter.num].updateSio();
-      } else if (event.ctrlKey && event.key === "ArrowRight") {
-        Parameter.num = imageLayerQueue.length - 1;
-        imageLayerQueue[Parameter.num].imgPanel.focus();
-        imageLayerQueue[Parameter.num].updateFocus();
-        imageLayerQueue[Parameter.num].updateSio();
-      } else if (event.key === "ArrowLeft" && Parameter.num > 0) {
-        Parameter.num--;
-        imageLayerQueue[Parameter.num].imgPanel.focus();
-        imageLayerQueue[Parameter.num].updateFocus();
-        imageLayerQueue[Parameter.num].updateSio();
-      } else if (event.key === "ArrowRight" && Parameter.num < imageLayerQueue.length - 1) {
-        Parameter.num++;
-        imageLayerQueue[Parameter.num].imgPanel.focus();
-        imageLayerQueue[Parameter.num].updateFocus();
-        imageLayerQueue[Parameter.num].updateSio();
-      }
+        if (event.ctrlKey && event.key === "ArrowLeft") {
+          Parameter.num = 0;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        } else if (event.ctrlKey && event.key === "ArrowRight") {
+          Parameter.num = imageLayerQueue.length - 1;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        } else if (event.key === "ArrowLeft" && Parameter.num > 0) {
+          Parameter.num--;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        } else if (
+          event.key === "ArrowRight" &&
+          Parameter.num < imageLayerQueue.length - 1
+        ) {
+          Parameter.num++;
+          imageLayerQueue[Parameter.num].imgPanel.focus();
+          imageLayerQueue[Parameter.num].updateFocus();
+          imageLayerQueue[Parameter.num].updateSio();
+        }
       }
     });
 
@@ -290,8 +293,22 @@ class ImageLayer {
       this.updateFocus();
       this.updateSio();
     });
-    // this.ctx.lineWidth = 1;
-    this.canvas.addEventListener("drag", function (event) {}, false);
+
+    this.imgPanel.addEventListener(
+      "mouseover",
+      function (event) {
+        document.body.style.cursor = "pointer";
+      },
+      false
+    );
+
+    this.imgPanel.addEventListener(
+      "mouseout",
+      function (event) {
+        document.body.style.cursor = "default";
+      },
+      false
+    );
 
     this.canvas.addEventListener(
       "dragover",
@@ -309,32 +326,19 @@ class ImageLayer {
         if (!file) return;
 
         const tryOpenImg = (filepathOrBuffer) => {
-          // Try to load image using sharp to check validity
-          sharp(filepathOrBuffer).metadata((err, info) => {
-            if (err) {
-              // Invalid image, do not add
-              document
-                .getElementById("error_msg")
-                ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-                  duration: 1800,
-                  iterations: 1,
-                });
-              return;
-            }
-            // Valid image, add new layer
-            if (typeof filepathOrBuffer === "string") {
-              imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
-            } else {
-              imageLayerQueue[Parameter.num].openImgBuffer(
-                filepathOrBuffer,
-                file.name
-              );
-            }
-            Parameter.num++;
-            imageLayerQueue.push(new ImageLayer());
-            document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-            imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
-          });
+          // Valid image, add new layer
+          if (typeof filepathOrBuffer === "string") {
+            return imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
+          } else {
+            imageLayerQueue[Parameter.num].openImgBuffer(
+              filepathOrBuffer,
+              file.name
+            );
+          }
+          Parameter.num++;
+          imageLayerQueue.push(new ImageLayer());
+          document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+          imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
         };
 
         if (!file.path) {
@@ -382,7 +386,12 @@ class ImageLayer {
         ctxs.setLineDash([2]);
 
         const mouseMoveHandler = (evt) => {
-          ctxs.clearRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
+          ctxs.clearRect(
+            0,
+            0,
+            this.canvas.clientWidth,
+            this.canvas.clientHeight
+          );
           ctxs.drawImage(this.image, 0, 0);
           const currX = evt.clientX - rect.left;
           const currY = evt.clientY - rect.top;
@@ -421,8 +430,8 @@ class ImageLayer {
           cropH > 0 &&
           this.buffer &&
           this.information &&
-          (cropX + cropW) <= this.information.width &&
-          (cropY + cropH) <= this.information.height
+          cropX + cropW <= this.information.width &&
+          cropY + cropH <= this.information.height
         ) {
           sharp(this.buffer)
             .extract({ left: cropX, top: cropY, width: cropW, height: cropH })
@@ -694,48 +703,54 @@ class ImageLayer {
   }
 
   openImg(filepath) {
+    this.extension = path.extname(filepath).replace(".", "");
     if (filepath !== "./assets/addImage.png") {
       this.canvas.id = "full";
     }
-    this.filepath = filepath;
-    this.extension = path.extname(this.filepath).replace(".", "");
-    this.nameSpan.textContent = path
-      .basename(this.filepath)
-      .replace("." + this.extension, "");
 
     const afterLoad = (buf, info) => {
       this.updatePreviewImg(buf, info);
       updateScrollUI();
-      // Automatically scroll to the right when a new image is opened
       scrollContainer.scrollLeft = scrollContainer.scrollWidth;
     };
 
-    if (this.extension === "tiff" || this.extension === "tif") {
-      sharp(filepath)
-        .toFormat("png")
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+    let loader;
+    if (["tiff", "tif"].includes(this.extension)) {
+      loader = sharp(filepath).png();
     } else if (this.extension === "ico") {
-      ico
-        .sharpsFromIco(this.filepath)
-        .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+      loader = ico.sharpsFromIco(filepath)[0].png();
     } else if (this.extension === "bmp") {
-      bmp
-        .sharpFromBmp(this.filepath)
-        .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+      loader = bmp.sharpFromBmp(filepath).png();
     } else {
-      sharp(filepath).toBuffer((err, buf, info) => afterLoad(buf, info));
+      loader = sharp(filepath);
     }
+
+    return new Promise((resolve) => {
+      loader.toBuffer((err, buf, info) => {
+        if (err) {
+          document
+            .getElementById("error_msg")
+            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+              duration: 1800,
+              iterations: 1,
+            });
+          resolve(false);
+          return;
+        }
+        this.filepath = filepath;
+        this.nameSpan.textContent = path.basename(
+          filepath,
+          path.extname(filepath)
+        );
+        afterLoad(buf, info);
+        resolve(true);
+      });
+    });
   }
 
   openImgBuffer(buffer, name) {
-    this.canvas.id = "full";
-    this.filepath = name;
     this.extension = path.extname(name).replace(".", "");
-    this.nameSpan.textContent = path
-      .basename(name)
-      .replace("." + this.extension, "");
+    this.canvas.id = "full";
 
     const afterLoad = (buf, info) => {
       this.updatePreviewImg(buf, info);
@@ -743,24 +758,37 @@ class ImageLayer {
       scrollContainer.scrollLeft = scrollContainer.scrollWidth;
     };
 
-    // sharp는 buffer 입력도 지원
-    if (this.extension === "tiff" || this.extension === "tif") {
-      sharp(buffer)
-        .toFormat("png")
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+    let loader;
+    if (["tiff", "tif"].includes(this.extension)) {
+      loader = sharp(buffer).png();
     } else if (this.extension === "ico") {
-      ico
-        .sharpsFromIco(buffer)
-        .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+      loader = ico.sharpsFromIco(buffer)[0].png();
     } else if (this.extension === "bmp") {
-      bmp
-        .sharpFromBmp(buffer)
-        .png()
-        .toBuffer((err, buf, info) => afterLoad(buf, info));
+      loader = bmp.sharpFromBmp(buffer).png();
     } else {
-      sharp(buffer).toBuffer((err, buf, info) => afterLoad(buf, info));
+      loader = sharp(buffer);
     }
+
+    return new Promise((resolve) => {
+      loader.toBuffer((err, buf, info) => {
+        if (err) {
+          document
+            .getElementById("error_msg")
+            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
+              duration: 1800,
+              iterations: 1,
+            });
+          resolve(false);
+          return;
+        }
+        this.filepath = name;
+        this.nameSpan.textContent = path
+          .basename(name)
+          .replace("." + this.extension, "");
+        afterLoad(buf, info);
+        resolve(true);
+      });
+    });
   }
 
   saveImg(filepath) {
@@ -774,7 +802,6 @@ class ImageLayer {
       if (err) {
         // console.log("failed to save");
       } else {
-        // console.log("saved successfully");
         document
           .getElementById("save_msg")
           .animate([{ opacity: "1" }, { opacity: "0" }], {

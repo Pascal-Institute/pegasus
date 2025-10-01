@@ -7,11 +7,24 @@
 
 ## 1. Requirements
 
+### For Development
 - IDE : Visual Studio Code (Recommemded)
 - node.js : v22.18.0 (At least version)
 
 ```bash
+npm install -g electron
+```
+
+```bash
 npm install --save electron electron-reload electron-rebuild electron-builder sharp sharp-ico sharp-bmp fs imgkit
+```
+### For Application use
+
+1. Install node.js : https://nodejs.org/
+
+2. Install electron
+```bash
+npm install -g electron
 ```
 
 ### when electron is not working

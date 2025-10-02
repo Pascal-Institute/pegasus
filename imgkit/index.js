@@ -338,37 +338,36 @@ class ImageLayer {
 
     this.canvas.addEventListener("drop", (event) => {
       event.preventDefault();
-      if (this.canvas.id !== "full") {
-        // Try to open the image first, only add if successful
-        const file = event.dataTransfer.files[0];
-        if (!file) return;
-        var isOpened = false;
-        const tryOpenImg = (filepathOrBuffer) => {
-          // Valid image, add new layer
-          if (typeof filepathOrBuffer === "string") {
-            isOpened = imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
-          } else {
-            isOpened = imageLayerQueue[Parameter.num].openImgBuffer(
-              filepathOrBuffer,
-              file.name
-            );
-          }
-          if (!isOpened) return;
-          createDefaultImage();
-        };
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
 
-        if (!file.path) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const arrayBuffer = e.target.result;
-            const buffer = Buffer.from(arrayBuffer);
-            tryOpenImg(buffer);
-          };
-          reader.readAsArrayBuffer(file);
+      // Get the current image layer that received the drop
+      const currentLayer = this;
+      
+      const tryOpenImg = (filepathOrBuffer) => {
+        // Replace the image in the current layer
+        if (typeof filepathOrBuffer === "string") {
+          currentLayer.openImg(filepathOrBuffer);
         } else {
-          tryOpenImg(file.path);
+          currentLayer.openImgBuffer(filepathOrBuffer, file.name);
         }
-        return;
+        
+        // Only create a new default image if the current layer was the placeholder
+        if (currentLayer.canvas.id !== "full") {
+          createDefaultImage();
+        }
+      };
+
+      if (!file.path) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const arrayBuffer = e.target.result;
+          const buffer = Buffer.from(arrayBuffer);
+          tryOpenImg(buffer);
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        tryOpenImg(file.path);
       }
     });
 

@@ -305,7 +305,9 @@ class ImageLayer {
 
   build() {
     this.imgPanel.addEventListener("click", (event) => {
-      Parameter.num = this.imgPanel.id;
+      Parameter.num = imageLayerQueue.findIndex(
+        (layer) => layer.imgPanel.id == this.imgPanel.id
+      );
       this.updateFocus();
       this.updateSio();
     });

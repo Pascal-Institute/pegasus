@@ -351,13 +351,15 @@ class ImageLayer {
         // Try to open the image first, only add if successful
         const file = event.dataTransfer.files[0];
         if (!file) return;
-        var isOpened = false;
-        const tryOpenImg = (filepathOrBuffer) => {
+        let isOpened;
+        const tryOpenImg = async (filepathOrBuffer) => {
           // Valid image, add new layer
           if (typeof filepathOrBuffer === "string") {
-            isOpened = imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
+            isOpened = await imageLayerQueue[Parameter.num].openImg(
+              filepathOrBuffer
+            );
           } else {
-            isOpened = imageLayerQueue[Parameter.num].openImgBuffer(
+            isOpened = await imageLayerQueue[Parameter.num].openImgBuffer(
               filepathOrBuffer,
               file.name
             );
@@ -727,7 +729,7 @@ class ImageLayer {
     this.extensionComboBox.value = this.extension;
   }
 
-  openImg(filepath) {
+  async openImg(filepath) {
     this.extension = path.extname(filepath).replace(".", "");
     if (filepath !== "./assets/addImage.png") {
       this.canvas.id = "full";
@@ -759,6 +761,7 @@ class ImageLayer {
               duration: 1800,
               iterations: 1,
             });
+          this.canvas.id = "default";
           resolve(false);
           return;
         }
@@ -773,9 +776,11 @@ class ImageLayer {
     });
   }
 
-  openImgBuffer(buffer, name) {
+  async openImgBuffer(buffer, name) {
     this.extension = path.extname(name).replace(".", "");
-    this.canvas.id = "full";
+    if (filepath !== "./assets/addImage.png") {
+      this.canvas.id = "full";
+    }
 
     const afterLoad = (buf, info) => {
       this.updatePreviewImg(buf, info);
@@ -803,6 +808,7 @@ class ImageLayer {
               duration: 1800,
               iterations: 1,
             });
+          this.canvas.id = "default";
           resolve(false);
           return;
         }

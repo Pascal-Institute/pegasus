@@ -336,6 +336,15 @@ class ImageLayer {
       false
     );
 
+    this.canvas.addEventListener("dragenter", (event) => {
+      event.preventDefault();
+      Parameter.num = imageLayerQueue.findIndex(
+        (layer) => layer.imgPanel.id == this.imgPanel.id
+      );
+      this.updateFocus();
+      this.updateSio();
+    });
+
     this.canvas.addEventListener("drop", (event) => {
       event.preventDefault();
       if (this.canvas.id !== "full") {

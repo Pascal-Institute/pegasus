@@ -105,8 +105,8 @@ function createDefaultImage() {
   imageLayerQueue.push(new ImageLayer());
   document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
   imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
-  this.updateFocus();
-  this.updateSio();
+  imageLayerQueue[Parameter.num].imgPanel.focus();
+  imageLayerQueue[Parameter.num].updateSio();
 }
 
 class ImageLayer {
@@ -146,14 +146,21 @@ class ImageLayer {
 
     const deleteImage = () => {
       this.imgPanel.parentNode.removeChild(this.imgPanel);
+      var deletedIndex = 0;
       for (let i = 0; i < imageLayerQueue.length; i++) {
         if (imageLayerQueue[i].imgPanel.id == this.imgPanel.id) {
           imageLayerQueue.splice(i, 1);
+          deletedIndex = i;
           break;
         }
       }
       Parameter.num = Math.max(0, imageLayerQueue.length - 1);
       if (imageLayerQueue.length === 0) {
+        createDefaultImage();
+      } else if (
+        imageLayerQueue.length > 0 &&
+        deletedIndex === imageLayerQueue.length
+      ) {
         createDefaultImage();
       }
 

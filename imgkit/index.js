@@ -144,7 +144,9 @@ class ImageLayer {
           imageLayerQueue[Parameter.num].updateFocus();
           imageLayerQueue[Parameter.num].updateSio();
         } else {
-          Parameter.num = 0;
+          imageLayerQueue.push(new ImageLayer());
+          document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+          imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
         }
       }
 

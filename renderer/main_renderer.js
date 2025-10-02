@@ -186,6 +186,7 @@ sioCheckBox.addEventListener("click", (event) => {
 });
 
 ipcRenderer.on("openImgCMD", (event, res) => {
+  Parameter.num = imageLayerQueue.length - 1;
   imageLayerQueue[Parameter.num].filepath = res;
   if (
     imageLayerQueue[Parameter.num].filepath !== undefined &&

@@ -105,6 +105,8 @@ function createDefaultImage() {
   imageLayerQueue.push(new ImageLayer());
   document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
   imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+  this.updateFocus();
+  this.updateSio();
 }
 
 class ImageLayer {
@@ -142,19 +144,17 @@ class ImageLayer {
     img.style.objectFit = "contain";
     this.deleteBtn.appendChild(img);
 
-    const deleteImagePanel = () => {
-      const index = parseInt(this.imgPanel.id, 10);
-      if (index >= 0 && index < imageLayerQueue.length) {
-        if (this.imgPanel.parentNode) {
-          this.imgPanel.parentNode.removeChild(this.imgPanel);
+    const deleteImage = () => {
+      this.imgPanel.parentNode.removeChild(this.imgPanel);
+      for (let i = 0; i < imageLayerQueue.length; i++) {
+        if (imageLayerQueue[i].imgPanel.id == this.imgPanel.id) {
+          imageLayerQueue.splice(i, 1);
+          break;
         }
-        imageLayerQueue.splice(index, 1);
-        Parameter.num = Math.max(0, imageLayerQueue.length - 1);
-        if (imageLayerQueue.length === 0) {
-          createDefaultImage();
-        }
-        imageLayerQueue[Parameter.num].updateFocus();
-        imageLayerQueue[Parameter.num].updateSio();
+      }
+      Parameter.num = Math.max(0, imageLayerQueue.length - 1);
+      if (imageLayerQueue.length === 0) {
+        createDefaultImage();
       }
 
       document
@@ -165,7 +165,7 @@ class ImageLayer {
         });
     };
 
-    this.deleteBtn.addEventListener("click", deleteImagePanel);
+    this.deleteBtn.addEventListener("click", deleteImage);
 
     this.nameSpan = document.createElement("span");
     this.nameSpan.id = "nameSpan";
@@ -175,7 +175,7 @@ class ImageLayer {
         (event.ctrlKey && event.key === "d") ||
         (event.key === "Delete" && document.activeElement === this.imgPanel)
       ) {
-        deleteImagePanel();
+        deleteImage();
       } else if (
         document.activeElement === this.imgPanel &&
         (event.key === "ArrowLeft" || event.key === "ArrowRight")

@@ -1,0 +1,7 @@
+#flipBtn:hover,
+#flopBtn:hover,
+#rotateLeftBtn:hover,
+#rotateRightBtn:hover,
+#rotateExecuteBtn:hover {
+  cursor: pointer;
+}

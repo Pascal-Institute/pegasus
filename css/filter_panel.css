@@ -1,0 +1,8 @@
+#blurBtn:hover,
+#sharpenBtn:hover,
+#medianBtn:hover,
+#bitwiseBtn:hover,
+#negativeBtn:hover,
+#normalizeBtn:hover {
+  cursor: pointer;
+}

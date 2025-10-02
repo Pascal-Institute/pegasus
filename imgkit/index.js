@@ -343,6 +343,8 @@ class ImageLayer {
 
       // Get the current image layer that received the drop
       const currentLayer = this;
+      // Check if this is a placeholder image before we replace it
+      const wasPlaceholder = currentLayer.canvas.id !== "full";
       
       const tryOpenImg = (filepathOrBuffer) => {
         // Replace the image in the current layer
@@ -353,7 +355,7 @@ class ImageLayer {
         }
         
         // Only create a new default image if the current layer was the placeholder
-        if (currentLayer.canvas.id !== "full") {
+        if (wasPlaceholder) {
           createDefaultImage();
         }
       };

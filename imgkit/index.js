@@ -97,6 +97,15 @@ scrollContainer.addEventListener("scroll", updateScrollUI);
 class Parameter {
   static num = 0;
 }
+function createDefaultLayer() {
+  if (imageLayerQueue.length === 0) {
+  } else {
+    Parameter.num++;
+  }
+  imageLayerQueue.push(new ImageLayer());
+  document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+  imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+}
 
 class ImageLayer {
   static drawFlag = false;
@@ -132,6 +141,7 @@ class ImageLayer {
     img.style.height = "100%";
     img.style.objectFit = "contain";
     this.deleteBtn.appendChild(img);
+
     const deleteImagePanel = () => {
       const index = parseInt(this.imgPanel.id, 10);
       if (index >= 0 && index < imageLayerQueue.length) {
@@ -141,9 +151,7 @@ class ImageLayer {
         imageLayerQueue.splice(index, 1);
         Parameter.num = Math.max(0, imageLayerQueue.length - 1);
         if (imageLayerQueue.length === 0) {
-          imageLayerQueue.push(new ImageLayer());
-          document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-          imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+          createDefaultLayer();
         }
         imageLayerQueue[Parameter.num].updateFocus();
         imageLayerQueue[Parameter.num].updateSio();
@@ -325,21 +333,19 @@ class ImageLayer {
         // Try to open the image first, only add if successful
         const file = event.dataTransfer.files[0];
         if (!file) return;
-
+        var isOpened = false;
         const tryOpenImg = (filepathOrBuffer) => {
           // Valid image, add new layer
           if (typeof filepathOrBuffer === "string") {
-            return imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
+            isOpened = imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
           } else {
-            imageLayerQueue[Parameter.num].openImgBuffer(
+            isOpened = imageLayerQueue[Parameter.num].openImgBuffer(
               filepathOrBuffer,
               file.name
             );
           }
-          Parameter.num++;
-          imageLayerQueue.push(new ImageLayer());
-          document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-          imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+          if (!isOpened) return;
+          createDefaultLayer();
         };
 
         if (!file.path) {
@@ -873,4 +879,5 @@ module.exports = {
   drawFlag: ImageLayer.drawFlag,
   dragFlag: ImageLayer.dragFlag,
   imageLayerQueue: imageLayerQueue,
+  createDefaultLayer: createDefaultLayer,
 };

@@ -3,7 +3,7 @@ const {
   ImageLayer,
   Parameter,
   imageLayerQueue,
-  createDefaultLayer,
+  createDefaultImage,
 } = require("imgkit");
 var { num } = require("imgkit");
 const sharp = require("sharp");
@@ -162,7 +162,7 @@ ipcRenderer.on("drawImgCMD", (event, res) => {
   }
 });
 
-createDefaultLayer();
+createDefaultImage();
 var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
 
 sioCheckBox.addEventListener("click", (event) => {
@@ -194,7 +194,7 @@ ipcRenderer.on("openImgCMD", (event, res) => {
     imageLayerQueue[Parameter.num].openImg(
       imageLayerQueue[Parameter.num].filepath
     );
-    createDefaultLayer();
+    createDefaultImage();
   }
 });
 

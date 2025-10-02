@@ -97,7 +97,7 @@ scrollContainer.addEventListener("scroll", updateScrollUI);
 class Parameter {
   static num = 0;
 }
-function createDefaultLayer() {
+function createDefaultImage() {
   if (imageLayerQueue.length === 0) {
   } else {
     Parameter.num++;
@@ -151,7 +151,7 @@ class ImageLayer {
         imageLayerQueue.splice(index, 1);
         Parameter.num = Math.max(0, imageLayerQueue.length - 1);
         if (imageLayerQueue.length === 0) {
-          createDefaultLayer();
+          createDefaultImage();
         }
         imageLayerQueue[Parameter.num].updateFocus();
         imageLayerQueue[Parameter.num].updateSio();
@@ -345,7 +345,7 @@ class ImageLayer {
             );
           }
           if (!isOpened) return;
-          createDefaultLayer();
+          createDefaultImage();
         };
 
         if (!file.path) {
@@ -879,5 +879,5 @@ module.exports = {
   drawFlag: ImageLayer.drawFlag,
   dragFlag: ImageLayer.dragFlag,
   imageLayerQueue: imageLayerQueue,
-  createDefaultLayer: createDefaultLayer,
+  createDefaultImage: createDefaultImage,
 };

@@ -1,5 +1,5 @@
 const { ipcRenderer } = require("electron");
-var { drawFlag} = require("imgkit");
+var { drawFlag } = require("imgkit");
 
 var rgb = { r: "123", g: "123", b: "123" };
 
@@ -7,7 +7,6 @@ document.getElementById("drawBtn").addEventListener("click", () => {
   if (!drawFlag) {
     drawFlag = true;
     document.getElementById("drawBtn").style.backgroundColor = "gray";
-
   } else {
     drawFlag = false;
     document.getElementById("drawBtn").style.backgroundColor = "#efefef";
@@ -21,6 +20,10 @@ document.getElementById("grayScaleBtn").addEventListener("click", () => {
 
 document.getElementById("tintExecuteBtn").addEventListener("click", () => {
   ipcRenderer.send("tintValueSEND", rgb);
+});
+
+document.getElementById("watermarkBtn").addEventListener("click", () => {
+  ipcRenderer.send("watermarkImgREQ");
 });
 
 document.getElementById("redValue").addEventListener("input", (event) => {

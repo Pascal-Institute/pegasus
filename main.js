@@ -164,6 +164,11 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on("watermarkImgREQ", (event) => {
+    mainWindow.webContents.send("watermarkImgCMD");
+    mainWindow.webContents.focus();
+  });
+
   ipcMain.on("cropImgREQ", (event, res) => {
     mainWindow.webContents.send("cropImgCMD", res);
     mainWindow.webContents.focus();

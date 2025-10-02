@@ -145,6 +145,20 @@ ipcRenderer.on("tintImgCMD", (event, res) => {
     });
 });
 
+ipcRenderer.on("watermarkImgCMD", async (event) => {
+  const watermark = await sharp("./assets/icon.png").resize(32, 32).toBuffer();
+  sharp(imageLayerQueue[Parameter.num].buffer)
+    .composite([
+      {
+        input: watermark,
+        gravity: "southeast",
+      },
+    ])
+    .toBuffer((err, buf, info) => {
+      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
+    });
+});
+
 ipcRenderer.on("cropImgCMD", (event, res) => {
   imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", false);
   document.body.style.cursor = "crosshair";

@@ -140,14 +140,13 @@ class ImageLayer {
         }
         imageLayerQueue.splice(index, 1);
         Parameter.num = Math.max(0, imageLayerQueue.length - 1);
-        if (imageLayerQueue.length > 0) {
-          imageLayerQueue[Parameter.num].updateFocus();
-          imageLayerQueue[Parameter.num].updateSio();
-        } else {
+        if (imageLayerQueue.length === 0) {
           imageLayerQueue.push(new ImageLayer());
           document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
           imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
         }
+        imageLayerQueue[Parameter.num].updateFocus();
+        imageLayerQueue[Parameter.num].updateSio();
       }
 
       document

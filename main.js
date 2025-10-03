@@ -222,7 +222,7 @@ app.whenReady().then(() => {
         label: "File",
         submenu: [
           {
-            label: "Open",
+            label: "Open...",
             click: () => {
               dialog
                 .showOpenDialog({

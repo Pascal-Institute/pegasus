@@ -347,39 +347,38 @@ class ImageLayer {
 
     this.canvas.addEventListener("drop", (event) => {
       event.preventDefault();
-      if (this.canvas.id !== "full") {
-        // Try to open the image first, only add if successful
-        const file = event.dataTransfer.files[0];
-        if (!file) return;
-        let isOpened;
-        const tryOpenImg = async (filepathOrBuffer) => {
-          // Valid image, add new layer
-          if (typeof filepathOrBuffer === "string") {
-            isOpened = await imageLayerQueue[Parameter.num].openImg(
-              filepathOrBuffer
-            );
-          } else {
-            isOpened = await imageLayerQueue[Parameter.num].openImgBuffer(
-              filepathOrBuffer,
-              file.name
-            );
-          }
-          if (!isOpened) return;
-          createDefaultImage();
-        };
-
-        if (!file.path) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const arrayBuffer = e.target.result;
-            const buffer = Buffer.from(arrayBuffer);
-            tryOpenImg(buffer);
-          };
-          reader.readAsArrayBuffer(file);
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
+      
+      let isOpened;
+      const tryOpenImg = async (filepathOrBuffer) => {
+        if (typeof filepathOrBuffer === "string") {
+          isOpened = await imageLayerQueue[Parameter.num].openImg(
+            filepathOrBuffer
+          );
         } else {
-          tryOpenImg(file.path);
+          isOpened = await imageLayerQueue[Parameter.num].openImgBuffer(
+            filepathOrBuffer,
+            file.name
+          );
         }
-        return;
+        if (!isOpened) return;
+        // Only create a new default layer if dropping on an empty canvas
+        if (this.canvas.id !== "full") {
+          createDefaultImage();
+        }
+      };
+
+      if (!file.path) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const arrayBuffer = e.target.result;
+          const buffer = Buffer.from(arrayBuffer);
+          tryOpenImg(buffer);
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        tryOpenImg(file.path);
       }
     });
 

@@ -349,7 +349,7 @@ class ImageLayer {
       event.preventDefault();
       const file = event.dataTransfer.files[0];
       if (!file) return;
-      
+
       let isOpened;
       const tryOpenImg = async (filepathOrBuffer) => {
         if (typeof filepathOrBuffer === "string") {
@@ -364,7 +364,10 @@ class ImageLayer {
         }
         if (!isOpened) return;
         // Only create a new default layer if dropping on an empty canvas
-        if (this.canvas.id !== "full") {
+        if (
+          Parameter.num === imageLayerQueue.length - 1 ||
+          this.canvas.id !== "full"
+        ) {
           createDefaultImage();
         }
       };

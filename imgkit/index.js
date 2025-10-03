@@ -2,7 +2,8 @@ const sharp = require("sharp");
 const bmp = require("sharp-bmp");
 const ico = require("sharp-ico");
 var path = require("path");
-
+/** @type {ImageLayer | undefined} */
+let copy;
 const imageLayerQueue = [];
 
 const scrollContainer = document.createElement("div");
@@ -134,6 +135,82 @@ class ImageLayer {
     this.canvas.setAttribute("class", "img-canvas");
     this.canvas.className = "previewImg";
     this.canvas.id = "default";
+    // ...existing code...
+
+    this.canvas.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+
+      // Create context menu
+      const contextMenu = document.createElement("div");
+      contextMenu.style.position = "fixed";
+      contextMenu.style.left = event.clientX + "px";
+      contextMenu.style.top = event.clientY + "px";
+      contextMenu.style.backgroundColor = "#fff";
+      contextMenu.style.border = "1px solid #ccc";
+      contextMenu.style.borderRadius = "4px";
+      contextMenu.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
+      contextMenu.style.zIndex = "10000";
+      contextMenu.style.minWidth = "120px";
+      contextMenu.style.padding = "4px 0";
+      contextMenu.id = "canvas-context-menu";
+
+      // Copy menu item
+      const copyItem = document.createElement("div");
+      copyItem.innerText = "Copy";
+      copyItem.style.padding = "8px 16px";
+      copyItem.style.cursor = "pointer";
+      copyItem.style.fontSize = "14px";
+      copyItem.addEventListener("mouseover", () => {
+        copyItem.style.backgroundColor = "#f0f0f0";
+      });
+      copyItem.addEventListener("mouseout", () => {
+        copyItem.style.backgroundColor = "transparent";
+      });
+      copyItem.addEventListener("click", () => {
+        copy = imageLayerQueue[Parameter.num];
+        document.body.removeChild(contextMenu);
+      });
+
+      // Paste menu item
+      const pasteItem = document.createElement("div");
+      pasteItem.innerText = "Paste";
+      pasteItem.style.padding = "8px 16px";
+      pasteItem.style.cursor = "pointer";
+      pasteItem.style.fontSize = "14px";
+      pasteItem.addEventListener("mouseover", () => {
+        pasteItem.style.backgroundColor = "#f0f0f0";
+      });
+      pasteItem.addEventListener("mouseout", () => {
+        pasteItem.style.backgroundColor = "transparent";
+      });
+      pasteItem.addEventListener("click", () => {
+        imageLayerQueue[Parameter.num].openImgBuffer(
+          copy.buffer,
+          copy.nameSpan.textContent + "_copy"
+        );
+        document.body.removeChild(contextMenu);
+      });
+
+      contextMenu.appendChild(copyItem);
+      contextMenu.appendChild(pasteItem);
+      document.body.appendChild(contextMenu);
+
+      // Remove context menu when clicking elsewhere
+      const removeContextMenu = (e) => {
+        if (!contextMenu.contains(e.target)) {
+          if (document.body.contains(contextMenu)) {
+            document.body.removeChild(contextMenu);
+          }
+          document.removeEventListener("click", removeContextMenu);
+        }
+      };
+
+      setTimeout(() => {
+        document.addEventListener("click", removeContextMenu);
+      }, 10);
+    });
+
+    // ...existing code in build() method...
 
     this.deleteBtn = document.createElement("button");
     this.deleteBtn.id = "deleteBtn";
@@ -602,7 +679,7 @@ class ImageLayer {
 
     this.updateImgInfoText(info);
     this.extractMainColors(buf, info);
-    this.updateExtension();
+    this.updateExtension(this.extension);
 
     this.buffer = buf;
     this.i++;
@@ -727,8 +804,8 @@ class ImageLayer {
       });
   }
 
-  updateExtension() {
-    this.extensionComboBox.value = this.extension;
+  updateExtension(extension) {
+    this.extensionComboBox.value = extension;
   }
 
   async openImg(filepath) {
@@ -780,9 +857,7 @@ class ImageLayer {
 
   async openImgBuffer(buffer, name) {
     this.extension = path.extname(name).replace(".", "");
-    if (filepath !== "./assets/addImage.png") {
-      this.canvas.id = "full";
-    }
+    this.canvas.id = "full";
 
     const afterLoad = (buf, info) => {
       this.updatePreviewImg(buf, info);
@@ -814,7 +889,6 @@ class ImageLayer {
           resolve(false);
           return;
         }
-        this.filepath = name;
         this.nameSpan.textContent = path
           .basename(name)
           .replace("." + this.extension, "");
@@ -866,7 +940,7 @@ class ImageLayer {
 
       this.updateImgInfoText(this.information);
       this.extractMainColors(this.buffer, this.information);
-      this.updateExtension();
+      this.updateExtension(this.extension);
     } catch (err) {
       console.log(err);
       this.i++;
@@ -892,7 +966,7 @@ class ImageLayer {
 
       this.updateImgInfoText(this.information);
       this.extractMainColors(this.buffer, this.information);
-      this.updateExtension();
+      this.updateExtension(this.extension);
     } catch (err) {
       this.i--;
     }

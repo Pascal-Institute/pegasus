@@ -126,6 +126,14 @@ select#extensionComboBox {
   position: inherit;
 }
 
+.previewImg[draggable="true"] {
+  cursor: grab;
+}
+
+.previewImg[draggable="true"]:active {
+  cursor: grabbing;
+}
+
 #dummyCanvas {
   background-color: transparent;
 }

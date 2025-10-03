@@ -332,14 +332,12 @@ class ImageLayer {
       "dragover",
       function (event) {
         event.preventDefault();
-        document.body.style.cursor = "copy";
       },
       false
     );
 
     this.canvas.addEventListener("dragenter", (event) => {
       event.preventDefault();
-      document.body.style.cursor = "copy";
       Parameter.num = imageLayerQueue.findIndex(
         (layer) => layer.imgPanel.id == this.imgPanel.id
       );
@@ -347,14 +345,8 @@ class ImageLayer {
       this.updateSio();
     });
 
-    this.canvas.addEventListener("dragleave", (event) => {
-      event.preventDefault();
-      document.body.style.cursor = "default";
-    });
-
     this.canvas.addEventListener("drop", (event) => {
       event.preventDefault();
-      document.body.style.cursor = "default";
       const file = event.dataTransfer.files[0];
       if (!file) return;
 
@@ -391,6 +383,14 @@ class ImageLayer {
       } else {
         tryOpenImg(file.path);
       }
+    });
+
+    this.canvas.addEventListener("dragstart", (event) => {
+      document.body.style.cursor = "grabbing";
+    });
+
+    this.canvas.addEventListener("dragend", (event) => {
+      document.body.style.cursor = "grab";
     });
 
     this.canvas.addEventListener("mousedown", (event) => {

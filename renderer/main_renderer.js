@@ -245,8 +245,6 @@ document.addEventListener("keydown", function (event) {
     imageLayerQueue[Parameter.num].undoPreviewImg();
   } else if (event.ctrlKey && event.key === "y") {
     imageLayerQueue[Parameter.num].redoPreviewImg();
-  } else if (event.ctrlKey && event.key === "s") {
-    ipcRenderer.send("saveImgREQ");
   } else if (event.which === 122) {
     if (!fullScreenFlag) {
       ipcRenderer.send("FullScreenREQ");

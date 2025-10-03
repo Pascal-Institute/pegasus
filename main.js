@@ -250,6 +250,7 @@ app.whenReady().then(() => {
           },
           {
             label: "Save",
+            accelerator: "Ctrl+S",
             click: () => {
               event.sender.send("saveImgCMD");
             },

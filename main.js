@@ -223,6 +223,7 @@ app.whenReady().then(() => {
         submenu: [
           {
             label: "Open...",
+            accelerator: "Ctrl+O",
             click: () => {
               dialog
                 .showOpenDialog({
@@ -255,6 +256,7 @@ app.whenReady().then(() => {
           },
           {
             label: "Save As...",
+            accelerator: "Ctrl+Shift+S",
             click: () => {
               event.sender.send("setExtensionCMD");
             },

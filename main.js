@@ -50,7 +50,7 @@ function createView(type, mainWindow) {
 
   view.setBounds({ x: 0, y: 33, width: 1280, height: 90 });
   view.setAutoResize({ width: true, height: false });
-  view.webContents.loadFile(`./pages/_panel.html`);
+  view.webContents.loadFile(`./pages/resize_panel.html`);
   mainWindow.addBrowserView(view);
   // view.webContents.openDevTools();
 }

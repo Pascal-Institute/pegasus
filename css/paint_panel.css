@@ -1,0 +1,6 @@
+#drawBtn:hover,
+#grayScaleBtn:hover,
+#tintExecuteBtn:hover,
+#watermarkBtn:hover {
+  cursor: pointer;
+}

@@ -1,8 +1,12 @@
 const { ipcRenderer } = require("electron");
-const { ImageLayer, Parameter, imageLayerQueue} = require("imgkit");
+const {
+  ImageLayer,
+  Parameter,
+  imageLayerQueue,
+  createDefaultImage,
+} = require("imgkit");
 var { num } = require("imgkit");
 const sharp = require("sharp");
-var path = require("path");
 var fullScreenFlag = false;
 var lineWidth = 1;
 
@@ -26,7 +30,9 @@ buttons.forEach((btnId) => {
 ipcRenderer.send("showMenuREQ", "ping");
 
 ipcRenderer.on("resizeImgCMD", (event, res) => {
-  const newWidth = Math.floor(imageLayerQueue[Parameter.num].canvas.width * res);
+  const newWidth = Math.floor(
+    imageLayerQueue[Parameter.num].canvas.width * res
+  );
   sharp(imageLayerQueue[Parameter.num].buffer)
     .resize({ width: newWidth })
     .toBuffer((err, buf, info) => {
@@ -139,9 +145,23 @@ ipcRenderer.on("tintImgCMD", (event, res) => {
     });
 });
 
+ipcRenderer.on("watermarkImgCMD", async (event) => {
+  const watermark = await sharp("./assets/icon.png").resize(32, 32).toBuffer();
+  sharp(imageLayerQueue[Parameter.num].buffer)
+    .composite([
+      {
+        input: watermark,
+        gravity: "southeast",
+      },
+    ])
+    .toBuffer((err, buf, info) => {
+      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
+    });
+});
+
 ipcRenderer.on("cropImgCMD", (event, res) => {
-    imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", false);
-    document.body.style.cursor = "crosshair";
+  imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", false);
+  document.body.style.cursor = "crosshair";
 });
 
 ipcRenderer.on("drawImgCMD", (event, res) => {
@@ -156,10 +176,7 @@ ipcRenderer.on("drawImgCMD", (event, res) => {
   }
 });
 
-imageLayerQueue.push(new ImageLayer());
-
-document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-
+createDefaultImage();
 var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
 
 sioCheckBox.addEventListener("click", (event) => {
@@ -182,23 +199,17 @@ sioCheckBox.addEventListener("click", (event) => {
   }
 });
 
-imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
-console.log(imageLayerQueue[Parameter.num].filepath);
 ipcRenderer.on("openImgCMD", (event, res) => {
+  Parameter.num = imageLayerQueue.length - 1;
   imageLayerQueue[Parameter.num].filepath = res;
   if (
-    imageLayerQueue[Parameter.num].filepath === undefined ||
-    imageLayerQueue[Parameter.num].filepath === null
+    imageLayerQueue[Parameter.num].filepath !== undefined &&
+    imageLayerQueue[Parameter.num].filepath !== null
   ) {
-    imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
-  } else {
     imageLayerQueue[Parameter.num].openImg(
       imageLayerQueue[Parameter.num].filepath
     );
-    Parameter.num++;
-    imageLayerQueue.push(new ImageLayer());
-    document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-    imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+    createDefaultImage();
   }
 });
 
@@ -234,8 +245,6 @@ document.addEventListener("keydown", function (event) {
     imageLayerQueue[Parameter.num].undoPreviewImg();
   } else if (event.ctrlKey && event.key === "y") {
     imageLayerQueue[Parameter.num].redoPreviewImg();
-  } else if (event.ctrlKey && event.key === "s") {
-    ipcRenderer.send("saveImgREQ");
   } else if (event.which === 122) {
     if (!fullScreenFlag) {
       ipcRenderer.send("FullScreenREQ");

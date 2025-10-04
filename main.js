@@ -164,6 +164,11 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on("watermarkImgREQ", (event) => {
+    mainWindow.webContents.send("watermarkImgCMD");
+    mainWindow.webContents.focus();
+  });
+
   ipcMain.on("cropImgREQ", (event, res) => {
     mainWindow.webContents.send("cropImgCMD", res);
     mainWindow.webContents.focus();
@@ -217,7 +222,8 @@ app.whenReady().then(() => {
         label: "File",
         submenu: [
           {
-            label: "Open",
+            label: "Open...",
+            accelerator: "Ctrl+O",
             click: () => {
               dialog
                 .showOpenDialog({
@@ -244,12 +250,14 @@ app.whenReady().then(() => {
           },
           {
             label: "Save",
+            accelerator: "Ctrl+S",
             click: () => {
               event.sender.send("saveImgCMD");
             },
           },
           {
             label: "Save As...",
+            accelerator: "Ctrl+Shift+S",
             click: () => {
               event.sender.send("setExtensionCMD");
             },

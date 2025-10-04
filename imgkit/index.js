@@ -2,7 +2,8 @@ const sharp = require("sharp");
 const bmp = require("sharp-bmp");
 const ico = require("sharp-ico");
 var path = require("path");
-
+/** @type {ImageLayer | undefined} */
+let copy;
 const imageLayerQueue = [];
 
 const scrollContainer = document.createElement("div");
@@ -97,6 +98,17 @@ scrollContainer.addEventListener("scroll", updateScrollUI);
 class Parameter {
   static num = 0;
 }
+function createDefaultImage() {
+  if (imageLayerQueue.length === 0) {
+  } else {
+    Parameter.num++;
+  }
+  imageLayerQueue.push(new ImageLayer());
+  document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+  imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+  imageLayerQueue[Parameter.num].imgPanel.focus();
+  imageLayerQueue[Parameter.num].updateSio();
+}
 
 class ImageLayer {
   static drawFlag = false;
@@ -123,6 +135,79 @@ class ImageLayer {
     this.canvas.setAttribute("class", "img-canvas");
     this.canvas.className = "previewImg";
     this.canvas.id = "default";
+    // ...existing code...
+
+    this.canvas.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+
+      // Create context menu
+      const contextMenu = document.createElement("div");
+      contextMenu.style.position = "fixed";
+      contextMenu.style.left = event.clientX + "px";
+      contextMenu.style.top = event.clientY + "px";
+      contextMenu.style.backgroundColor = "#fff";
+      contextMenu.style.border = "1px solid #ccc";
+      contextMenu.style.borderRadius = "4px";
+      contextMenu.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
+      contextMenu.style.zIndex = "10000";
+      contextMenu.style.minWidth = "120px";
+      contextMenu.style.padding = "4px 0";
+      contextMenu.id = "canvas-context-menu";
+
+      // Copy menu item
+      const copyItem = document.createElement("div");
+      copyItem.innerText = "Copy";
+      copyItem.style.padding = "8px 16px";
+      copyItem.style.cursor = "pointer";
+      copyItem.style.fontSize = "14px";
+      copyItem.addEventListener("mouseover", () => {
+        copyItem.style.backgroundColor = "#f0f0f0";
+      });
+      copyItem.addEventListener("mouseout", () => {
+        copyItem.style.backgroundColor = "transparent";
+      });
+      copyItem.addEventListener("click", () => {
+        copyImage();
+        document.body.removeChild(contextMenu);
+      });
+
+      // Paste menu item
+      const pasteItem = document.createElement("div");
+      pasteItem.innerText = "Paste";
+      pasteItem.style.padding = "8px 16px";
+      pasteItem.style.cursor = "pointer";
+      pasteItem.style.fontSize = "14px";
+      pasteItem.addEventListener("mouseover", () => {
+        pasteItem.style.backgroundColor = "#f0f0f0";
+      });
+      pasteItem.addEventListener("mouseout", () => {
+        pasteItem.style.backgroundColor = "transparent";
+      });
+      pasteItem.addEventListener("click", () => {
+        pasteImage();
+        document.body.removeChild(contextMenu);
+      });
+
+      contextMenu.appendChild(copyItem);
+      contextMenu.appendChild(pasteItem);
+      document.body.appendChild(contextMenu);
+
+      // Remove context menu when clicking elsewhere
+      const removeContextMenu = (e) => {
+        if (!contextMenu.contains(e.target)) {
+          if (document.body.contains(contextMenu)) {
+            document.body.removeChild(contextMenu);
+          }
+          document.removeEventListener("click", removeContextMenu);
+        }
+      };
+
+      setTimeout(() => {
+        document.addEventListener("click", removeContextMenu);
+      }, 10);
+    });
+
+    // ...existing code in build() method...
 
     this.deleteBtn = document.createElement("button");
     this.deleteBtn.id = "deleteBtn";
@@ -132,20 +217,50 @@ class ImageLayer {
     img.style.height = "100%";
     img.style.objectFit = "contain";
     this.deleteBtn.appendChild(img);
-    const deleteImagePanel = () => {
-      const index = parseInt(this.imgPanel.id, 10);
-      if (index >= 0 && index < imageLayerQueue.length) {
-        if (this.imgPanel.parentNode) {
-          this.imgPanel.parentNode.removeChild(this.imgPanel);
+
+    const copyImage = () => {
+      copy = imageLayerQueue[Parameter.num];
+
+      document
+        .getElementById("img_copy_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
+    };
+
+    const pasteImage = () => {
+      imageLayerQueue[Parameter.num].openImgBuffer(
+        copy.buffer,
+        copy.nameSpan.textContent + "_copy." + copy.extension
+      );
+
+      document
+        .getElementById("img_paste_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
+    };
+
+    const deleteImage = () => {
+      this.imgPanel.parentNode.removeChild(this.imgPanel);
+      var deletedIndex = 0;
+      for (let i = 0; i < imageLayerQueue.length; i++) {
+        if (imageLayerQueue[i].imgPanel.id == this.imgPanel.id) {
+          imageLayerQueue.splice(i, 1);
+          deletedIndex = i;
+          break;
         }
-        imageLayerQueue.splice(index, 1);
-        Parameter.num = Math.max(0, imageLayerQueue.length - 1);
-        if (imageLayerQueue.length > 0) {
-          imageLayerQueue[Parameter.num].updateFocus();
-          imageLayerQueue[Parameter.num].updateSio();
-        } else {
-          Parameter.num = 0;
-        }
+      }
+      Parameter.num = Math.max(0, imageLayerQueue.length - 1);
+      if (imageLayerQueue.length === 0) {
+        createDefaultImage();
+      } else if (
+        imageLayerQueue.length > 0 &&
+        deletedIndex === imageLayerQueue.length
+      ) {
+        createDefaultImage();
       }
 
       document
@@ -156,7 +271,7 @@ class ImageLayer {
         });
     };
 
-    this.deleteBtn.addEventListener("click", deleteImagePanel);
+    this.deleteBtn.addEventListener("click", deleteImage);
 
     this.nameSpan = document.createElement("span");
     this.nameSpan.id = "nameSpan";
@@ -166,7 +281,11 @@ class ImageLayer {
         (event.ctrlKey && event.key === "d") ||
         (event.key === "Delete" && document.activeElement === this.imgPanel)
       ) {
-        deleteImagePanel();
+        deleteImage();
+      } else if (event.ctrlKey && event.key === "c") {
+        copyImage();
+      } else if (event.ctrlKey && event.key === "v") {
+        pasteImage();
       } else if (
         document.activeElement === this.imgPanel &&
         (event.key === "ArrowLeft" || event.key === "ArrowRight")
@@ -289,7 +408,9 @@ class ImageLayer {
 
   build() {
     this.imgPanel.addEventListener("click", (event) => {
-      Parameter.num = this.imgPanel.id;
+      Parameter.num = imageLayerQueue.findIndex(
+        (layer) => layer.imgPanel.id == this.imgPanel.id
+      );
       this.updateFocus();
       this.updateSio();
     });
@@ -318,41 +439,52 @@ class ImageLayer {
       false
     );
 
+    this.canvas.addEventListener("dragenter", (event) => {
+      event.preventDefault();
+      Parameter.num = imageLayerQueue.findIndex(
+        (layer) => layer.imgPanel.id == this.imgPanel.id
+      );
+      this.updateFocus();
+      this.updateSio();
+    });
+
     this.canvas.addEventListener("drop", (event) => {
       event.preventDefault();
-      if (this.canvas.id !== "full") {
-        // Try to open the image first, only add if successful
-        const file = event.dataTransfer.files[0];
-        if (!file) return;
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
 
-        const tryOpenImg = (filepathOrBuffer) => {
-          // Valid image, add new layer
-          if (typeof filepathOrBuffer === "string") {
-            return imageLayerQueue[Parameter.num].openImg(filepathOrBuffer);
-          } else {
-            imageLayerQueue[Parameter.num].openImgBuffer(
-              filepathOrBuffer,
-              file.name
-            );
-          }
-          Parameter.num++;
-          imageLayerQueue.push(new ImageLayer());
-          document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-          imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
-        };
-
-        if (!file.path) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const arrayBuffer = e.target.result;
-            const buffer = Buffer.from(arrayBuffer);
-            tryOpenImg(buffer);
-          };
-          reader.readAsArrayBuffer(file);
+      const tryOpenImg = async (filepathOrBuffer) => {
+        let isOpened;
+        if (typeof filepathOrBuffer === "string") {
+          isOpened = await imageLayerQueue[Parameter.num].openImg(
+            filepathOrBuffer
+          );
         } else {
-          tryOpenImg(file.path);
+          isOpened = await imageLayerQueue[Parameter.num].openImgBuffer(
+            filepathOrBuffer,
+            file.name
+          );
         }
-        return;
+        if (!isOpened) return;
+        // Only create a new default layer if dropping on an empty canvas
+        if (
+          Parameter.num === imageLayerQueue.length - 1 ||
+          this.canvas.id !== "full"
+        ) {
+          createDefaultImage();
+        }
+      };
+
+      if (!file.path) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const arrayBuffer = e.target.result;
+          const buffer = Buffer.from(arrayBuffer);
+          tryOpenImg(buffer);
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        tryOpenImg(file.path);
       }
     });
 
@@ -573,7 +705,7 @@ class ImageLayer {
 
     this.updateImgInfoText(info);
     this.extractMainColors(buf, info);
-    this.updateExtension();
+    this.updateExtension(this.extension);
 
     this.buffer = buf;
     this.i++;
@@ -698,11 +830,11 @@ class ImageLayer {
       });
   }
 
-  updateExtension() {
-    this.extensionComboBox.value = this.extension;
+  updateExtension(extension) {
+    this.extensionComboBox.value = extension;
   }
 
-  openImg(filepath) {
+  async openImg(filepath) {
     this.extension = path.extname(filepath).replace(".", "");
     if (filepath !== "./assets/addImage.png") {
       this.canvas.id = "full";
@@ -734,6 +866,7 @@ class ImageLayer {
               duration: 1800,
               iterations: 1,
             });
+          this.canvas.id = "default";
           resolve(false);
           return;
         }
@@ -748,7 +881,7 @@ class ImageLayer {
     });
   }
 
-  openImgBuffer(buffer, name) {
+  async openImgBuffer(buffer, name) {
     this.extension = path.extname(name).replace(".", "");
     this.canvas.id = "full";
 
@@ -778,10 +911,10 @@ class ImageLayer {
               duration: 1800,
               iterations: 1,
             });
+          this.canvas.id = "default";
           resolve(false);
           return;
         }
-        this.filepath = name;
         this.nameSpan.textContent = path
           .basename(name)
           .replace("." + this.extension, "");
@@ -833,7 +966,7 @@ class ImageLayer {
 
       this.updateImgInfoText(this.information);
       this.extractMainColors(this.buffer, this.information);
-      this.updateExtension();
+      this.updateExtension(this.extension);
     } catch (err) {
       console.log(err);
       this.i++;
@@ -859,7 +992,7 @@ class ImageLayer {
 
       this.updateImgInfoText(this.information);
       this.extractMainColors(this.buffer, this.information);
-      this.updateExtension();
+      this.updateExtension(this.extension);
     } catch (err) {
       this.i--;
     }
@@ -872,4 +1005,5 @@ module.exports = {
   drawFlag: ImageLayer.drawFlag,
   dragFlag: ImageLayer.dragFlag,
   imageLayerQueue: imageLayerQueue,
+  createDefaultImage: createDefaultImage,
 };

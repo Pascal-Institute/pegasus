@@ -167,7 +167,7 @@ class ImageLayer {
         copyItem.style.backgroundColor = "transparent";
       });
       copyItem.addEventListener("click", () => {
-        copy = imageLayerQueue[Parameter.num];
+        copyImage();
         document.body.removeChild(contextMenu);
       });
 
@@ -184,10 +184,7 @@ class ImageLayer {
         pasteItem.style.backgroundColor = "transparent";
       });
       pasteItem.addEventListener("click", () => {
-        imageLayerQueue[Parameter.num].openImgBuffer(
-          copy.buffer,
-          copy.nameSpan.textContent + "_copy"
-        );
+        pasteImage();
         document.body.removeChild(contextMenu);
       });
 
@@ -220,6 +217,17 @@ class ImageLayer {
     img.style.height = "100%";
     img.style.objectFit = "contain";
     this.deleteBtn.appendChild(img);
+
+    const copyImage = () => {
+      copy = imageLayerQueue[Parameter.num];
+    };
+
+    const pasteImage = () => {
+      imageLayerQueue[Parameter.num].openImgBuffer(
+        copy.buffer,
+        copy.nameSpan.textContent + "_copy"
+      );
+    };
 
     const deleteImage = () => {
       this.imgPanel.parentNode.removeChild(this.imgPanel);
@@ -260,6 +268,10 @@ class ImageLayer {
         (event.key === "Delete" && document.activeElement === this.imgPanel)
       ) {
         deleteImage();
+      } else if (event.ctrlKey && event.key === "c") {
+        copyImage();
+      } else if (event.ctrlKey && event.key === "v") {
+        pasteImage();
       } else if (
         document.activeElement === this.imgPanel &&
         (event.key === "ArrowLeft" || event.key === "ArrowRight")
@@ -427,8 +439,8 @@ class ImageLayer {
       const file = event.dataTransfer.files[0];
       if (!file) return;
 
-      let isOpened;
       const tryOpenImg = async (filepathOrBuffer) => {
+        let isOpened;
         if (typeof filepathOrBuffer === "string") {
           isOpened = await imageLayerQueue[Parameter.num].openImg(
             filepathOrBuffer

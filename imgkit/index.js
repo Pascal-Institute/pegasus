@@ -220,6 +220,13 @@ class ImageLayer {
 
     const copyImage = () => {
       copy = imageLayerQueue[Parameter.num];
+
+      document
+        .getElementById("img_copy_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
     };
 
     const pasteImage = () => {
@@ -227,6 +234,13 @@ class ImageLayer {
         copy.buffer,
         copy.nameSpan.textContent + "_copy." + copy.extension
       );
+
+      document
+        .getElementById("img_paste_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
     };
 
     const deleteImage = () => {

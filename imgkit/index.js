@@ -223,9 +223,14 @@ class ImageLayer {
     };
 
     const pasteImage = () => {
+      // If pasting on a default image section, create a new default image first
+      if (imageLayerQueue[Parameter.num].canvas.id === "default") {
+        createDefaultImage();
+      }
+      // Include the extension from the copied image
       imageLayerQueue[Parameter.num].openImgBuffer(
         copy.buffer,
-        copy.nameSpan.textContent + "_copy"
+        copy.nameSpan.textContent + "_copy." + copy.extension
       );
     };
 

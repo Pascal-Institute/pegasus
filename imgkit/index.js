@@ -225,7 +225,7 @@ class ImageLayer {
     const pasteImage = () => {
       imageLayerQueue[Parameter.num].openImgBuffer(
         copy.buffer,
-        copy.nameSpan.textContent + "_copy"
+        copy.nameSpan.textContent + "_copy." + copy.extension
       );
     };
 

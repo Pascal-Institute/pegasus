@@ -1,6 +1,6 @@
 const electron = require("electron");
 const pkg = require("./package.json");
-const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu, MenuItem } = electron;
+const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu, MenuItem, clipboard, nativeImage } = electron;
 
 //electron refresh (only develop)
 if (process.env.NODE_ENV === "development") {
@@ -237,6 +237,29 @@ app.whenReady().then(() => {
 
     // Show menu at cursor position
     menu.popup({ window: BrowserWindow.fromWebContents(event.sender) });
+  });
+
+  // Native Clipboard Handlers
+  ipcMain.on('copy-image-to-clipboard', (event, imageBuffer) => {
+    try {
+      const image = nativeImage.createFromBuffer(Buffer.from(imageBuffer));
+      clipboard.writeImage(image);
+    } catch (error) {
+      console.error('Failed to copy image to clipboard:', error);
+    }
+  });
+
+  ipcMain.handle('paste-image-from-clipboard', () => {
+    try {
+      const image = clipboard.readImage();
+      if (!image.isEmpty()) {
+        return image.toPNG();
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to paste image from clipboard:', error);
+      return null;
+    }
   });
 
   ipcMain.on("FullScreenREQ", (event) => {

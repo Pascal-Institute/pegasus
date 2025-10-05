@@ -13,6 +13,7 @@
 
 const sharp = require("sharp");
 const path = require("path");
+const { ipcRenderer } = require("electron");
 const { ImageLayer, setGetImgKitMain } = require("./image-layer.js");
 setGetImgKitMain(getImgKitMain);
 
@@ -252,75 +253,60 @@ class ImgKitRenderer {
   // --------------------------------------------------------------------------
 
   /**
-   * Copy current image layer to clipboard
-   * Stores image data for paste operation
+   * Copy current image layer to native clipboard
+   * Uses Electron's clipboard API for better app interoperability
    */
-  copyImage() {
+  async copyImage() {
     const current = this.getCurrentLayer();
     if (current && current.buffer) {
-      this.copiedLayer = {
-        buffer: current.buffer,
-        filename: current.filename,
-        extension: current.extension,
-      };
-      this.showMessage("img-copy");
+      try {
+        // Send image to native clipboard via IPC
+        ipcRenderer.send('copy-image-to-clipboard', current.buffer);
+        
+        // Also keep internal copy for fallback
+        this.copiedLayer = {
+          buffer: current.buffer,
+          filename: current.filename,
+          extension: current.extension,
+        };
+        
+        this.showMessage("img-copy");
+      } catch (error) {
+        console.error('Failed to copy image:', error);
+      }
     }
   }
 
   /**
    * Paste image to current layer
    * Can paste from:
-   * 1. Previously copied layer (this.copiedLayer)
-   * 2. System clipboard (if browser allows)
+   * 1. Native clipboard (via Electron API)
+   * 2. Previously copied layer (fallback)
    */
   async pasteImage() {
-    // If no copied layer, try system clipboard
-    if (!this.copiedLayer) {
-      await this._pasteFromClipboard();
-      return;
+    const current = this.getCurrentLayer();
+    if (!current) return;
+
+    try {
+      // Try to get image from native clipboard first
+      const imageBuffer = await ipcRenderer.invoke('paste-image-from-clipboard');
+      
+      if (imageBuffer) {
+        // Got image from clipboard
+        const filename = 'pasted_image.png';
+        await current.openImageBuffer(Buffer.from(imageBuffer), filename);
+        this.showMessage("img-paste");
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to paste from clipboard:', error);
     }
 
-    // Paste from copied layer
-    const current = this.getCurrentLayer();
-    if (current) {
+    // Fallback: paste from internally copied layer
+    if (this.copiedLayer) {
       const filename = `${this.copiedLayer.filename}_copy.${this.copiedLayer.extension}`;
       await current.openImageBuffer(this.copiedLayer.buffer, filename);
       this.showMessage("img-paste");
-    }
-  }
-
-  /**
-   * Paste from system clipboard (helper method)
-   * @private
-   */
-  async _pasteFromClipboard() {
-    try {
-      const clipboardItems = await navigator.clipboard.read();
-
-      for (const item of clipboardItems) {
-        for (const type of item.types) {
-          // Check if clipboard contains image
-          if (type.startsWith("image/")) {
-            const blob = await item.getType(type);
-            const arrayBuffer = await blob.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-
-            // Determine file extension from mime type
-            const extension = type.split("/")[1] || "png";
-            const filename = `pasted_image.${extension}`;
-
-            // Paste to current layer
-            const current = this.getCurrentLayer();
-            if (current) {
-              await current.openImageBuffer(buffer, filename);
-              this.showMessage("img-paste");
-            }
-            return;
-          }
-        }
-      }
-    } catch (err) {
-      console.log("No image in clipboard or clipboard access denied");
     }
   }
 

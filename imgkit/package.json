@@ -1,11 +1,31 @@
 {
   "name": "imgkit",
   "version": "1.0.0",
-  "description": "pegasus engine",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo"
+  "description": "Easy-to-use image processing toolkit for Electron apps",
+  "main": "main.js",
+  "exports": {
+    ".": "./main.js",
+    "./main": "./main.js",
+    "./renderer": "./renderer.js"
   },
+  "files": [
+    "main.js",
+    "renderer.js",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "image-processing",
+    "electron",
+    "sharp",
+    "ui-template",
+    "junior-friendly"
+  ],
   "author": "Pascal Institute",
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "sharp": "^0.33.0"
+  }
 }

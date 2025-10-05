@@ -101,15 +101,27 @@ class ImgKitMain {
       const cropH = Math.round(height);
 
       // Validate crop dimensions
-      if (
-        cropW <= 0 ||
-        cropH <= 0 ||
-        cropX < 0 ||
-        cropY < 0 ||
-        cropX + cropW > imageInfo.width ||
-        cropY + cropH > imageInfo.height
-      ) {
-        throw new Error('Invalid crop dimensions');
+      if (cropW <= 0) {
+        throw new Error(`Invalid crop width: ${cropW}`);
+      }
+      if (cropH <= 0) {
+        throw new Error(`Invalid crop height: ${cropH}`);
+      }
+      if (cropX < 0) {
+        throw new Error(`Invalid crop x (left): ${cropX}`);
+      }
+      if (cropY < 0) {
+        throw new Error(`Invalid crop y (top): ${cropY}`);
+      }
+      if (cropX + cropW > imageInfo.width) {
+        throw new Error(
+          `Crop width (${cropW}) and x (${cropX}) exceed image width (${imageInfo.width})`
+        );
+      }
+      if (cropY + cropH > imageInfo.height) {
+        throw new Error(
+          `Crop height (${cropH}) and y (${cropY}) exceed image height (${imageInfo.height})`
+        );
       }
 
       const result = await sharp(buffer)

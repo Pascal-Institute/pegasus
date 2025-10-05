@@ -1,17 +1,18 @@
 const { ipcRenderer } = require("electron");
-var { drawFlag } = require("imgkit");
 
 var rgb = { r: "123", g: "123", b: "123" };
+var drawFlagState = false;
 
 document.getElementById("drawBtn").addEventListener("click", () => {
-  if (!drawFlag) {
-    drawFlag = true;
+  drawFlagState = !drawFlagState;
+
+  if (drawFlagState) {
     document.getElementById("drawBtn").style.backgroundColor = "gray";
   } else {
-    drawFlag = false;
     document.getElementById("drawBtn").style.backgroundColor = "#efefef";
   }
-  ipcRenderer.send("drawImgREQ", drawFlag);
+
+  ipcRenderer.send("drawImgREQ", drawFlagState);
 });
 
 document.getElementById("grayScaleBtn").addEventListener("click", () => {

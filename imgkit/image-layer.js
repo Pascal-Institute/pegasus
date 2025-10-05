@@ -16,6 +16,7 @@
 // - Bridge UI events to backend operations (via imgKitMain)
 
 const { ipcRenderer } = require('electron');
+const { getCurrentLayer } = require('./renderer');
 
 // Lazy load to avoid circular dependency
 let getImgKitMain = () => {
@@ -175,6 +176,69 @@ class ImageLayer {
 
     // Setup drawing/cropping
     this.setupDrawingAndCropping();
+
+    this.setupPanelDragging();
+  }
+
+  /**
+   * Setup drag and drop for reordering panels
+   */
+  setupPanelDragging() {
+
+    // Make panel draggable
+    this.panel.draggable = false; // Initially false, set to true when image is loaded
+
+    // Drag start - store the dragged layer index
+    this.panel.addEventListener('dragstart', (e) => {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.panel.innerHTML);
+      
+      // Store the index of dragged layer
+      const index = this.renderer.imageLayerQueue.indexOf(this);
+      e.dataTransfer.setData('layerIndex', index.toString());
+      
+      // Add visual feedback
+      this.panel.style.opacity = '0.5';
+    });
+
+    // Drag end - restore opacity
+    this.panel.addEventListener('dragend', (e) => {
+      this.panel.style.opacity = '1';
+    });
+
+    // Drag over - allow drop
+    this.panel.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      
+      // Add visual feedback
+      this.panel.style.borderTop = '3px solid #4CAF50';
+      return false;
+    });
+
+    // Drag leave - remove visual feedback
+    this.panel.addEventListener('dragleave', (e) => {
+      this.panel.style.borderTop = '';
+    });
+
+    // Drop - swap positions
+    this.panel.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Remove visual feedback
+      this.panel.style.borderTop = '';
+      
+      // Get dragged layer index
+      const fromIndex = parseInt(e.dataTransfer.getData('layerIndex'));
+      const toIndex = this.renderer.imageLayerQueue.indexOf(this);
+      
+      if (fromIndex !== toIndex && fromIndex >= 0 && toIndex >= 0) {
+        this.renderer.swapLayers(fromIndex, toIndex);
+      }
+      
+      return false;
+    });
   }
 
   /**
@@ -205,9 +269,12 @@ class ImageLayer {
             file.path || null
           );
         }
-        if (!isOpened) returnf;
+        if (!isOpened) return;
+
         // Only create a new default layer if dropping on an empty canvas
-        if (this.isDefault) {
+        if (!this.isDefault) {
+          // Make panel draggable
+          this.panel.draggable = true;
           this.renderer.createDefaultImage();
         }
       };
@@ -601,6 +668,7 @@ class ImageLayer {
 
       if (filepath !== "./assets/addImage.png") {
         this.canvas.id = "full";
+        this.isDefault = false;
       }
 
       return true;
@@ -646,6 +714,7 @@ class ImageLayer {
       }
 
       this.canvas.id = "full";
+      this.isDefault = false;
       return true;
     } catch (error) {
       this.renderer.showMessage("error");

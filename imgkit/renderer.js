@@ -208,6 +208,39 @@ class ImgKitRenderer {
   }
 
   /**
+   * Swap two layers by index
+   * Used for drag & drop reordering
+   * 
+   * @param {number} fromIndex - Source layer index
+   * @param {number} toIndex - Target layer index
+   */
+  swapLayers(fromIndex, toIndex) {
+    if (
+      fromIndex < 0 || 
+      fromIndex >= this.imageLayerQueue.length ||
+      toIndex < 0 || 
+      toIndex >= this.imageLayerQueue.length
+    ) {
+      return;
+    }
+
+    // Swap in array
+    const temp = this.imageLayerQueue[fromIndex];
+    this.imageLayerQueue[fromIndex] = this.imageLayerQueue[toIndex];
+    this.imageLayerQueue[toIndex] = temp;
+
+    // Update current index if needed
+    if (this.currentIndex === fromIndex) {
+      this.currentIndex = toIndex;
+    } else if (this.currentIndex === toIndex) {
+      this.currentIndex = fromIndex;
+    }
+
+    // Update DOM and scroll UI
+    this.updateScrollUI();
+  }
+
+  /**
    * Create default placeholder image layer
    * This shows the "+ Add Image" icon when app starts
    *

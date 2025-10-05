@@ -26,6 +26,6 @@
   "author": "Pascal Institute",
   "license": "MIT",
   "peerDependencies": {
-    "sharp": "^0.33.0"
+    "sharp": "^0.32.0"
   }
 }

@@ -220,7 +220,7 @@ class ImageLayer {
 
     const copyImage = () => {
       copy = imageLayerQueue[Parameter.num];
-
+      copy.filepath = imageLayerQueue[Parameter.num].filepath;
       document
         .getElementById("img_copy_msg")
         .animate([{ opacity: "1" }, { opacity: "0" }], {

@@ -15,6 +15,9 @@
 // - Manage undo/redo history
 // - Bridge UI events to backend operations (via imgKitMain)
 
+const remote = require('@electron/remote');
+const { Menu, MenuItem, dialog } = remote;
+
 // Lazy load to avoid circular dependency
 let getImgKitMain = () => {
   throw new Error(
@@ -224,44 +227,59 @@ class ImageLayer {
 
   /**
    * Setup context menu (right-click)
+   * Uses Electron's native Menu API via @electron/remote
    */
   setupContextMenu() {
     this.canvas.addEventListener("contextmenu", (e) => {
       e.preventDefault();
 
-      const menu = document.createElement("div");
-      menu.className = "context-menu";
-      menu.style.left = `${e.clientX}px`;
-      menu.style.top = `${e.clientY}px`;
+      const menu = new Menu();
 
-      const createMenuItem = (text, onClick) => {
-        const item = document.createElement("div");
-        item.className = "context-menu-item";
-        item.textContent = text;
-        item.addEventListener("click", () => {
-          onClick();
-          document.body.removeChild(menu);
-        });
-        return item;
-      };
+      // Copy menu item
+      menu.append(new MenuItem({
+        label: 'Copy',
+        accelerator: 'CmdOrCtrl+C',
+        click: () => this.renderer.copyImage()
+      }));
 
-      menu.appendChild(createMenuItem("Copy", () => this.renderer.copyImage()));
-      menu.appendChild(
-        createMenuItem("Paste", () => this.renderer.pasteImage())
-      );
+      // Paste menu item
+      menu.append(new MenuItem({
+        label: 'Paste',
+        accelerator: 'CmdOrCtrl+V',
+        click: () => this.renderer.pasteImage()
+      }));
 
-      document.body.appendChild(menu);
+      // Separator
+      menu.append(new MenuItem({ type: 'separator' }));
 
-      // Remove menu on outside click
-      setTimeout(() => {
-        const removeMenu = (evt) => {
-          if (!menu.contains(evt.target) && document.body.contains(menu)) {
-            document.body.removeChild(menu);
-          }
-          document.removeEventListener("click", removeMenu);
-        };
-        document.addEventListener("click", removeMenu);
-      }, 10);
+      // Delete menu item
+      menu.append(new MenuItem({
+        label: 'Delete',
+        accelerator: 'Delete',
+        click: () => this.renderer.deleteImage()
+      }));
+
+      // Separator
+      menu.append(new MenuItem({ type: 'separator' }));
+
+      // Undo
+      menu.append(new MenuItem({
+        label: 'Undo',
+        accelerator: 'CmdOrCtrl+Z',
+        enabled: this.history.index > 0,
+        click: () => this.undo()
+      }));
+
+      // Redo
+      menu.append(new MenuItem({
+        label: 'Redo',
+        accelerator: 'Ctrl+Y',
+        enabled: this.history.index < this.history.buffers.length - 1,
+        click: () => this.redo()
+      }));
+
+      // Show native context menu
+      menu.popup({ window: remote.getCurrentWindow() });
     });
   }
 

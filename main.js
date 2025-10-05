@@ -2,6 +2,10 @@ const electron = require("electron");
 const pkg = require("./package.json");
 const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu } = electron;
 
+// Initialize @electron/remote
+const remoteMain = require('@electron/remote/main');
+remoteMain.initialize();
+
 //electron refresh (only develop)
 if (process.env.NODE_ENV === "development") {
   try {
@@ -75,6 +79,10 @@ app.whenReady().then(() => {
   });
 
   mainWindow.loadFile("index.html");
+  
+  // Enable @electron/remote for this window
+  remoteMain.enable(mainWindow.webContents);
+  
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 

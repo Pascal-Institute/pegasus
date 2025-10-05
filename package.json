@@ -1,9 +1,10 @@
 {
   "name": "pegasus",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "",
   "main": "main.js",
   "dependencies": {
+    "@electron/remote": "^2.1.3",
     "fs": "^0.0.1-security",
     "imgkit": "file:imgkit",
     "sharp": "^0.34.3",
@@ -34,7 +35,8 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "signAndEditExecutable": false
     },
     "mac": {
       "target": []

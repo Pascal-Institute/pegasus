@@ -389,7 +389,7 @@ if (typeof module !== "undefined" && module.exports) {
     ImgKitRenderer,
     ImageLayer,
     imgKitRenderer,
-    imgKitMain: getImgKitMain(),
+    getImgKitMain,
 
     // Helper functions
     createDefaultImage,

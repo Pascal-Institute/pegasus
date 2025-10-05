@@ -2,9 +2,50 @@ const sharp = require("sharp");
 const bmp = require("sharp-bmp");
 const ico = require("sharp-ico");
 var path = require("path");
+
 /** @type {ImageLayer | undefined} */
 let copy;
 const imageLayerQueue = [];
+
+const messages = {};
+function createMessageElement(id, text, isError = false) {
+  const msg = document.createElement("div");
+  msg.id = `imgkit-${id}`;
+  msg.className = "imgkit-notification";
+  msg.textContent = text;
+  msg.style.position = "fixed";
+  msg.style.bottom = "15px";
+  msg.style.left = "50%";
+  msg.style.transform = "translateX(-50%)";
+  msg.style.width = "400px";
+  msg.style.padding = "15px";
+  msg.style.opacity = "0";
+  msg.style.border = "1px solid transparent";
+  msg.style.borderRadius = "4px";
+  msg.style.backgroundColor = isError ? "#f29999" : "#dff0d8";
+  msg.style.textAlign = "center";
+  msg.style.zIndex = "10000";
+  msg.style.pointerEvents = "none";
+  document.body.appendChild(msg);
+  messages[id] = msg;
+  return msg;
+}
+
+function showMessage(id) {
+  if (!messages[id]) return;
+  messages[id].animate([{ opacity: "1" }, { opacity: "0" }], {
+    duration: 1800,
+    iterations: 1,
+  });
+}
+
+createMessageElement("copy", "Color Copied");
+createMessageElement("img-copy", "Image Copied");
+createMessageElement("img-paste", "Image Pasted");
+createMessageElement("delete", "Deleted", true);
+createMessageElement("save", "Saved Successfully");
+createMessageElement("convert", "Converted Successfully");
+createMessageElement("error", "Sorry. Couldn't open image...", true);
 
 const scrollContainer = document.createElement("div");
 scrollContainer.id = "scroll-container";
@@ -221,12 +262,7 @@ class ImageLayer {
     const copyImage = () => {
       copy = imageLayerQueue[Parameter.num];
       copy.filepath = imageLayerQueue[Parameter.num].filepath;
-      document
-        .getElementById("img_copy_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
+      showMessage("img-copy");
     };
 
     const pasteImage = () => {
@@ -234,13 +270,7 @@ class ImageLayer {
         copy.buffer,
         copy.nameSpan.textContent + "_copy." + copy.extension
       );
-
-      document
-        .getElementById("img_paste_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
+      showMessage("img-paste");
     };
 
     const deleteImage = () => {
@@ -262,13 +292,7 @@ class ImageLayer {
       ) {
         createDefaultImage();
       }
-
-      document
-        .getElementById("delete_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
+      showMessage("delete");
     };
 
     this.deleteBtn.addEventListener("click", deleteImage);
@@ -340,13 +364,7 @@ class ImageLayer {
         text.select();
         document.execCommand("Copy");
         this.imgPanel.removeChild(text);
-
-        document
-          .getElementById("copy_msg")
-          .animate([{ opacity: "1" }, { opacity: "0" }], {
-            duration: 1800,
-            iterations: 1,
-          });
+        showMessage("copy");
       });
     });
 
@@ -614,13 +632,7 @@ class ImageLayer {
               this.updatePreviewImg(buf, info);
             });
         });
-
-        document
-          .getElementById("convert_msg")
-          .animate([{ opacity: "1" }, { opacity: "0" }], {
-            duration: 1800,
-            iterations: 1,
-          });
+        showMessage("convert");
       } else if (this.extension === "ico") {
         ico
           .sharpsToIco([sharp(this.buffer)], this.filepath)
@@ -634,25 +646,14 @@ class ImageLayer {
                 this.updatePreviewImg(buf, info);
               });
           });
-
-        document
-          .getElementById("convert_msg")
-          .animate([{ opacity: "1" }, { opacity: "0" }], {
-            duration: 1800,
-            iterations: 1,
-          });
+        showMessage("convert");
       } else {
         sharp(this.buffer)
           .toFormat(this.extension)
           .png()
           .toBuffer((err, buf, info) => {
             this.updatePreviewImg(buf, info);
-            document
-              .getElementById("convert_msg")
-              .animate([{ opacity: "1" }, { opacity: "0" }], {
-                duration: 1800,
-                iterations: 1,
-              });
+            showMessage("convert");
           });
       }
     });
@@ -860,12 +861,7 @@ class ImageLayer {
     return new Promise((resolve) => {
       loader.toBuffer((err, buf, info) => {
         if (err) {
-          document
-            .getElementById("error_msg")
-            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-              duration: 1800,
-              iterations: 1,
-            });
+          showMessage("error");
           this.canvas.id = "default";
           resolve(false);
           return;
@@ -905,12 +901,7 @@ class ImageLayer {
     return new Promise((resolve) => {
       loader.toBuffer((err, buf, info) => {
         if (err) {
-          document
-            .getElementById("error_msg")
-            ?.animate([{ opacity: "1" }, { opacity: "0" }], {
-              duration: 1800,
-              iterations: 1,
-            });
+          showMessage("error");
           this.canvas.id = "default";
           resolve(false);
           return;
@@ -935,12 +926,7 @@ class ImageLayer {
       if (err) {
         // console.log("failed to save");
       } else {
-        document
-          .getElementById("save_msg")
-          .animate([{ opacity: "1" }, { opacity: "0" }], {
-            duration: 1800,
-            iterations: 1,
-          });
+        showMessage("save");
       }
     });
   }

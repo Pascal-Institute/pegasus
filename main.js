@@ -1,10 +1,6 @@
 const electron = require("electron");
 const pkg = require("./package.json");
-const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu } = electron;
-
-// Initialize @electron/remote
-const remoteMain = require('@electron/remote/main');
-remoteMain.initialize();
+const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu, MenuItem } = electron;
 
 //electron refresh (only develop)
 if (process.env.NODE_ENV === "development") {
@@ -27,7 +23,6 @@ function createMainWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true,
       // devTools: true,
       //   preload: path.join(__dirname, "preload.js"),
     },
@@ -46,7 +41,6 @@ function createView(type, mainWindow) {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true,
       // devTools: true,
       //   preload: path.join(__dirname, "preload.js"),
     },
@@ -72,16 +66,12 @@ app.whenReady().then(() => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true,
       // devTools: true,
       //   preload: path.join(__dirname, "preload.js"),
     },
   });
 
   mainWindow.loadFile("index.html");
-  
-  // Enable @electron/remote for this window
-  remoteMain.enable(mainWindow.webContents);
   
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
@@ -185,6 +175,68 @@ app.whenReady().then(() => {
   ipcMain.on("drawImgREQ", (event, res) => {
     mainWindow.webContents.send("drawImgCMD", res);
     mainWindow.webContents.focus();
+  });
+
+  // ImgKit Context Menu Handler
+  ipcMain.on("show-imgkit-context-menu", (event, options) => {
+    const { hasUndo, hasRedo } = options;
+    const menu = new Menu();
+
+    // Copy
+    menu.append(new MenuItem({
+      label: 'Copy',
+      accelerator: 'Ctrl+C',
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'copy');
+      }
+    }));
+
+    // Paste
+    menu.append(new MenuItem({
+      label: 'Paste',
+      accelerator: 'Ctrl+V',
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'paste');
+      }
+    }));
+
+    // Separator
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    // Delete
+    menu.append(new MenuItem({
+      label: 'Delete',
+      accelerator: 'Delete',
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'delete');
+      }
+    }));
+
+    // Separator
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    // Undo
+    menu.append(new MenuItem({
+      label: 'Undo',
+      accelerator: 'Ctrl+Z',
+      enabled: hasUndo,
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'undo');
+      }
+    }));
+
+    // Redo
+    menu.append(new MenuItem({
+      label: 'Redo',
+      accelerator: 'Ctrl+Y',
+      enabled: hasRedo,
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'redo');
+      }
+    }));
+
+    // Show menu at cursor position
+    menu.popup({ window: BrowserWindow.fromWebContents(event.sender) });
   });
 
   ipcMain.on("FullScreenREQ", (event) => {

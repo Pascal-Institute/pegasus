@@ -15,8 +15,7 @@
 // - Manage undo/redo history
 // - Bridge UI events to backend operations (via imgKitMain)
 
-const remote = require('@electron/remote');
-const { Menu, MenuItem, dialog } = remote;
+const { ipcRenderer } = require('electron');
 
 // Lazy load to avoid circular dependency
 let getImgKitMain = () => {
@@ -227,59 +226,38 @@ class ImageLayer {
 
   /**
    * Setup context menu (right-click)
-   * Uses Electron's native Menu API via @electron/remote
+   * Uses IPC to communicate with Main Process for native menu
    */
   setupContextMenu() {
+    // Listen for menu action responses from Main Process
+    ipcRenderer.on('imgkit-context-menu-action', (event, action) => {
+      switch (action) {
+        case 'copy':
+          this.renderer.copyImage();
+          break;
+        case 'paste':
+          this.renderer.pasteImage();
+          break;
+        case 'delete':
+          this.renderer.deleteImage();
+          break;
+        case 'undo':
+          this.undo();
+          break;
+        case 'redo':
+          this.redo();
+          break;
+      }
+    });
+
     this.canvas.addEventListener("contextmenu", (e) => {
       e.preventDefault();
 
-      const menu = new Menu();
-
-      // Copy menu item
-      menu.append(new MenuItem({
-        label: 'Copy',
-        accelerator: 'CmdOrCtrl+C',
-        click: () => this.renderer.copyImage()
-      }));
-
-      // Paste menu item
-      menu.append(new MenuItem({
-        label: 'Paste',
-        accelerator: 'CmdOrCtrl+V',
-        click: () => this.renderer.pasteImage()
-      }));
-
-      // Separator
-      menu.append(new MenuItem({ type: 'separator' }));
-
-      // Delete menu item
-      menu.append(new MenuItem({
-        label: 'Delete',
-        accelerator: 'Delete',
-        click: () => this.renderer.deleteImage()
-      }));
-
-      // Separator
-      menu.append(new MenuItem({ type: 'separator' }));
-
-      // Undo
-      menu.append(new MenuItem({
-        label: 'Undo',
-        accelerator: 'CmdOrCtrl+Z',
-        enabled: this.history.index > 0,
-        click: () => this.undo()
-      }));
-
-      // Redo
-      menu.append(new MenuItem({
-        label: 'Redo',
-        accelerator: 'Ctrl+Y',
-        enabled: this.history.index < this.history.buffers.length - 1,
-        click: () => this.redo()
-      }));
-
-      // Show native context menu
-      menu.popup({ window: remote.getCurrentWindow() });
+      // Send request to Main Process to show context menu
+      ipcRenderer.send('show-imgkit-context-menu', {
+        hasUndo: this.history.index > 0,
+        hasRedo: this.history.index < this.history.buffers.length - 1
+      });
     });
   }
 

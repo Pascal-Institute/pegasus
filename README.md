@@ -30,11 +30,6 @@ npm install --save electron electron-reload electron-rebuild electron-builder sh
 npm install -g electron
 ```
 
-### when electron is not working
-```bash
- npm install -g electron
-```
-
 ### npm update (Recommended)
 
 ```bash

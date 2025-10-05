@@ -362,7 +362,8 @@ class ImgKitRenderer {
 let imgKitRenderer;
 if (typeof document !== "undefined") {
   imgKitRenderer = new ImgKitRenderer();
-  // Initialize ImgKitMain for side effects only (return value intentionally ignored)
+  // Intentionally ignore the return value of getImgKitMain().
+  // This call is made solely for its side effects (initialization).
   getImgKitMain();
   // Initialize with default image
   imgKitRenderer.createDefaultImage();

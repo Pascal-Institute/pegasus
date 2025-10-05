@@ -205,9 +205,11 @@ class ImageLayer {
             file.path || null
           );
         }
-        if (!isOpened) return;
+        if (!isOpened) returnf;
         // Only create a new default layer if dropping on an empty canvas
-        this.renderer.createDefaultImage();
+        if (this.isDefault) {
+          this.renderer.createDefaultImage();
+        }
       };
 
       if (!file.path) {

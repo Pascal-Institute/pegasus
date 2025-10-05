@@ -296,6 +296,9 @@ class ImgKitRenderer {
         const filename = 'pasted_image.png';
         await current.openImageBuffer(Buffer.from(imageBuffer), filename);
         this.showMessage("img-paste");
+        if (this.currentIndex === this.imageLayerQueue.length - 1) {
+            this.createDefaultImage();  
+        }
         return;
       }
     } catch (error) {
@@ -308,6 +311,7 @@ class ImgKitRenderer {
       await current.openImageBuffer(this.copiedLayer.buffer, filename);
       this.showMessage("img-paste");
     }
+      
   }
 
   // --------------------------------------------------------------------------

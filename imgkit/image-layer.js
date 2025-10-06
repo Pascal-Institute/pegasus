@@ -548,12 +548,18 @@ class ImageLayer {
     this.buffer = buffer;
     this.info = info;
 
+    // Update main canvas size
     this.canvas.width = info.width;
     this.canvas.height = info.height;
     
-    // Update overlay canvas size to match
+    // Update overlay canvas size and position to match exactly
     this.overlayCanvas.width = info.width;
     this.overlayCanvas.height = info.height;
+    // Ensure overlay stays perfectly aligned
+    this.overlayCanvas.style.width = info.width + 'px';
+    this.overlayCanvas.style.height = info.height + 'px';
+    this.overlayCanvas.style.left = '0';
+    this.overlayCanvas.style.top = '0';
 
     this.image.src = `data:image/${this.extension};base64,${buffer.toString(
       "base64"
@@ -561,6 +567,9 @@ class ImageLayer {
     this.image.onload = () => {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.drawImage(this.image, 0, 0);
+      
+      // Clear overlay canvas when image changes
+      this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
     };
 
     this.infoText.textContent = `${info.width} x ${info.height}`;

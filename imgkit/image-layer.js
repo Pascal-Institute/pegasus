@@ -272,7 +272,8 @@ class ImageLayer {
         if (!isOpened) return;
 
         // Only create a new default layer if dropping on an empty canvas
-        if (!this.isDefault) {
+        if (!this.isDefault && 
+          this.renderer.currentIndex === this.renderer.imageLayerQueue.length - 1) {
           // Make panel draggable
           this.panel.draggable = true;
           this.renderer.createDefaultImage();

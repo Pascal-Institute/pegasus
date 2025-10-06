@@ -1,5 +1,4 @@
-const { ipcRenderer } = require("electron");
-const { webUtils } = require("electron");
+const { ipcRenderer, webUtils } = require("electron");
 
 /**
  * ImageLayerEvents - Handles all event listeners for ImageLayer

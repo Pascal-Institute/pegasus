@@ -299,13 +299,34 @@ sioCheckBox.addEventListener("click", (event) => {
 });
 
 ipcRenderer.on("openImgCMD", async (event, res) => {
-  // Get the last layer (should be the default placeholder)
-  const lastLayer = imageLayerQueue[imageLayerQueue.length - 1];
+  // Handle both single file (backward compatibility) and multiple files
+  const filePaths = Array.isArray(res) ? res : [res];
+  
+  // Filter out any undefined/null values
+  const validPaths = filePaths.filter(path => path);
+  
+  if (validPaths.length === 0) return;
 
-  if (res && lastLayer && lastLayer.openImage) {
-    await lastLayer.openImage(res);
-    createDefaultImage();
+  // Get the last layer (should be the default placeholder)
+  let currentLayer = imageLayerQueue[imageLayerQueue.length - 1];
+
+  // Open each file in sequence
+  for (let i = 0; i < validPaths.length; i++) {
+    const filePath = validPaths[i];
+    
+    if (currentLayer && currentLayer.openImage) {
+      await currentLayer.openImage(filePath);
+      
+      // Create a new default layer for the next file (except for the last file)
+      if (i < validPaths.length - 1) {
+        createDefaultImage();
+        currentLayer = imageLayerQueue[imageLayerQueue.length - 1];
+      }
+    }
   }
+  
+  // Create a final default layer after all files are loaded
+  createDefaultImage();
 });
 
 ipcRenderer.on("setExtensionCMD", (event) => {

@@ -310,7 +310,7 @@ app.whenReady().then(() => {
             click: () => {
               dialog
                 .showOpenDialog({
-                  properties: ["openFile"],
+                  properties: ["openFile", "multiSelections"],
                   filters: [
                     {
                       name: "Image file",
@@ -327,7 +327,7 @@ app.whenReady().then(() => {
                   ],
                 })
                 .then((result) => {
-                  event.sender.send("openImgCMD", result.filePaths[0]);
+                  event.sender.send("openImgCMD", result.filePaths);
                 });
             },
           },

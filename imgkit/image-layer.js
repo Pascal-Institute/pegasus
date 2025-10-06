@@ -117,11 +117,20 @@ class ImageLayer {
     this.overlayCanvas.style.pointerEvents = 'none'; // Pass through mouse events
     this.overlayCanvas.style.left = '0';
     this.overlayCanvas.style.top = '0';
+    this.overlayCanvas.style.width = '100%';
+    this.overlayCanvas.style.height = '100%';
     this.overlayCtx = this.overlayCanvas.getContext("2d");
     
-    // Insert overlay after main canvas
-    this.canvas.parentElement.style.position = 'relative';
-    this.canvas.parentElement.appendChild(this.overlayCanvas);
+    // Wrap canvas in a container for proper overlay positioning
+    const canvasWrapper = document.createElement('div');
+    canvasWrapper.style.position = 'relative';
+    canvasWrapper.style.display = 'inline-block';
+    canvasWrapper.style.lineHeight = '0'; // Remove extra spacing
+    
+    // Move canvas into wrapper
+    this.canvas.parentElement.insertBefore(canvasWrapper, this.canvas);
+    canvasWrapper.appendChild(this.canvas);
+    canvasWrapper.appendChild(this.overlayCanvas);
 
     // Get UI control elements
     this.deleteBtn = this.panel.querySelector(".delete-btn");
@@ -469,12 +478,16 @@ class ImageLayer {
       // Schedule next frame
       this.magnifyAnimationId = requestAnimationFrame(() => {
         const rect = this.canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
+        let mouseX = e.clientX - rect.left;
+        let mouseY = e.clientY - rect.top;
 
         const magnifySize = 128;
         const magnifyScale = 2;
         const radius = magnifySize / 2;
+
+        // Clamp coordinates to canvas bounds (allow full edge coverage)
+        mouseX = Math.max(0, Math.min(mouseX, this.canvas.width));
+        mouseY = Math.max(0, Math.min(mouseY, this.canvas.height));
 
         // Clear overlay canvas (main canvas stays untouched = no flicker!)
         this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
@@ -486,9 +499,13 @@ class ImageLayer {
         this.overlayCtx.clip();
 
         const sourceSize = magnifySize / magnifyScale;
+        // Clamp source coordinates to prevent reading outside image bounds
+        const sourceX = Math.max(0, Math.min(mouseX - sourceSize / 2, this.image.width - sourceSize));
+        const sourceY = Math.max(0, Math.min(mouseY - sourceSize / 2, this.image.height - sourceSize));
+        
         this.overlayCtx.drawImage(
           this.image,
-          mouseX - sourceSize / 2, mouseY - sourceSize / 2, sourceSize, sourceSize,
+          sourceX, sourceY, sourceSize, sourceSize,
           mouseX - radius, mouseY - radius, magnifySize, magnifySize
         );
         

@@ -779,6 +779,7 @@ class ImageLayer {
       if (filepath !== "./assets/addImage.png") {
         this.canvas.id = "full";
         this.isDefault = false;
+        this.panel.draggable = true; 
       }
 
       return true;
@@ -826,6 +827,7 @@ class ImageLayer {
 
       this.canvas.id = "full";
       this.isDefault = false;
+      this.panel.draggable = true;
       return true;
     } catch (error) {
       this.renderer.showMessage("error");

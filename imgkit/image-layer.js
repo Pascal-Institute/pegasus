@@ -77,6 +77,10 @@ class ImageLayer {
     this.dragFlag = false; // Is user currently dragging to crop?
     this.magnifyFlag = false; // Is magnifying glass mode active?
     this.cropData = { x: 0, y: 0, width: 0, height: 0 }; // Crop selection area
+    
+    // Magnifying glass state (for partial redraw)
+    this.lastMagnifyPos = null; // { x, y, radius } - previous magnifying glass position
+    this.magnifyAnimationId = null; // requestAnimationFrame ID
 
     // Create DOM elements and setup event listeners
     this.createPanelFromTemplate();
@@ -106,6 +110,18 @@ class ImageLayer {
     this.canvas.id = this.isDefault ? "default" : "full";
     this.ctx = this.canvas.getContext("2d"); // 2D drawing context
     this.image = new Image(); // For loading image data
+    
+    // Create overlay canvas for magnifying glass (on top of main canvas)
+    this.overlayCanvas = document.createElement('canvas');
+    this.overlayCanvas.style.position = 'absolute';
+    this.overlayCanvas.style.pointerEvents = 'none'; // Pass through mouse events
+    this.overlayCanvas.style.left = '0';
+    this.overlayCanvas.style.top = '0';
+    this.overlayCtx = this.overlayCanvas.getContext("2d");
+    
+    // Insert overlay after main canvas
+    this.canvas.parentElement.style.position = 'relative';
+    this.canvas.parentElement.appendChild(this.overlayCanvas);
 
     // Get UI control elements
     this.deleteBtn = this.panel.querySelector(".delete-btn");
@@ -337,6 +353,8 @@ class ImageLayer {
    * Setup keyboard shortcuts
    */
   setupKeyboardShortcuts() {
+    // Note: Alt + A for magnifying glass is handled globally in renderer.js
+    
     document.addEventListener("keydown", (e) => {
       // Only handle if this panel is focused
       if (document.activeElement !== this.panel) return;
@@ -441,58 +459,60 @@ class ImageLayer {
 
     // Magnifying glass mode
     this.canvas.addEventListener("mousemove", (e) => {
-      if (this.magnifyFlag) {
+      if (!this.magnifyFlag) return;
+      
+      // Cancel previous animation
+      if (this.magnifyAnimationId) {
+        cancelAnimationFrame(this.magnifyAnimationId);
+      }
+      
+      // Schedule next frame
+      this.magnifyAnimationId = requestAnimationFrame(() => {
         const rect = this.canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        // Magnifying glass parameters
-        const magnifySize = 128; // 128px x 128px magnifying box
-        const magnifyScale = 2; // 2x scale
+        const magnifySize = 128;
+        const magnifyScale = 2;
         const radius = magnifySize / 2;
 
-        // Clear and redraw the image
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.drawImage(this.image, 0, 0);
+        // Clear overlay canvas (main canvas stays untouched = no flicker!)
+        this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
 
-        // Save the current context state
-        this.ctx.save();
+        // Draw magnifying glass on overlay
+        this.overlayCtx.save();
+        this.overlayCtx.beginPath();
+        this.overlayCtx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+        this.overlayCtx.clip();
 
-        // Create circular clipping path for the magnifying glass
-        this.ctx.beginPath();
-        this.ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
-        this.ctx.clip();
-
-        // Draw the magnified portion
-        // Calculate the source rectangle (area to magnify)
         const sourceSize = magnifySize / magnifyScale;
-        const sourceX = mouseX - sourceSize / 2;
-        const sourceY = mouseY - sourceSize / 2;
-
-        // Draw the magnified image
-        this.ctx.drawImage(
+        this.overlayCtx.drawImage(
           this.image,
-          sourceX, sourceY, sourceSize, sourceSize,
+          mouseX - sourceSize / 2, mouseY - sourceSize / 2, sourceSize, sourceSize,
           mouseX - radius, mouseY - radius, magnifySize, magnifySize
         );
+        
+        this.overlayCtx.restore();
 
-        // Restore the context state
-        this.ctx.restore();
-
-        // Draw the circular border
-        this.ctx.beginPath();
-        this.ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
-        this.ctx.strokeStyle = "#000";
-        this.ctx.lineWidth = 2;
-        this.ctx.stroke();
-      }
+        // Draw border on overlay
+        this.overlayCtx.beginPath();
+        this.overlayCtx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+        this.overlayCtx.strokeStyle = "#000";
+        this.overlayCtx.lineWidth = 2;
+        this.overlayCtx.stroke();
+      });
     });
 
     this.canvas.addEventListener("mouseleave", () => {
       if (this.magnifyFlag) {
-        // Redraw the image without the magnifying glass
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.drawImage(this.image, 0, 0);
+        // Cancel animation
+        if (this.magnifyAnimationId) {
+          cancelAnimationFrame(this.magnifyAnimationId);
+          this.magnifyAnimationId = null;
+        }
+        
+        // Clear overlay (main canvas untouched!)
+        this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
       }
     });
   }
@@ -513,6 +533,10 @@ class ImageLayer {
 
     this.canvas.width = info.width;
     this.canvas.height = info.height;
+    
+    // Update overlay canvas size to match
+    this.overlayCanvas.width = info.width;
+    this.overlayCanvas.height = info.height;
 
     this.image.src = `data:image/${this.extension};base64,${buffer.toString(
       "base64"

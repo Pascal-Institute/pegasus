@@ -335,20 +335,6 @@ ipcRenderer.on("saveAsImgCMD", async (event, res) => {
   }
 });
 
-document.getElementById("undoBtn").addEventListener("click", (event) => {
-  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
-  if (currentLayer && currentLayer.undo) {
-    currentLayer.undo();
-  }
-});
-
-document.getElementById("redoBtn").addEventListener("click", (event) => {
-  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
-  if (currentLayer && currentLayer.redo) {
-    currentLayer.redo();
-  }
-});
-
 document.addEventListener("keydown", function (event) {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
 

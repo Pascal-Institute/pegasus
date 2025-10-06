@@ -135,10 +135,17 @@ class ImageLayer {
 
     // Mouse hover effects
     this.panel.addEventListener("mouseover", () => {
-      document.body.style.cursor = "pointer";
+      // Only set pointer cursor if panel is not draggable
+      // (draggable panels use grab/grabbing cursor)
+      if (!this.panel.draggable) {
+        document.body.style.cursor = "pointer";
+      }
     });
     this.panel.addEventListener("mouseout", () => {
-      document.body.style.cursor = "default";
+      // Restore default cursor only if not dragging
+      if (!this.panel.draggable) {
+        document.body.style.cursor = "default";
+      }
     });
 
     // Delete button
@@ -189,6 +196,20 @@ class ImageLayer {
     // Make panel draggable
     this.panel.draggable = false; // Initially false, set to true when image is loaded
 
+    // Mouse enter - show grab cursor for draggable panels
+    this.panel.addEventListener('mouseenter', () => {
+      if (this.panel.draggable) {
+        this.panel.style.cursor = 'grab';
+      }
+    });
+
+    // Mouse leave - restore default cursor
+    this.panel.addEventListener('mouseleave', () => {
+      if (this.panel.draggable) {
+        this.panel.style.cursor = '';
+      }
+    });
+
     // Drag start - store the dragged layer index
     this.panel.addEventListener('dragstart', (e) => {
       e.dataTransfer.effectAllowed = 'move';
@@ -200,11 +221,15 @@ class ImageLayer {
       
       // Add visual feedback
       this.panel.style.opacity = '0.5';
+      this.panel.style.cursor = 'grabbing';
+      document.body.style.cursor = 'grabbing';
     });
 
     // Drag end - restore opacity
     this.panel.addEventListener('dragend', (e) => {
       this.panel.style.opacity = '1';
+      this.panel.style.cursor = 'grab';
+      document.body.style.cursor = 'default';
     });
 
     // Drag over - allow drop
@@ -671,6 +696,7 @@ class ImageLayer {
       if (filepath !== "./assets/addImage.png") {
         this.canvas.id = "full";
         this.isDefault = false;
+        this.panel.draggable = true; // Make panel draggable when image is loaded
       }
 
       return true;
@@ -718,6 +744,7 @@ class ImageLayer {
 
       this.canvas.id = "full";
       this.isDefault = false;
+      this.panel.draggable = true; // Make panel draggable when image is loaded
       return true;
     } catch (error) {
       this.renderer.showMessage("error");

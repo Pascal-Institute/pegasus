@@ -15,7 +15,8 @@
 // - Manage undo/redo history
 // - Bridge UI events to backend operations (via imgKitMain)
 
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, webUtils } = require('electron');
+
 const { getCurrentLayer } = require('./renderer');
 
 // Lazy load to avoid circular dependency
@@ -262,11 +263,11 @@ class ImageLayer {
         if (typeof filepathOrBuffer === "string") {
           isOpened = await this.openImage(filepathOrBuffer);
         } else {
-          // Pass file.path if available, otherwise use file.name
+          const filePath = webUtils.getPathForFile(file);
           isOpened = await this.openImageBuffer(
             filepathOrBuffer,
             file.name,
-            file.path || null
+            filePath
           );
         }
         if (!isOpened) return;
@@ -699,7 +700,8 @@ class ImageLayer {
 
       this.buffer = result.buffer;
       this.filename = result.filename;
-      this.filepath = filepath || result.filename; // Use provided filepath or fallback to filename
+      this.filepath = filepath || ""; // Store the file path from drag & drop
+
       this.extension = result.extension;
       this.nameSpan.textContent = this.filename;
       this.extensionCombo.value = this.extension;

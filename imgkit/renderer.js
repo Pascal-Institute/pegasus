@@ -21,8 +21,7 @@ setGetImgKitMain(getImgKitMain);
 // LAZY LOADING: Avoid circular dependency with main.js
 // ============================================================================
 
-let ImgKitMain;
-let imgKitMain;
+let imgKitMain;  // Singleton instance (only one needed!)
 
 /**
  * Get ImgKitMain instance (lazy loaded to avoid circular dependency)
@@ -30,9 +29,8 @@ let imgKitMain;
  */
 function getImgKitMain() {
   if (!imgKitMain) {
-    ImgKitMain = require("./main.js").ImgKitMain;
-    imgKitMain = new ImgKitMain();
-    // setGetImgKitMain is now called immediately after require to avoid initialization order issues
+    const ImgKitMain = require("./main.js").ImgKitMain;  // Load class as local const
+    imgKitMain = new ImgKitMain();                        // Create singleton instance
   }
   return imgKitMain;
 }

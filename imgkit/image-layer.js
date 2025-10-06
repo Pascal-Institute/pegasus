@@ -75,7 +75,12 @@ class ImageLayer {
     // Used for drawing/painting and crop operations
     this.drawFlag = false; // Is user currently drawing?
     this.dragFlag = false; // Is user currently dragging to crop?
+    this.magnifyFlag = false; // Is magnifying glass mode active?
     this.cropData = { x: 0, y: 0, width: 0, height: 0 }; // Crop selection area
+    
+    // Magnifying glass state (for partial redraw)
+    this.lastMagnifyPos = null; // { x, y, radius } - previous magnifying glass position
+    this.magnifyAnimationId = null; // requestAnimationFrame ID
 
     // Create DOM elements and setup event listeners
     this.createPanelFromTemplate();
@@ -105,6 +110,27 @@ class ImageLayer {
     this.canvas.id = this.isDefault ? "default" : "full";
     this.ctx = this.canvas.getContext("2d"); // 2D drawing context
     this.image = new Image(); // For loading image data
+    
+    // Create overlay canvas for magnifying glass (on top of main canvas)
+    this.overlayCanvas = document.createElement('canvas');
+    this.overlayCanvas.style.position = 'absolute';
+    this.overlayCanvas.style.pointerEvents = 'none'; // Pass through mouse events
+    this.overlayCanvas.style.left = '0';
+    this.overlayCanvas.style.top = '0';
+    this.overlayCanvas.style.width = '100%';
+    this.overlayCanvas.style.height = '100%';
+    this.overlayCtx = this.overlayCanvas.getContext("2d");
+    
+    // Wrap canvas in a container for proper overlay positioning
+    const canvasWrapper = document.createElement('div');
+    canvasWrapper.style.position = 'relative';
+    canvasWrapper.style.display = 'inline-block';
+    canvasWrapper.style.lineHeight = '0'; // Remove extra spacing
+    
+    // Move canvas into wrapper
+    this.canvas.parentElement.insertBefore(canvasWrapper, this.canvas);
+    canvasWrapper.appendChild(this.canvas);
+    canvasWrapper.appendChild(this.overlayCanvas);
 
     // Get UI control elements
     this.deleteBtn = this.panel.querySelector(".delete-btn");
@@ -336,6 +362,8 @@ class ImageLayer {
    * Setup keyboard shortcuts
    */
   setupKeyboardShortcuts() {
+    // Note: Alt + A for magnifying glass is handled globally in renderer.js
+    
     document.addEventListener("keydown", (e) => {
       // Only handle if this panel is focused
       if (document.activeElement !== this.panel) return;
@@ -437,6 +465,73 @@ class ImageLayer {
     this.canvas.addEventListener("mouseup", () => {
       this.dragFlag = false;
     });
+
+    // Magnifying glass mode
+    this.canvas.addEventListener("mousemove", (e) => {
+      if (!this.magnifyFlag) return;
+      
+      // Cancel previous animation
+      if (this.magnifyAnimationId) {
+        cancelAnimationFrame(this.magnifyAnimationId);
+      }
+      
+      // Schedule next frame
+      this.magnifyAnimationId = requestAnimationFrame(() => {
+        const rect = this.canvas.getBoundingClientRect();
+        let mouseX = e.clientX - rect.left;
+        let mouseY = e.clientY - rect.top;
+
+        const magnifySize = 128;
+        const magnifyScale = 2;
+        const radius = magnifySize / 2;
+
+        // Clamp coordinates to canvas bounds (allow full edge coverage)
+        mouseX = Math.max(0, Math.min(mouseX, this.canvas.width));
+        mouseY = Math.max(0, Math.min(mouseY, this.canvas.height));
+
+        // Clear overlay canvas (main canvas stays untouched = no flicker!)
+        this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
+
+        // Draw magnifying glass on overlay
+        this.overlayCtx.save();
+        this.overlayCtx.beginPath();
+        this.overlayCtx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+        this.overlayCtx.clip();
+
+        const sourceSize = magnifySize / magnifyScale;
+        // Clamp source coordinates to prevent reading outside image bounds
+        const sourceX = Math.max(0, Math.min(mouseX - sourceSize / 2, this.image.width - sourceSize));
+        const sourceY = Math.max(0, Math.min(mouseY - sourceSize / 2, this.image.height - sourceSize));
+        
+        this.overlayCtx.drawImage(
+          this.image,
+          sourceX, sourceY, sourceSize, sourceSize,
+          mouseX - radius, mouseY - radius, magnifySize, magnifySize
+        );
+        
+        this.overlayCtx.restore();
+
+        // Draw border on overlay
+        this.overlayCtx.beginPath();
+        this.overlayCtx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+        this.overlayCtx.strokeStyle = "#000";
+        this.overlayCtx.lineWidth = 2;
+        this.overlayCtx.stroke();
+      });
+    });
+
+    this.canvas.addEventListener("mouseleave", () => {
+      if (this.magnifyFlag) {
+        // Cancel animation
+        if (this.magnifyAnimationId) {
+          cancelAnimationFrame(this.magnifyAnimationId);
+          this.magnifyAnimationId = null;
+        }
+        
+        // Clear overlay (main canvas untouched!)
+        this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
+      }
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -453,8 +548,18 @@ class ImageLayer {
     this.buffer = buffer;
     this.info = info;
 
+    // Update main canvas size
     this.canvas.width = info.width;
     this.canvas.height = info.height;
+    
+    // Update overlay canvas size and position to match exactly
+    this.overlayCanvas.width = info.width;
+    this.overlayCanvas.height = info.height;
+    // Ensure overlay stays perfectly aligned
+    this.overlayCanvas.style.width = info.width + 'px';
+    this.overlayCanvas.style.height = info.height + 'px';
+    this.overlayCanvas.style.left = '0';
+    this.overlayCanvas.style.top = '0';
 
     this.image.src = `data:image/${this.extension};base64,${buffer.toString(
       "base64"
@@ -462,6 +567,9 @@ class ImageLayer {
     this.image.onload = () => {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.drawImage(this.image, 0, 0);
+      
+      // Clear overlay canvas when image changes
+      this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
     };
 
     this.infoText.textContent = `${info.width} x ${info.height}`;
@@ -671,6 +779,7 @@ class ImageLayer {
       if (filepath !== "./assets/addImage.png") {
         this.canvas.id = "full";
         this.isDefault = false;
+        this.panel.draggable = true; 
       }
 
       return true;
@@ -718,6 +827,7 @@ class ImageLayer {
 
       this.canvas.id = "full";
       this.isDefault = false;
+      this.panel.draggable = true;
       return true;
     } catch (error) {
       this.renderer.showMessage("error");

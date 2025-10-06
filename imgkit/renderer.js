@@ -53,6 +53,7 @@ class ImgKitRenderer {
     this.currentIndex = 0; // Which layer is currently selected
     this.copiedLayer = null; // Copied image data for paste operation
     this.messages = {}; // Notification message elements
+    this.globalMagnifyFlag = false; // Global magnifying glass state (Alt + A)
 
     // Get UI elements from DOM (must exist in index.html)
     this.scrollContainer = document.getElementById("scroll-container");
@@ -64,6 +65,7 @@ class ImgKitRenderer {
     if (this.scrollContainer && this.scrollLeftBtn && this.scrollRightBtn) {
       this.initializeMessages();
       this.setupScrollEvents();
+      this.setupGlobalMagnifyShortcut(); // Setup Alt + A globally
     }
   }
 
@@ -131,6 +133,66 @@ class ImgKitRenderer {
     this.scrollContainer.addEventListener("scroll", () =>
       this.updateScrollUI()
     );
+  }
+
+  /**
+   * Setup global magnifying glass shortcut (Alt + A)
+   * This works regardless of which layer is focused
+   */
+  setupGlobalMagnifyShortcut() {
+    let isAltPressed = false;
+    let isAPressed = false;
+
+    // Track Alt key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Alt") {
+        isAltPressed = true;
+      }
+      if (e.key.toLowerCase() === "a") {
+        isAPressed = true;
+      }
+
+      // Activate magnifying glass when both Alt and A are pressed
+      if (isAltPressed && isAPressed && !this.globalMagnifyFlag) {
+        e.preventDefault();
+        console.log("🔍 Magnifying glass ACTIVATED (Alt + A)");
+        this.globalMagnifyFlag = true;
+        document.body.style.cursor = "zoom-in";
+        
+        // Enable magnify on all layers
+        this.imageLayerQueue.forEach(layer => {
+          layer.magnifyFlag = true;
+        });
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "Alt") {
+        isAltPressed = false;
+      }
+      if (e.key.toLowerCase() === "a") {
+        isAPressed = false;
+      }
+
+      // Deactivate magnifying glass when either Alt or A is released
+      if ((!isAltPressed || !isAPressed) && this.globalMagnifyFlag) {
+        console.log("🔍 Magnifying glass DEACTIVATED");
+        this.globalMagnifyFlag = false;
+        document.body.style.cursor = "default";
+        
+        // Disable magnify on all layers and clear overlays
+        this.imageLayerQueue.forEach(layer => {
+          layer.magnifyFlag = false;
+          if (layer.overlayCanvas) {
+            layer.overlayCtx.clearRect(0, 0, layer.overlayCanvas.width, layer.overlayCanvas.height);
+          }
+          if (layer.magnifyAnimationId) {
+            cancelAnimationFrame(layer.magnifyAnimationId);
+            layer.magnifyAnimationId = null;
+          }
+        });
+      }
+    });
   }
 
   /**

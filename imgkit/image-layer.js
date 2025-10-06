@@ -75,6 +75,7 @@ class ImageLayer {
     // Used for drawing/painting and crop operations
     this.drawFlag = false; // Is user currently drawing?
     this.dragFlag = false; // Is user currently dragging to crop?
+    this.magnifyFlag = false; // Is magnifying glass mode active?
     this.cropData = { x: 0, y: 0, width: 0, height: 0 }; // Crop selection area
 
     // Create DOM elements and setup event listeners
@@ -436,6 +437,63 @@ class ImageLayer {
 
     this.canvas.addEventListener("mouseup", () => {
       this.dragFlag = false;
+    });
+
+    // Magnifying glass mode
+    this.canvas.addEventListener("mousemove", (e) => {
+      if (this.magnifyFlag) {
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // Magnifying glass parameters
+        const magnifySize = 128; // 128px x 128px magnifying box
+        const magnifyScale = 2; // 2x scale
+        const radius = magnifySize / 2;
+
+        // Clear and redraw the image
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.drawImage(this.image, 0, 0);
+
+        // Save the current context state
+        this.ctx.save();
+
+        // Create circular clipping path for the magnifying glass
+        this.ctx.beginPath();
+        this.ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+        this.ctx.clip();
+
+        // Draw the magnified portion
+        // Calculate the source rectangle (area to magnify)
+        const sourceSize = magnifySize / magnifyScale;
+        const sourceX = mouseX - sourceSize / 2;
+        const sourceY = mouseY - sourceSize / 2;
+
+        // Draw the magnified image
+        this.ctx.drawImage(
+          this.image,
+          sourceX, sourceY, sourceSize, sourceSize,
+          mouseX - radius, mouseY - radius, magnifySize, magnifySize
+        );
+
+        // Restore the context state
+        this.ctx.restore();
+
+        // Draw the circular border
+        this.ctx.beginPath();
+        this.ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+        this.ctx.strokeStyle = "#000";
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+      }
+    });
+
+    this.canvas.addEventListener("mouseleave", () => {
+      if (this.magnifyFlag) {
+        // Redraw the image without the magnifying glass
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.drawImage(this.image, 0, 0);
+      }
     });
   }
 

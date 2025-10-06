@@ -20,9 +20,10 @@ buttons.forEach((btnId) => {
     event.currentTarget.style.borderBottom = "none";
 
     ipcRenderer.send(`${btnId.replace("Btn", "")}ImgREQ`);
-    // Reset draw flag for all layers
+    // Reset draw flag and magnify flag for all layers
     imageLayerQueue.forEach((layer) => {
       layer.drawFlag = false;
+      layer.magnifyFlag = false;
     });
   });
 });
@@ -270,6 +271,7 @@ ipcRenderer.on("cropImgCMD", (event, res) => {
 
   currentLayer.canvas.setAttribute("draggable", false);
   document.body.style.cursor = "crosshair";
+  currentLayer.magnifyFlag = false;
 });
 
 ipcRenderer.on("drawImgCMD", (event, res) => {
@@ -278,6 +280,7 @@ ipcRenderer.on("drawImgCMD", (event, res) => {
 
   currentLayer.drawFlag = res;
   currentLayer.dragFlag = false;
+  currentLayer.magnifyFlag = false;
 
   if (currentLayer.drawFlag) {
     currentLayer.canvas.setAttribute("draggable", false);
@@ -345,6 +348,25 @@ document.addEventListener("keydown", function (event) {
   } else if (event.ctrlKey && event.key === "y") {
     if (currentLayer && currentLayer.redo) {
       currentLayer.redo();
+    }
+  } else if (event.altKey && (event.key === "a" || event.key === "A")) {
+    // Alt+A: Toggle magnifying glass mode
+    if (currentLayer) {
+      currentLayer.magnifyFlag = !currentLayer.magnifyFlag;
+      
+      if (currentLayer.magnifyFlag) {
+        currentLayer.canvas.setAttribute("draggable", false);
+        document.body.style.cursor = "crosshair";
+        // Disable other modes
+        currentLayer.drawFlag = false;
+        currentLayer.dragFlag = false;
+      } else {
+        currentLayer.canvas.setAttribute("draggable", true);
+        document.body.style.cursor = "default";
+        // Redraw the image to remove any magnifying glass artifacts
+        currentLayer.ctx.clearRect(0, 0, currentLayer.canvas.width, currentLayer.canvas.height);
+        currentLayer.ctx.drawImage(currentLayer.image, 0, 0);
+      }
     }
   } else if (event.which === 122) {
     if (!fullScreenFlag) {

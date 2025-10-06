@@ -12,7 +12,7 @@ ImgKit follows a **3-tier architecture** pattern to separate business logic, UI 
 ┌─────────────────────────────────────────────────────┐
 │                   Presentation Layer                │
 │                    (renderer.js)                    │
-│  - Manages UI container and scroll behavior        │
+│  - Manages UI container and scroll behavior         │
 │  - Handles layer creation and deletion              │
 │  - Coordinates copy/paste operations                │
 │  - Displays notification messages                   │
@@ -46,10 +46,11 @@ ImgKit follows a **3-tier architecture** pattern to separate business logic, UI 
 
 ```
 imgkit/
-├── main.js              # Backend - Image processing operations
-├── renderer.js          # Frontend - UI manager and coordinator
-├── image-layer.js       # Component - Individual image panel
-└── package.json         # Module configuration
+├── main.js               # Backend - Image processing operations
+├── renderer.js           # Frontend - UI manager and coordinator
+├── image-layer.js        # Component - Individual image panel
+├── image-layer-events.js # Component - image panel eventhandler
+└── package.json          # Module configuration
 ```
 
 ---
@@ -443,5 +444,5 @@ When contributing to ImgKit:
 ---
 
 **Last Updated**: October 5, 2025
-**Version**: 1.0.0
+**Version**: 2.0.0
 **Author**: Pascal Institute

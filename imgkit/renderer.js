@@ -277,9 +277,9 @@ class ImgKitRenderer {
   swapLayers(fromIndex, toIndex) {
     if (
       fromIndex < 0 || 
-      fromIndex >= this.imageLayerQueue.length ||
+      fromIndex >= this.imageLayerQueue.length -1 ||
       toIndex < 0 || 
-      toIndex >= this.imageLayerQueue.length
+      toIndex >= this.imageLayerQueue.length -1
     ) {
       return;
     }

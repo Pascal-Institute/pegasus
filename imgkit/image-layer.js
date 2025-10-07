@@ -13,26 +13,12 @@
 // - Display image on canvas
 // - Handle user interactions (drag & drop, keyboard shortcuts, context menu)
 // - Manage undo/redo history
-// - Bridge UI events to backend operations (via imgKitMain)
+// - Bridge UI events to backend operations (via ImageProcessor)
 
 const path = require('path');
 
 const { ImageLayerEvents } = require('./image-layer-events');
-
-// Lazy load to avoid circular dependency
-let getImgKitMain = () => {
-  throw new Error(
-    "getImgKitMain is not set. Please call setGetImgKitMain(fn) before using ImageLayer."
-  );
-};
-
-/**
- * Set the getImgKitMain function (called from renderer.js)
- * @param {Function} fn - Function to get imgKitMain instance
- */
-function setGetImgKitMain(fn) {
-  getImgKitMain = fn;
-}
+const { ImageProcessor } = require('./image-processor');
 
 /**
  * ImageLayer class - Represents a single image panel with canvas and controls
@@ -192,13 +178,7 @@ class ImageLayer {
     let extractedColors = colors;
     if (!extractedColors) {
       try {
-        if (typeof getImgKitMain !== "function") {
-          throw new Error(
-            "getImgKitMain is not set. Please call setGetImgKitMain(fn) before using ImageLayer."
-          );
-        }
-        const imgKitMain = getImgKitMain();
-        extractedColors = await imgKitMain.extractColors(buffer, info, 3);
+        extractedColors = await ImageProcessor.extractColors(buffer, info, 3);
       } catch (error) {
         console.error("Error extracting colors:", error);
         extractedColors = [];
@@ -366,12 +346,7 @@ class ImageLayer {
    */
   async openImage(filepath) {
     try {
-      if (typeof getImgKitMain !== "function") {
-        throw new Error(
-          "getImgKitMain is not set. Please call setGetImgKitMain(fn) before using ImageLayer."
-        );
-      }
-      const result = await getImgKitMain().openImage(filepath);
+      const result = await ImageProcessor.openImage(filepath);
 
       this.filepath = filepath;
       this.filename = result.filename;
@@ -413,12 +388,7 @@ class ImageLayer {
    */
   async openImageBuffer(buffer, filename, filepath = null) {
     try {
-      if (typeof getImgKitMain !== "function") {
-        throw new Error(
-          "getImgKitMain is not set. Please call setGetImgKitMain(fn) before using ImageLayer."
-        );
-      }
-      const result = await getImgKitMain().openImageBuffer(buffer, filename);
+      const result = await ImageProcessor.openImageBuffer(buffer, filename);
 
       this.buffer = result.buffer;
       this.filename = result.filename;
@@ -458,13 +428,7 @@ class ImageLayer {
     if (!this.buffer) return;
 
     try {
-      if (typeof getImgKitMain !== "function") {
-        throw new Error(
-          "getImgKitMain is not set. Please call setGetImgKitMain(fn) before using ImageLayer."
-        );
-      }
-      const imgKitMain = getImgKitMain();
-      const result = await imgKitMain.convertFormat(
+      const result = await ImageProcessor.convertFormat(
         this.buffer,
         this.extension,
         newExtension
@@ -474,7 +438,7 @@ class ImageLayer {
 
       // Update filepath extension using backend helper
       if (this.filepath) {
-        this.filepath = imgKitMain.updateFileExtension(
+        this.filepath = ImageProcessor.updateFileExtension(
           this.filepath,
           newExtension
         );
@@ -505,12 +469,7 @@ class ImageLayer {
       );
       const buffer = Buffer.from(base64Data, "base64");
 
-      if (typeof getImgKitMain !== "function") {
-        throw new Error(
-          "getImgKitMain is not set. Please call setGetImgKitMain(fn) before using ImageLayer."
-        );
-      }
-      await getImgKitMain().saveImage(buffer, savePath);
+      await ImageProcessor.saveImage(buffer, savePath);
       this.filepath = savePath;
       this.renderer.showMessage("save");
     } catch (error) {
@@ -527,12 +486,7 @@ class ImageLayer {
     if (!this.buffer) return;
 
     try {
-      if (typeof getImgKitMain !== "function") {
-        throw new Error(
-          "getImgKitMain is not set. Please call setGetImgKitMain(fn) before using ImageLayer."
-        );
-      }
-      const result = await getImgKitMain().processImage(this.buffer, options);
+      const result = await ImageProcessor.processImage(this.buffer, options);
       this.updatePreview(result.buffer, result.info);
     } catch (error) {
       this.renderer.showMessage("error");
@@ -553,7 +507,7 @@ class ImageLayer {
           "getImgKitMain is not set. Please call setGetImgKitMain(fn) before using ImageLayer."
         );
       }
-      const result = await getImgKitMain().applyCrop(
+      const result = await ImageProcessor.applyCrop(
         this.buffer,
         this.info,
         cropData
@@ -573,5 +527,4 @@ class ImageLayer {
 
 module.exports = {
   ImageLayer,
-  setGetImgKitMain,
 };

@@ -11,29 +11,8 @@
 // - ImageLayer: Each individual image panel with its own canvas, buttons, and data
 // - History: Each layer keeps track of changes for undo/redo functionality
 
-const sharp = require("sharp");
-const path = require("path");
 const { ipcRenderer } = require("electron");
-const { ImageLayer, setGetImgKitMain } = require("./image-layer.js");
-setGetImgKitMain(getImgKitMain);
-
-// ============================================================================
-// LAZY LOADING: Avoid circular dependency with main.js
-// ============================================================================
-
-let imgKitMain;  // Singleton instance (only one needed!)
-
-/**
- * Get ImgKitMain instance (lazy loaded to avoid circular dependency)
- * Only loads when actually needed
- */
-function getImgKitMain() {
-  if (!imgKitMain) {
-    const ImgKitMain = require("./main.js").ImgKitMain;  // Load class as local const
-    imgKitMain = new ImgKitMain();                        // Create singleton instance
-  }
-  return imgKitMain;
-}
+const { ImageLayer } = require("./image-layer.js");
 
 // ============================================================================
 // MAIN CLASS: ImgKitRenderer
@@ -445,9 +424,6 @@ class ImgKitRenderer {
 let imgKitRenderer;
 if (typeof document !== "undefined") {
   imgKitRenderer = new ImgKitRenderer();
-  // Intentionally ignore the return value of getImgKitMain().
-  // This call is made solely for its side effects (initialization).
-  getImgKitMain();
   // Initialize with default image
   imgKitRenderer.createDefaultImage();
 }
@@ -472,7 +448,6 @@ if (typeof module !== "undefined" && module.exports) {
     ImgKitRenderer,
     ImageLayer,
     imgKitRenderer,
-    getImgKitMain,
 
     // Helper functions
     createDefaultImage,

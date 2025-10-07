@@ -15,9 +15,8 @@
 // - Manage undo/redo history
 // - Bridge UI events to backend operations (via imgKitMain)
 
-const { webUtils } = require('electron');
+const path = require('path');
 
-const { getCurrentLayer } = require('./renderer');
 const { ImageLayerEvents } = require('./image-layer-events');
 
 // Lazy load to avoid circular dependency
@@ -390,7 +389,7 @@ class ImageLayer {
         });
       }
 
-      if (filepath !== "./assets/addImage.png") {
+      if (filepath !== PLACEHOLDER_IMAGE) {
         this.canvas.id = "full";
         this.isDefault = false;
         this.panel.draggable = true; 

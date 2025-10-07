@@ -419,7 +419,7 @@ class ImgKitRenderer {
    */
   deleteImage() {
     const current = this.getCurrentLayer();
-    if (!current) return;
+    if (!current || current.isDefault) return;
 
     const index = this.imageLayerQueue.indexOf(current);
     if (index !== -1) {

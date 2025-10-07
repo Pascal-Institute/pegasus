@@ -389,7 +389,7 @@ class ImageLayer {
         });
       }
 
-      if (filepath !== PLACEHOLDER_IMAGE) {
+      if (filepath !== "./assets/addImage.png") {
         this.canvas.id = "full";
         this.isDefault = false;
         this.panel.draggable = true; 

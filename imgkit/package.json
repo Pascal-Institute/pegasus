@@ -5,12 +5,16 @@
   "main": "main.js",
   "exports": {
     ".": "./main.js",
-    "./main": "./main.js",
-    "./renderer": "./renderer.js"
+    "./image-processor": "./image-processor.js",
+    "./renderer": "./renderer.js",
+    "./image-layer": "./image-layer.js"
   },
   "files": [
     "main.js",
+    "image-processor.js",
     "renderer.js",
+    "image-layer.js",
+    "image-layer-events.js",
     "README.md"
   ],
   "scripts": {

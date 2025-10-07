@@ -502,11 +502,6 @@ class ImageLayer {
     if (!this.buffer || !this.info) return;
 
     try {
-      if (typeof getImgKitMain !== "function") {
-        throw new Error(
-          "getImgKitMain is not set. Please call setGetImgKitMain(fn) before using ImageLayer."
-        );
-      }
       const result = await ImageProcessor.applyCrop(
         this.buffer,
         this.info,

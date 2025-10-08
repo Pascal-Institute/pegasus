@@ -44,19 +44,11 @@ class ImageProcessor {
       const loader = ImageProcessor._getImageLoader(filepath, extension);
       const result = await loader.toBuffer({ resolveWithObject: true });
 
-      // Extract dominant colors
-      const colors = await ImageProcessor.extractColors(
-        result.data,
-        result.info,
-        3
-      );
-
       return {
         buffer: result.data,
         info: result.info,
         filename,
-        extension,
-        colors,
+        extension
       };
     } catch (error) {
       throw new Error(`Failed to open image: ${error.message}`);
@@ -78,19 +70,11 @@ class ImageProcessor {
       const loader = ImageProcessor._getBufferLoader(buffer, extension);
       const result = await loader.toBuffer({ resolveWithObject: true });
 
-      // Extract dominant colors
-      const colors = await ImageProcessor.extractColors(
-        result.data,
-        result.info,
-        3
-      );
-
       return {
         buffer: result.data,
         info: result.info,
         filename: name,
-        extension,
-        colors,
+        extension
       };
     } catch (error) {
       throw new Error(`Failed to open image buffer: ${error.message}`);

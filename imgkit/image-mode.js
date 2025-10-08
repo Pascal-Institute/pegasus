@@ -21,9 +21,6 @@ const ImageMode = {
   
   /** Magnifying glass mode - zoomed preview follows mouse (Alt + A) */
   MAGNIFY: 'magnify',
-  
-  /** Drag mode - user is dragging to select crop area */
-  DRAG_CROP: 'drag_crop',
 
   /** Color picker mode - user is picking a color from the image */
   COLORPICKER: 'colorpicker'
@@ -102,13 +99,9 @@ class ModeManager {
   }
 
   /**
-   * Check if in drag crop mode
-   * @returns {boolean} True if in drag crop mode
+   * Check if in color picker mode
+   * @returns {boolean} True if in color picker mode
    */
-  isDraggingCrop() {
-    return this.currentMode === ImageMode.DRAG_CROP;
-  }
-
   isColorPicker() {
     return this.currentMode === ImageMode.COLORPICKER;
   }
@@ -134,7 +127,6 @@ class ModeManager {
   getCursor() {
     switch (this.currentMode) {
       case ImageMode.CROPPING:
-      case ImageMode.DRAG_CROP:
         return 'crosshair';
       case ImageMode.MAGNIFY:
         return 'zoom-in';

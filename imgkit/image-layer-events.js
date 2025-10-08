@@ -84,8 +84,10 @@ class ImageLayerEvents {
     // Setup keyboard shortcuts
     this.setupKeyboardShortcuts();
 
-    // Setup drawing/cropping
-    this.setupDrawingAndCropping();
+    // Setup individual interaction modes
+    this.setupCropping();
+    this.setupDrawing();
+    this.setupMagnifying();
 
     this.setupPanelDragging();
   }
@@ -295,65 +297,72 @@ class ImageLayerEvents {
   }
 
   /**
-   * Setup drawing and cropping functionality
+   * Setup cropping functionality
    */
-  setupDrawingAndCropping() {
+  setupCropping() {
     this.layer.canvas.addEventListener("mousedown", (e) => {
-      // Cropping mode (crosshair cursor)
-      if ( this.layer.modeManager.isDraggingCrop()) {
-        // Start drag crop mode
-        this.layer.modeManager.setMode(ImageMode.DsRAG_CROP);
-        
-        const rect = this.layer.canvas.getBoundingClientRect();
-        const startX = e.clientX - rect.left;
-        const startY = e.clientY - rect.top;
-        this.layer.cropData.x = startX;
-        this.layer.cropData.y = startY;
+      // Only handle if in cropping mode
+      if (!this.layer.modeManager.isCropping()) return;
+      this.layer.panel.setAttribute("draggable", false); 
+      
+      const rect = this.layer.canvas.getBoundingClientRect();
+      const startX = e.clientX - rect.left;
+      const startY = e.clientY - rect.top;
+      this.layer.cropData.x = startX;
+      this.layer.cropData.y = startY;
 
-        this.layer.ctx.setLineDash([2]);
+      this.layer.ctx.setLineDash([2]);
 
-        const mouseMoveHandler = (evt) => {
-          this.layer.ctx.clearRect(0, 0, this.layer.canvas.width, this.layer.canvas.height);
-          this.layer.ctx.drawImage(this.layer.image, 0, 0);
+      const mouseMoveHandler = (evt) => {
+        this.layer.ctx.clearRect(0, 0, this.layer.canvas.width, this.layer.canvas.height);
+        this.layer.ctx.drawImage(this.layer.image, 0, 0);
 
-          const currX = evt.clientX - rect.left;
-          const currY = evt.clientY - rect.top;
+        const currX = evt.clientX - rect.left;
+        const currY = evt.clientY - rect.top;
 
-          // Calculate crop rectangle
-          const x = Math.min(startX, currX);
-          const y = Math.min(startY, currY);
-          const w = Math.abs(currX - startX);
-          const h = Math.abs(currY - startY);
+        // Calculate crop rectangle
+        const x = Math.min(startX, currX);
+        const y = Math.min(startY, currY);
+        const w = Math.abs(currX - startX);
+        const h = Math.abs(currY - startY);
 
-          this.layer.cropData = { x, y, width: w, height: h };
-          this.layer.ctx.strokeRect(x, y, w, h);
-        };
+        this.layer.cropData = { x, y, width: w, height: h };
+        this.layer.ctx.strokeRect(x, y, w, h);
+      };
 
-        const mouseUpHandler = () => {
-          this.layer.canvas.removeEventListener("mousemove", mouseMoveHandler);
-          document.removeEventListener("mouseup", mouseUpHandler);
-          
-          // Reset to cropping mode (not drag crop)
-          this.layer.modeManager.setMode(ImageMode.CROPPING);
+      const mouseUpHandler = () => {
+        this.layer.canvas.removeEventListener("mousemove", mouseMoveHandler);
+        document.removeEventListener("mouseup", mouseUpHandler);
 
-          // Apply crop if valid
-          if (this.layer.applyCrop && this.layer.modeManager.isCropping()) {
-            this.layer.applyCrop(this.layer.cropData);
-          }
-        };
+        // Apply crop if valid
+        if (this.layer.applyCrop) {
+          this.layer.applyCrop(this.layer.cropData);
+        }
+      };
 
-        this.layer.canvas.addEventListener("mousemove", mouseMoveHandler);
-        document.addEventListener("mouseup", mouseUpHandler);
-      }
+      this.layer.canvas.addEventListener("mousemove", mouseMoveHandler);
+      document.addEventListener("mouseup", mouseUpHandler);
     });
+  }
 
-    this.layer.canvas.addEventListener("mouseup", () => {
-      // Only reset if in drag crop mode
-      if (this.layer.modeManager.isDraggingCrop()) {
-        this.layer.modeManager.setMode(ImageMode.CROPPING);
-      }
-    });
+  /**
+   * Setup drawing/painting functionality
+   */
+  setupDrawing() {
+    // Drawing mode will be implemented here
+    // Currently handled by main_renderer.js with drawImgCMD
+    
+    // TODO: Add canvas drawing logic when in DRAWING mode
+    // this.layer.canvas.addEventListener("mousedown", (e) => {
+    //   if (!this.layer.modeManager.isDrawing()) return;
+    //   // Start drawing...
+    // });
+  }
 
+  /**
+   * Setup magnifying glass functionality
+   */
+  setupMagnifying() {
     // Magnifying glass mode
     this.layer.canvas.addEventListener("mousemove", (e) => {
       if (!this.layer.modeManager.isMagnifying()) return;

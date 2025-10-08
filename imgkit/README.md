@@ -1,12 +1,13 @@
 # ImgKit - Image Processing Module
 
-A modular image processing library for Electron applications with a clean separation of concerns and intuitive API.
+A modular image processing library for Electron applications with unified mode system and clean separation of concerns.
 
 ## Table of Contents
 
 - [Architecture Overview](#architecture-overview)
 - [File Structure](#file-structure)
 - [Core Components](#core-components)
+- [Mode System](#mode-system)
 - [API Reference](#api-reference)
 - [Data Flow](#data-flow)
 - [Usage Examples](#usage-examples)
@@ -16,7 +17,7 @@ A modular image processing library for Electron applications with a clean separa
 
 ## Architecture Overview
 
-ImgKit follows a layered architecture pattern separating image processing logic, UI components, and event handling:
+ImgKit follows a layered architecture pattern with unified mode management:
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -24,7 +25,7 @@ ImgKit follows a layered architecture pattern separating image processing logic,
 │         (renderer.js)                        │
 │  • Manages scrollable container              │
 │  • Coordinates multiple image panels         │
-│  • Handles copy/paste operations             │
+│  • Global mode coordination (e.g., magnify)  │
 └─────────────────┬────────────────────────────┘
                   │
                   ▼
@@ -33,7 +34,25 @@ ImgKit follows a layered architecture pattern separating image processing logic,
 │         (image-layer.js)                     │
 │  • Individual image panel logic              │
 │  • Undo/redo history management              │
-│  • Bridges UI events to processing           │
+│  • Mode-based interaction handling           │
+└─────────────────┬────────────────────────────┘
+                  │
+                  ▼
+┌──────────────────────────────────────────────┐
+│         Mode Management Layer                │
+│         (image-mode.js)                      │
+│  • Unified mode system (replaces flags)      │
+│  • Mode validation and transitions           │
+│  • Cursor management per mode                │
+└─────────────────┬────────────────────────────┘
+                  │
+                  ▼
+┌──────────────────────────────────────────────┐
+│         Event Handling Layer                 │
+│         (image-layer-events.js)              │
+│  • Mode-specific event handlers              │
+│  • Cropping, Drawing, Magnifying             │
+│  • Keyboard shortcuts & context menu         │
 └─────────────────┬────────────────────────────┘
                   │
                   ▼
@@ -54,23 +73,88 @@ ImgKit follows a layered architecture pattern separating image processing logic,
 imgkit/
 ├── main.js                  # Module entry point and exports
 ├── image-processor.js       # Pure image processing logic
+├── image-mode.js            # ✨ Unified mode system
 ├── renderer.js              # UI container manager
 ├── image-layer.js           # Individual image panel component
-├── image-layer-events.js    # Event handlers for image panels
+├── image-layer-events.js    # Mode-specific event handlers
 ├── package.json             # Module configuration
 └── README.md                # This file
 ```
 
-**Key Characteristics:**
-- No circular dependencies
-- Clear separation between UI and business logic
-- Each file has a single, well-defined responsibility
+**Key Improvements:**
+- ✅ Unified mode system (no more flag-based state)
+- ✅ Clear separation between UI and business logic
+- ✅ Mode-based event handling
+- ✅ No circular dependencies
 
 ---
 
 ## Core Components
 
-### 1. ImageProcessor (image-processor.js)
+### 1. ImageMode & ModeManager (image-mode.js) ✨ NEW
+
+**Purpose:** Unified mode system replacing individual flags
+
+**Available Modes:**
+```javascript
+const ImageMode = {
+  NORMAL: 'normal',           // Default mode
+  DRAWING: 'drawing',         // Drawing/painting on canvas
+  CROPPING: 'cropping',       // Selecting crop area
+  MAGNIFY: 'magnify',         // Magnifying glass (Alt + A)
+  COLORPICKER: 'colorpicker'  // Color extraction from pixel
+};
+```
+
+**ModeManager API:**
+```javascript
+// Create mode manager (one per ImageLayer)
+const manager = new ModeManager();
+
+// Set mode
+manager.setMode(ImageMode.CROPPING);
+
+// Check current mode
+manager.isNormal()        // → false
+manager.isCropping()      // → true
+manager.isDrawing()       // → false
+manager.isMagnifying()    // → false
+manager.isColorPicker()   // → false
+
+// Get mode
+manager.getMode()         // → 'cropping'
+
+// Get cursor for current mode
+manager.getCursor()       // → 'crosshair'
+
+// Mode history
+manager.reset()           // → Back to NORMAL
+manager.restorePrevious() // → Restore previous mode
+```
+
+**Benefits over Flag System:**
+- ✅ Mutually exclusive states (can't be in DRAWING and MAGNIFYING simultaneously)
+- ✅ Type-safe enum prevents typos
+- ✅ Centralized cursor management
+- ✅ Easy to extend with new modes
+- ✅ Clear state transitions with history
+
+**Comparison:**
+```javascript
+// ❌ Before: Multiple flags (error-prone)
+this.drawFlag = false;
+this.magnifyFlag = false;
+this.cropFlag = true;
+if (drawFlag && !magnifyFlag && !cropFlag) { ... }
+
+// ✅ After: Single mode (clear)
+this.modeManager.setMode(ImageMode.CROPPING);
+if (this.modeManager.isCropping()) { ... }
+```
+
+---
+
+### 2. ImageProcessor (image-processor.js)
 
 **Purpose:** Pure image processing functions with no UI dependencies
 
@@ -96,15 +180,43 @@ static async extractColors(buffer, info, count)
 
 ---
 
-### 2. ImageLayer (image-layer.js)
+### 2. ImageProcessor (image-processor.js)
+
+**Purpose:** Pure image processing functions with no UI dependencies
+
+**Key Features:**
+- Image file I/O (open, save)
+- Format conversion (PNG, JPG, BMP, ICO, TIFF, WEBP)
+- Image operations (resize, crop, blur, sharpen)
+- Color extraction algorithm (including single pixel)
+- Temporary file management
+
+**API:**
+```javascript
+static async openImage(filepath)
+static async openImageBuffer(buffer, filename)
+static async saveImage(buffer, filepath)
+static async processImage(buffer, options)
+static async applyCrop(buffer, imageInfo, cropData)
+static async convertFormat(buffer, fromExt, toExt)
+static async extractColors(buffer, info, count)
+static async extractColorAt(buffer, info, x, y)  // ✨ NEW
+```
+
+**Dependencies:** Sharp, sharp-bmp, sharp-ico
+
+---
+
+### 3. ImageLayer (image-layer.js)
 
 **Purpose:** Manages individual image panel state and operations
 
 **State Management:**
 - Image data (buffer, metadata, filename)
 - Undo/redo history (max 10 entries)
-- UI state (focus, visibility, crop mode)
-- Drawing/cropping coordinates
+- **Mode manager** (replaces individual flags) ✨
+- UI state (focus, visibility)
+- Crop selection coordinates
 
 **Operations:**
 ```javascript
@@ -119,43 +231,64 @@ redo()
 destroy()
 ```
 
-**History Structure:**
+**Mode Integration:**
 ```javascript
-{
-  buffers: [],      // Previous image states
-  infos: [],        // Image metadata for each state
-  extensions: [],   // File extensions for each state
-  index: -1,        // Current position in history
-  maxSize: 10       // Maximum history entries
+// Each ImageLayer has its own mode manager
+constructor(renderer) {
+  this.modeManager = new ModeManager();  // ✨ Per-layer modes
+  // ...
 }
 ```
 
 ---
 
-### 3. ImageLayerEvents (image-layer-events.js)
+### 4. ImageLayerEvents (image-layer-events.js)
 
-**Purpose:** Event handling logic for image panels
+**Purpose:** Mode-specific event handling for image panels
 
-**Event Types:**
-- Drag & Drop (file upload)
-- Keyboard shortcuts (navigation, undo/redo)
-- Context menu (copy/paste)
-- Mouse interactions (focus, crop selection)
-- Panel dragging (reorder)
-
-**Key Methods:**
+**Organized by Mode:**
 ```javascript
-setupEvents()
-setupDragDrop()
+setupCropping()      // CROPPING mode events
+setupDrawing()       // DRAWING mode events
+setupMagnifying()    // MAGNIFY mode events
+setupDragDrop()      // File upload events
 setupKeyboardShortcuts()
 setupContextMenu()
-setupDrawingAndCropping()
 setupPanelDragging()
+```
+
+**Mode-Based Event Handling:**
+```javascript
+// Cropping only works in CROPPING mode
+setupCropping() {
+  canvas.addEventListener("mousedown", (e) => {
+    if (!this.layer.modeManager.isCropping()) return;  // ✅ Mode check
+    // Handle crop selection...
+  });
+}
+
+// Magnifying only works in MAGNIFY mode
+setupMagnifying() {
+  canvas.addEventListener("mousemove", (e) => {
+    if (!this.layer.modeManager.isMagnifying()) return;  // ✅ Mode check
+    // Draw magnifying glass...
+  });
+}
+```
+
+**Color Picker Integration:**
+```javascript
+canvas.addEventListener("click", async (e) => {
+  if (this.layer.modeManager.isColorPicker()) {  // ✨ NEW
+    const color = await ImageProcessor.extractColorAt(buffer, info, x, y);
+    ipcRenderer.send('colorpickerValueSEND', color);
+  }
+});
 ```
 
 ---
 
-### 4. ImgKitRenderer (renderer.js)
+### 5. ImgKitRenderer (renderer.js)
 
 **Purpose:** Manages the scrollable container and coordinates image panels
 
@@ -164,6 +297,7 @@ setupPanelDragging()
 - Manage layer navigation and focus
 - Handle copy/paste between layers
 - Display notification messages
+- **Global mode coordination** (e.g., Alt + A magnify) ✨
 - Control horizontal scroll behavior
 
 **API:**
@@ -180,16 +314,110 @@ showMessage(type)
 updateScrollUI()
 ```
 
-**State:**
+**Global Mode Management:**
 ```javascript
 {
-  imageLayerQueue: [],  // Array of ImageLayer instances
-  currentIndex: 0,      // Active layer index
-  copiedLayer: null,    // Clipboard data
-  messages: {},         // Notification elements
-  globalMagnifyFlag: false  // Magnifying glass state
+  imageLayerQueue: [],    // Array of ImageLayer instances
+  currentIndex: 0,        // Active layer index
+  copiedLayer: null,      // Clipboard data
+  messages: {},           // Notification elements
+  globalMode: ImageMode.NORMAL  // ✨ Global mode state
+}
+
+// Alt + A shortcut affects all layers
+setupGlobalMagnifyShortcut() {
+  document.addEventListener("keydown", (e) => {
+    if (e.altKey && e.key === "a") {
+      this.globalMode = ImageMode.MAGNIFY;
+      this.imageLayerQueue.forEach(layer => {
+        layer.modeManager.setMode(ImageMode.MAGNIFY);
+      });
+    }
+  });
 }
 ```
+
+---
+
+## Mode System
+
+### Mode Architecture
+
+Each `ImageLayer` has its own `ModeManager` instance, allowing different layers to be in different modes simultaneously (though typically only the active layer's mode matters for user interaction).
+
+**Mode Flow Example (Cropping):**
+```
+1. User clicks Crop button
+   ↓
+2. main_renderer.js sends 'cropImgCMD'
+   ↓
+3. currentLayer.modeManager.setMode(ImageMode.CROPPING)
+   ↓
+4. setupCropping() mousedown handler activates
+   ↓
+5. User drags to select area
+   ↓
+6. On mouseup → applyCrop() executes
+   ↓
+7. Mode can stay CROPPING or reset to NORMAL
+```
+
+### Mode Transitions
+
+```javascript
+// From main_renderer.js
+ipcRenderer.on("cropImgCMD", (event) => {
+  currentLayer.modeManager.setMode(ImageMode.CROPPING);
+  currentLayer.canvas.style.cursor = "crosshair";
+});
+
+ipcRenderer.on("drawImgCMD", (event, res) => {
+  if (res) {
+    currentLayer.modeManager.setMode(ImageMode.DRAWING);
+  } else {
+    currentLayer.modeManager.reset();  // Back to NORMAL
+  }
+});
+
+ipcRenderer.on("colorpickerImgCMD", (event, res) => {
+  if (res) {
+    currentLayer.modeManager.setMode(ImageMode.COLORPICKER);
+  } else {
+    currentLayer.modeManager.reset();
+  }
+});
+```
+
+### Mode-Specific Behavior
+
+**NORMAL Mode:**
+- Default cursor (pointer on panel)
+- No special canvas interactions
+- Panel draggable for reordering
+
+**CROPPING Mode:**
+- Crosshair cursor
+- Mouse drag selects crop rectangle
+- Dashed rectangle preview
+- mouseup applies crop
+
+**MAGNIFY Mode:**
+- Zoom-in cursor
+- Mouse move shows magnified preview
+- Uses overlay canvas (no flicker)
+- Alt + A toggle (global)
+
+**DRAWING Mode:**
+- Custom drawing cursor
+- Canvas stroke on mouse drag
+- Line width control with Ctrl + Scroll
+- Color selection
+
+**COLORPICKER Mode:**
+- Crosshair cursor
+- Click extracts pixel color
+- Sends color via IPC to paint panel
+- Auto-reset after selection
 
 ---
 
@@ -204,7 +432,46 @@ const imgkit = require('imgkit');
 imgkit.ImageProcessor     // Pure processing functions
 imgkit.imgKitRenderer     // Singleton UI manager
 imgkit.createDefaultImage // Helper function
-imgkit.drawFlag           // Crop mode state
+imgkit.ImageMode          // ✨ Mode enum
+imgkit.ModeManager        // ✨ Mode manager class
+```
+
+### ImageMode Enum
+
+```javascript
+const { ImageMode } = require('imgkit');
+
+ImageMode.NORMAL       // 'normal'
+ImageMode.DRAWING      // 'drawing'
+ImageMode.CROPPING     // 'cropping'
+ImageMode.MAGNIFY      // 'magnify'
+ImageMode.COLORPICKER  // 'colorpicker'
+```
+
+### ModeManager Class
+
+```javascript
+const { ModeManager, ImageMode } = require('imgkit');
+
+const manager = new ModeManager();
+
+// Set mode
+manager.setMode(ImageMode.CROPPING);
+
+// Check mode
+manager.isNormal()      // → boolean
+manager.isDrawing()     // → boolean
+manager.isCropping()    // → boolean
+manager.isMagnifying()  // → boolean
+manager.isColorPicker() // → boolean
+
+// Get mode
+manager.getMode()       // → 'cropping'
+
+// Utilities
+manager.getCursor()     // → 'crosshair' (based on current mode)
+manager.reset()         // → Set to NORMAL
+manager.restorePrevious() // → Restore previous mode
 ```
 
 ### ImageProcessor Methods
@@ -213,6 +480,12 @@ imgkit.drawFlag           // Crop mode state
 ```javascript
 const result = await ImageProcessor.openImage('/path/to/image.png');
 // Returns: { buffer, info, filename, extension, colors }
+```
+
+**extractColorAt(buffer, info, x, y)** ✨ NEW
+```javascript
+const color = await ImageProcessor.extractColorAt(buffer, info, 150, 200);
+// Returns: '#ff5733' (hex color at pixel x=150, y=200)
 ```
 
 **processImage(buffer, options)**
@@ -334,6 +607,57 @@ const layer = imgKitRenderer.createImageLayer();
 await layer.openImage('/path/to/photo.jpg');
 ```
 
+### Using Mode System
+
+```javascript
+const { imgKitRenderer, ImageMode } = require('imgkit');
+
+const currentLayer = imgKitRenderer.getCurrentLayer();
+
+// Enter cropping mode
+currentLayer.modeManager.setMode(ImageMode.CROPPING);
+// User can now drag to select crop area
+
+// Enter magnify mode
+currentLayer.modeManager.setMode(ImageMode.MAGNIFY);
+// User can move mouse to see magnified preview
+
+// Check current mode
+if (currentLayer.modeManager.isCropping()) {
+  console.log('In cropping mode');
+}
+
+// Reset to normal
+currentLayer.modeManager.reset();
+```
+
+### Color Picker Workflow
+
+```javascript
+const { ImageMode } = require('imgkit');
+
+// 1. Activate color picker mode
+currentLayer.modeManager.setMode(ImageMode.COLORPICKER);
+
+// 2. User clicks on canvas
+// 3. Image-layer-events.js handles the click:
+canvas.addEventListener("click", async (e) => {
+  if (this.layer.modeManager.isColorPicker()) {
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const color = await ImageProcessor.extractColorAt(buffer, info, x, y);
+    
+    // Send color to paint panel
+    ipcRenderer.send('colorpickerValueSEND', color);
+  }
+});
+
+// 4. Paint panel receives color
+ipcRenderer.on("colorpickerValueRECV", (event, color) => {
+  document.getElementById("colorValue").textContent = color;
+});
+```
+
 ### Image Processing
 
 ```javascript
@@ -377,21 +701,61 @@ layer.redo();
 const { ImageProcessor } = require('imgkit');
 
 const layer = imgKitRenderer.getCurrentLayer();
+
+// Extract dominant colors
 const colors = await ImageProcessor.extractColors(
   layer.buffer,
   layer.info,
   5  // Extract 5 dominant colors
 );
-
 console.log('Dominant colors:', colors);
 // Output: ['#2c3e50', '#ecf0f1', '#e74c3c', '#3498db', '#f39c12']
+
+// Extract color at specific pixel
+const pixelColor = await ImageProcessor.extractColorAt(
+  layer.buffer,
+  layer.info,
+  150,  // x coordinate
+  200   // y coordinate
+);
+console.log('Pixel color:', pixelColor);
+// Output: '#3498db'
 ```
 
 ---
 
 ## Design Principles
 
-### 1. Separation of Concerns
+### 1. Unified Mode System
+
+**Problem (Before):**
+```javascript
+// Multiple flags - prone to conflicting states
+this.drawFlag = true;
+this.magnifyFlag = true;  // ❌ Can't draw and magnify!
+this.cropFlag = false;
+
+// Complex conditions everywhere
+if (drawFlag && !magnifyFlag && !cropFlag) { ... }
+```
+
+**Solution (After):**
+```javascript
+// Single mode - mutually exclusive states
+this.modeManager.setMode(ImageMode.DRAWING);
+
+// Clear, simple checks
+if (this.modeManager.isDrawing()) { ... }
+```
+
+**Benefits:**
+- ✅ **State Consistency:** Can't be in DRAWING and MAGNIFY simultaneously
+- ✅ **Type Safety:** Enum prevents typos (IDE autocomplete)
+- ✅ **Maintainability:** Add new mode = add one enum value
+- ✅ **Clarity:** Mode name clearly indicates behavior
+- ✅ **History:** Built-in previous mode tracking
+
+### 2. Separation of Concerns
 
 **Processing Layer (image-processor.js)**
 - Pure functions only
@@ -399,41 +763,72 @@ console.log('Dominant colors:', colors);
 - No state management
 - Testable in isolation
 
+**Mode Layer (image-mode.js)**
+- Mode enum definition
+- Mode validation
+- Mode transition logic
+- Cursor management
+
 **Component Layer (image-layer.js)**
 - Manages component state
 - Bridges UI events to processing
-- No direct DOM manipulation of container
+- Owns ModeManager instance
+
+**Event Layer (image-layer-events.js)**
+- Mode-specific event handlers
+- Separated by functionality (cropping, drawing, magnifying)
+- No business logic
 
 **Presentation Layer (renderer.js)**
 - Manages UI container
-- Coordinates multiple components
+- Global mode coordination
 - No business logic
 
-### 2. Single Responsibility
+### 3. Single Responsibility
 
-Each class has one clear purpose:
-- **ImageProcessor:** Image manipulation
+Each module has one clear purpose:
+- **ImageProcessor:** Image manipulation (pure functions)
+- **ImageMode:** Mode definition and validation
+- **ModeManager:** Mode state management
 - **ImageLayer:** Panel state and operations
 - **ImageLayerEvents:** Event handling
 - **ImgKitRenderer:** Container coordination
 
-### 3. No Circular Dependencies
+### 4. No Circular Dependencies
 
-**Before (problematic):**
+**Dependency Flow:**
 ```
-renderer.js ← main.js
-     ↓           ↑
-     └───────────┘
-```
-
-**After (resolved):**
-```
-renderer.js → ImageProcessor
-image-layer.js → ImageProcessor
+renderer.js ──────┐
+                  ↓
+image-layer.js ───┼──→ image-processor.js
+                  ↓
+image-mode.js ────┘
+                  
 (No circular references)
 ```
 
-### 4. Error Handling
+### 5. Event-Driven Architecture
+
+**Mode Changes:**
+```javascript
+// Mode change can trigger callbacks
+modeManager.onModeChange = (newMode, oldMode) => {
+  console.log(`${oldMode} → ${newMode}`);
+  updateCursor();
+};
+```
+
+**IPC Communication:**
+```javascript
+// Renderer → Main Process → BrowserView
+ipcRenderer.send('colorpickerValueSEND', color);
+// Main process broadcasts to all BrowserViews
+views.forEach(view => {
+  view.webContents.send('colorpickerValueRECV', color);
+});
+```
+
+### 6. Error Handling
 
 All async operations include try-catch blocks:
 
@@ -447,7 +842,7 @@ try {
 }
 ```
 
-### 5. Immutability for History
+### 7. Immutability for History
 
 History entries store complete states:
 
@@ -515,6 +910,7 @@ Auto cleanup on app exit
 | Delete | Delete current image |
 | Ctrl + Z | Undo |
 | Ctrl + Y | Redo |
+| Alt + A | Magnify |
 
 ---
 
@@ -653,15 +1049,46 @@ Part of the Pegasus image editor application.
 
 ## Version History
 
-**2.0.0** (Current)
+### v2.0.0 (Current)
+**Architecture:**
 - Removed circular dependencies
 - Separated ImageProcessor from main logic
 - Simplified module exports
 - Improved error handling
+- Created `ImageLayer` class for individual panels
+- Implemented `ImgKitRenderer` for multi-panel container
+- Added `ImageLayerEvents` for event delegation
+- Introduced undo/redo history system
 
-**1.0.0**
-- Initial release with 3-tier architecture
+**Mode System:**
+- Unified `ImageMode` enum system (NORMAL, DRAWING, CROPPING, MAGNIFY, COLORPICKER)
+- `ModeManager` class for state management with validation
+- Mode-specific event handlers: `setupCropping()`, `setupDrawing()`, `setupMagnifying()`
+- Mode history tracking with `previousMode` and `restorePrevious()`
+- Mode-aware cursor management via `getCursor()` method
+- Global mode coordination for magnify (Alt+A affects all layers)
+
+**Features:**
+- **Color Picker Mode:** Click on image to extract pixel color and send to paint panel
+- IPC communication for color picker: `colorpickerValueSEND` → Main → `colorpickerValueRECV`
+- Enhanced `ImageProcessor.extractColorAt(buffer, info, x, y)` for single-pixel extraction
+
+**API:**
+```javascript
+// Mode management
+const { ImageMode, ModeManager } = require('imgkit');
+imageLayer.modeManager.setMode(ImageMode.DRAWING);
+if (imageLayer.modeManager.isMagnifying()) { ... }
+```
 
 ---
 
-Last Updated: October 7, 2025
+### v1.0.0 - Initial Release
+- Basic Sharp image processing integration
+- Single image panel support (just 1 index.js file)
+- Direct DOM manipulation
+- Monolithic renderer architecture
+
+---
+
+Last Updated: January 2025

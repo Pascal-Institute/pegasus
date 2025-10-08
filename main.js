@@ -340,7 +340,7 @@ app.whenReady().then(() => {
                   ],
                 })
                 .then((result) => {
-                  event.sender.send("openImgCMD", result.filePaths);
+                  event.sender.send("openImgCMD", result.filePaths[0]);
                 });
             },
           },

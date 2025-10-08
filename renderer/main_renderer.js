@@ -264,6 +264,20 @@ ipcRenderer.on("watermarkImgCMD", async (event) => {
   }
 });
 
+ipcRenderer.on("colorpickerImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer) return;
+  if (res) {
+    currentLayer.modeManager.setMode(ImageMode.COLORPICKER);
+    currentLayer.canvas.setAttribute("draggable", false);
+    document.body.style.cursor = "crosshair";
+  } else {
+    currentLayer.modeManager.reset();
+    currentLayer.canvas.setAttribute("draggable", true);
+    document.body.style.cursor = "default";
+  }
+});
+
 ipcRenderer.on("cropImgCMD", (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer) return;

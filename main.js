@@ -127,6 +127,11 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on("colorpickerValueSEND", (event, res) => {
+    mainWindow.webContents.send("colorpickerImgCMD", res);
+    mainWindow.webContents.focus();
+  });
+
   ipcMain.on("rotateLeftImgREQ", (event) => {
     mainWindow.webContents.send("rotateLeftImgCMD");
     mainWindow.webContents.focus();

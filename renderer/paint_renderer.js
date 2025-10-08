@@ -2,6 +2,7 @@ const { ipcRenderer } = require("electron");
 
 var rgb = { r: "123", g: "123", b: "123" };
 var drawFlagState = false;
+var colorpickerActive = false;
 
 document.getElementById("drawBtn").addEventListener("click", () => {
   drawFlagState = !drawFlagState;
@@ -26,6 +27,17 @@ document.getElementById("tintExecuteBtn").addEventListener("click", () => {
 document.getElementById("watermarkBtn").addEventListener("click", () => {
   ipcRenderer.send("watermarkImgREQ");
 });
+
+document.getElementById("colorpickerBtn").addEventListener("click", () => {
+  colorpickerActive = !colorpickerActive; 
+  if (colorpickerActive) {
+    document.getElementById("colorpickerBtn").style.backgroundColor = "gray";
+  } else {
+    document.getElementById("colorpickerBtn").style.backgroundColor = "#efefef";
+  }
+  ipcRenderer.send("colorpickerValueSEND", colorpickerActive);
+});
+
 
 document.getElementById("redValue").addEventListener("input", (event) => {
   rgb.r = event.target.value; //parseInt(event.target.value, 10).toString(16).padStart(2, "0");

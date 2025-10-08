@@ -23,7 +23,10 @@ const ImageMode = {
   MAGNIFY: 'magnify',
   
   /** Drag mode - user is dragging to select crop area */
-  DRAG_CROP: 'drag_crop'
+  DRAG_CROP: 'drag_crop',
+
+  /** Color picker mode - user is picking a color from the image */
+  COLORPICKER: 'colorpicker'
 };
 
 /**
@@ -106,6 +109,10 @@ class ModeManager {
     return this.currentMode === ImageMode.DRAG_CROP;
   }
 
+  isColorPicker() {
+    return this.currentMode === ImageMode.COLORPICKER;
+  }
+
   /**
    * Reset to normal mode
    */
@@ -133,6 +140,8 @@ class ModeManager {
         return 'zoom-in';
       case ImageMode.DRAWING:
         return 'crosshair'; // or custom drawing cursor
+      case ImageMode.COLORPICKER:
+        return 'crosshair';
       default:
         return 'default';
     }

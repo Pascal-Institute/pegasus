@@ -28,10 +28,11 @@ class ImageLayerEvents {
 
     // Mouse hover effects
     this.layer.panel.addEventListener("mouseover", () => {
-      document.body.style.cursor = "pointer";
+      this.layer.canvas.style.cursor = this.layer.modeManager.getCursor();
     });
+
     this.layer.panel.addEventListener("mouseout", () => {
-      document.body.style.cursor = "default";
+      this.layer.canvas.style.cursor = "default";
     });
 
     // Delete button
@@ -284,7 +285,7 @@ class ImageLayerEvents {
   setupDrawingAndCropping() {
     this.layer.canvas.addEventListener("mousedown", (e) => {
       // Cropping mode (crosshair cursor)
-      if (document.body.style.cursor === "crosshair") {
+      if (this.layer.canvas.style.cursor === "crosshair") {
         // Start drag crop mode
         this.layer.modeManager.setMode(ImageMode.DRAG_CROP);
         

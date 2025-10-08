@@ -355,15 +355,6 @@ class ImageLayer {
       this.extensionCombo.value = this.extension;
       this.updatePreview(result.buffer, result.info);
 
-      if (result.colors && result.colors.length > 0) {
-        result.colors.forEach((color, idx) => {
-          if (this.colorBox.colors[idx]) {
-            this.colorBox.colors[idx].style.backgroundColor = color;
-            this.colorBox.colors[idx].title = color;
-          }
-        });
-      }
-
       if (filepath !== "./assets/addImage.png") {
         this.canvas.id = "full";
         this.isDefault = false;
@@ -398,15 +389,6 @@ class ImageLayer {
       this.nameSpan.textContent = this.filename;
       this.extensionCombo.value = this.extension;
       this.updatePreview(result.buffer, result.info);
-
-      if (result.colors && result.colors.length > 0) {
-        result.colors.forEach((color, idx) => {
-          if (this.colorBox.colors[idx]) {
-            this.colorBox.colors[idx].style.backgroundColor = color;
-            this.colorBox.colors[idx].title = color;
-          }
-        });
-      }
 
       this.canvas.id = "full";
       this.isDefault = false;

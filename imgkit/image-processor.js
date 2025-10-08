@@ -287,16 +287,17 @@ class ImageProcessor {
 
       const rawBuffer = result.data;
       const rawInfo = result.info;
+      const channels = rawInfo.channels; // 3 for RGB, 4 for RGBA
 
       // Step 2: Get color value at (x, y) position
-      const pixelIndex = (y * rawInfo.width + x) * 4;
+      const pixelIndex = (y * rawInfo.width + x) * channels;
       const r = rawBuffer[pixelIndex];
       const g = rawBuffer[pixelIndex + 1];
       const b = rawBuffer[pixelIndex + 2];
-      const a = rawBuffer[pixelIndex + 3];
+      const a = channels === 4 ? rawBuffer[pixelIndex + 3] : 255;
 
       // Step 3: Convert to hex format
-      return ImageProcessor._rgbaToHex(r, g, b, a);
+      return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
     } catch (error) {
       console.error("Color extraction failed:", error);
       return null;

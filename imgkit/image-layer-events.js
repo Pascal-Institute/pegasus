@@ -1,5 +1,6 @@
 const { ipcRenderer, webUtils } = require("electron");
 const { ImageMode } = require('./image-mode');
+const { ImageProcessor } = require("./image-processor");
 
 /**
  * ImageLayerEvents - Handles all event listeners for ImageLayer
@@ -24,6 +25,17 @@ class ImageLayerEvents {
     this.layer.panel.addEventListener("click", () => {
       const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
       this.layer.renderer.setCurrentLayer(index);
+    });
+
+    this.layer.canvas.addEventListener("click", async (e) => {
+      if (this.layer.modeManager.isColorPicker()) {
+        const rect = this.layer.canvas.getBoundingClientRect();
+        const x = Math.floor(e.clientX - rect.left);
+        const y = Math.floor(e.clientY - rect.top);
+        
+        var color = await ImageProcessor.extractColorAt(this.layer.buffer, this.layer.info, x, y);
+        console.log('Picked color:', color);
+      }
     });
 
     // Mouse hover effects
@@ -285,9 +297,9 @@ class ImageLayerEvents {
   setupDrawingAndCropping() {
     this.layer.canvas.addEventListener("mousedown", (e) => {
       // Cropping mode (crosshair cursor)
-      if (this.layer.canvas.style.cursor === "crosshair") {
+      if ( this.layer.modeManager.isDraggingCrop()) {
         // Start drag crop mode
-        this.layer.modeManager.setMode(ImageMode.DRAG_CROP);
+        this.layer.modeManager.setMode(ImageMode.DsRAG_CROP);
         
         const rect = this.layer.canvas.getBoundingClientRect();
         const startX = e.clientX - rect.left;
@@ -322,7 +334,7 @@ class ImageLayerEvents {
           this.layer.modeManager.setMode(ImageMode.CROPPING);
 
           // Apply crop if valid
-          if (this.layer.applyCrop) {
+          if (this.layer.applyCrop && this.layer.modeManager.isCropping()) {
             this.layer.applyCrop(this.layer.cropData);
           }
         };

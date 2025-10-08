@@ -5,3 +5,62 @@
 #colorpickerBtn:hover {
   cursor: pointer;
 }
+
+.tintBar {
+  display: flex;
+  width: 170px;
+  height: 15px;
+}
+
+#tintBox {
+  margin-left: 20px;
+  padding: 2px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  width: 217px;
+  border: 1px solid black;
+  position: relative;
+}
+
+#tintBox:hover {
+  background-color: gainsboro;
+}
+
+#tintBox:active {
+  background-color: ghostwhite;
+}
+
+#tintExecuteBtn {
+  border-radius: 5px;
+  border: none;
+  position: absolute;
+  right: 0px;
+}
+
+#wrapperBox {
+  margin-left: 20px;
+  padding: 2px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+  width: 217px;
+  border: 1px solid black;
+  position: relative;
+}
+
+#wrapperBox:hover {
+  background-color: gainsboro;
+}
+
+#wrapperBox:active {
+  background-color: ghostwhite;
+}
+
+#colorpickerBox {
+  margin-left: 5px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid black;
+  background-color: white;
+}

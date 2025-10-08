@@ -4,6 +4,13 @@ var rgb = { r: "123", g: "123", b: "123" };
 var drawFlagState = false;
 var colorpickerActive = false;
 
+// Receive color from color picker
+ipcRenderer.on("colorpickerValueRECV", (event, color) => {
+  if (!color) return;
+  document.getElementById("colorpickerBox").style.backgroundColor = color;
+  document.getElementById("colorpickerValue").textContent = color;
+});
+
 document.getElementById("drawBtn").addEventListener("click", () => {
   drawFlagState = !drawFlagState;
 
@@ -35,7 +42,7 @@ document.getElementById("colorpickerBtn").addEventListener("click", () => {
   } else {
     document.getElementById("colorpickerBtn").style.backgroundColor = "#efefef";
   }
-  ipcRenderer.send("colorpickerValueSEND", colorpickerActive);
+  ipcRenderer.send("colorpickerImgREQ", colorpickerActive);
 });
 
 

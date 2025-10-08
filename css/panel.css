@@ -22,42 +22,6 @@ body {
   height: 36px;
 }
 
-.tintBar {
-  display: flex;
-  width: 170px;
-  height: 15px;
-}
-
 .charDiv {
   font-size: 10px;
-}
-
-/* #rotateValue {
-  margin-left: 20px;
-} */
-
-#tintBox {
-  margin-left: 20px;
-  padding: 2px;
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  width: 217px;
-  border: 1px solid black;
-  position: relative;
-}
-
-#tintBox:hover {
-  background-color: gainsboro;
-}
-
-#tintBox:active {
-  background-color: ghostwhite;
-}
-
-#tintExecuteBtn {
-  border-radius: 5px;
-  border: none;
-  position: absolute;
-  right: 0px;
 }

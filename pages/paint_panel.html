@@ -62,10 +62,14 @@
     <button id="watermarkBtn" title="watermark">
       <img class="icon" src="../assets/watermark.ico" />
     </button>
-
-    <button id="colorpickerBtn" title="color-picker">
-      <img class="icon" src="../assets/color-picker.ico" />
-    </button>
+    
+    <div id="wrapperBox">
+          <button id="colorpickerBtn" title="color-picker">
+          <img class="icon" src="../assets/color-picker.ico" />
+        </button>
+        <div id="colorpickerBox"></div>
+        <span id="colorpickerValue">#000000</span>
+    </div>
 
     <script src="../renderer/paint_renderer.js"></script>
   </body>

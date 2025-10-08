@@ -33,8 +33,11 @@ class ImageLayerEvents {
         const x = Math.floor(e.clientX - rect.left);
         const y = Math.floor(e.clientY - rect.top);
         
-        var color = await ImageProcessor.extractColorAt(this.layer.buffer, this.layer.info, x, y);
-        console.log('Picked color:', color);
+        // Extract color at clicked position
+        const color = await ImageProcessor.extractColorAt(this.layer.buffer, this.layer.info, x, y);
+        
+        // Send color to main renderer
+        ipcRenderer.send('colorpickerValueSEND', color);
       }
     });
 

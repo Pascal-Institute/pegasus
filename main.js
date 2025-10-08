@@ -127,7 +127,7 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
-  ipcMain.on("colorpickerValueSEND", (event, res) => {
+  ipcMain.on("colorpickerImgREQ", (event, res) => {
     mainWindow.webContents.send("colorpickerImgCMD", res);
     mainWindow.webContents.focus();
   });
@@ -180,6 +180,14 @@ app.whenReady().then(() => {
   ipcMain.on("drawImgREQ", (event, res) => {
     mainWindow.webContents.send("drawImgCMD", res);
     mainWindow.webContents.focus();
+  });
+
+  ipcMain.on('colorpickerValueSEND', (event, color) => {
+    const views = mainWindow.getBrowserViews();
+    
+    views.forEach(view => {
+      view.webContents.send('colorpickerValueRECV', color);
+    });
   });
 
   // ImgKit Context Menu Handler

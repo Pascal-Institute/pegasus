@@ -135,7 +135,6 @@ class ImgKitRenderer {
         e.preventDefault();
         console.log("🔍 Magnifying glass ACTIVATED (Alt + A)");
         this.globalMode = ImageMode.MAGNIFY;
-        document.body.style.cursor = "zoom-in";
         
         // Enable magnify mode on all layers
         this.imageLayerQueue.forEach(layer => {
@@ -156,7 +155,6 @@ class ImgKitRenderer {
       if ((!isAltPressed || !isAPressed) && this.globalMode === ImageMode.MAGNIFY) {
         console.log("🔍 Magnifying glass DEACTIVATED");
         this.globalMode = ImageMode.NORMAL;
-        document.body.style.cursor = "default";
         
         // Disable magnify on all layers and clear overlays
         this.imageLayerQueue.forEach(layer => {

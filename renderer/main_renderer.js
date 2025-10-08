@@ -270,11 +270,9 @@ ipcRenderer.on("colorpickerImgCMD", async (event, res) => {
   if (res) {
     currentLayer.modeManager.setMode(ImageMode.COLORPICKER);
     currentLayer.canvas.setAttribute("draggable", false);
-    currentLayer.canvas.style.cursor = "crosshair";
   } else {
     currentLayer.modeManager.reset();
     currentLayer.canvas.setAttribute("draggable", true);
-    currentLayer.canvas.style.cursor = "default";
   }
 });
 
@@ -283,7 +281,6 @@ ipcRenderer.on("cropImgCMD", (event, res) => {
   if (!currentLayer) return;
 
   currentLayer.canvas.setAttribute("draggable", false);
-  document.body.style.cursor = "crosshair";
   currentLayer.modeManager.setMode(ImageMode.CROPPING);
 });
 
@@ -294,11 +291,9 @@ ipcRenderer.on("drawImgCMD", (event, res) => {
   if (res) {
     currentLayer.modeManager.setMode(ImageMode.DRAWING);
     currentLayer.canvas.setAttribute("draggable", false);
-    document.body.style.cursor = "url('./assets/drawCursor.ico'), default";
   } else {
     currentLayer.modeManager.reset();
     currentLayer.canvas.setAttribute("draggable", true);
-    document.body.style.cursor = "default";
   }
 });
 

@@ -291,7 +291,7 @@ class ImageProcessor {
   static async extractColors(buffer, info, count = 3) {
     try {
       // Step 1: Resize image to small size for faster processing
-      const resizeWidth = info.width > 24 ? 24 : info.width;
+      const resizeWidth = info.width > 64 ? 64 : info.width;
 
       const result = await sharp(buffer)
         .resize({ width: resizeWidth })

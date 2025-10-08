@@ -263,6 +263,46 @@ class ImageProcessor {
   // COLOR EXTRACTION
   // --------------------------------------------------------------------------
 
+   /**
+   * Extract color from (x, y) position in image
+   * This is used to show color palette in UI
+   *
+   * @param {Buffer} buffer - Image buffer
+   * @param {Object} info - Image info from sharp
+   * @param {number} x - X coordinate of the pixel
+   * @param {number} y - Y coordinate of the pixel
+   * @returns {Promise<string>} Hex color string (e.g., '#ff0000')
+   */
+  static async extractColorAt(buffer, info, x, y) {
+    try {
+      // Step 1: Validate coordinates
+      if (x < 0 || y < 0 || x >= info.width || y >= info.height) {
+        throw new Error(`Invalid coordinates: (${x}, ${y})`);
+      }
+
+      const result = await sharp(buffer)
+        .toColorspace("srgb")
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+
+      const rawBuffer = result.data;
+      const rawInfo = result.info;
+
+      // Step 2: Get color value at (x, y) position
+      const pixelIndex = (y * rawInfo.width + x) * 4;
+      const r = rawBuffer[pixelIndex];
+      const g = rawBuffer[pixelIndex + 1];
+      const b = rawBuffer[pixelIndex + 2];
+      const a = rawBuffer[pixelIndex + 3];
+
+      // Step 3: Convert to hex format
+      return ImageProcessor._rgbaToHex(r, g, b, a);
+    } catch (error) {
+      console.error("Color extraction failed:", error);
+      return null;
+    }
+  }
+
   /**
    * Extract dominant colors from image
    * This is used to show color palette in UI

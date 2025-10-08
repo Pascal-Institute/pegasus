@@ -1,2 +1,2 @@
 const { ipcRenderer } = require("electron");
-var {drawFlag} = require("imgkit");
+// drawFlag is no longer used - mode management is handled through ImageMode system

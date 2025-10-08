@@ -13,6 +13,7 @@
 
 const { ipcRenderer } = require("electron");
 const { ImageLayer } = require("./image-layer.js");
+const { ImageMode } = require('./image-mode.js');
 
 // ============================================================================
 // MAIN CLASS: ImgKitRenderer
@@ -30,7 +31,7 @@ class ImgKitRenderer {
     this.currentIndex = 0; // Which layer is currently selected
     this.copiedLayer = null; // Copied image data for paste operation
     this.messages = {}; // Notification message elements
-    this.globalMagnifyFlag = false; // Global magnifying glass state (Alt + A)
+    this.globalMode = ImageMode.NORMAL; // Global interaction mode (e.g., magnify with Alt + A)
 
     // Get UI elements from DOM (must exist in index.html)
     this.scrollContainer = document.getElementById("scroll-container");
@@ -130,15 +131,15 @@ class ImgKitRenderer {
       }
 
       // Activate magnifying glass when both Alt and A are pressed
-      if (isAltPressed && isAPressed && !this.globalMagnifyFlag) {
+      if (isAltPressed && isAPressed && this.globalMode !== ImageMode.MAGNIFY) {
         e.preventDefault();
         console.log("🔍 Magnifying glass ACTIVATED (Alt + A)");
-        this.globalMagnifyFlag = true;
+        this.globalMode = ImageMode.MAGNIFY;
         document.body.style.cursor = "zoom-in";
         
-        // Enable magnify on all layers
+        // Enable magnify mode on all layers
         this.imageLayerQueue.forEach(layer => {
-          layer.magnifyFlag = true;
+          layer.modeManager.setMode(ImageMode.MAGNIFY);
         });
       }
     });
@@ -152,14 +153,14 @@ class ImgKitRenderer {
       }
 
       // Deactivate magnifying glass when either Alt or A is released
-      if ((!isAltPressed || !isAPressed) && this.globalMagnifyFlag) {
+      if ((!isAltPressed || !isAPressed) && this.globalMode === ImageMode.MAGNIFY) {
         console.log("🔍 Magnifying glass DEACTIVATED");
-        this.globalMagnifyFlag = false;
+        this.globalMode = ImageMode.NORMAL;
         document.body.style.cursor = "default";
         
         // Disable magnify on all layers and clear overlays
         this.imageLayerQueue.forEach(layer => {
-          layer.magnifyFlag = false;
+          layer.modeManager.reset();
           if (layer.overlayCanvas) {
             layer.overlayCtx.clearRect(0, 0, layer.overlayCanvas.width, layer.overlayCanvas.height);
           }
@@ -456,7 +457,5 @@ if (typeof module !== "undefined" && module.exports) {
     // Backward compatibility
     Parameter,
     imageLayerQueue: imgKitRenderer ? imgKitRenderer.imageLayerQueue : [],
-    drawFlag: false,
-    dragFlag: false,
   };
 }

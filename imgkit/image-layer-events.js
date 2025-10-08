@@ -1,4 +1,5 @@
 const { ipcRenderer, webUtils } = require("electron");
+const { ImageMode } = require('./image-mode');
 
 /**
  * ImageLayerEvents - Handles all event listeners for ImageLayer
@@ -282,10 +283,11 @@ class ImageLayerEvents {
    */
   setupDrawingAndCropping() {
     this.layer.canvas.addEventListener("mousedown", (e) => {
-      this.layer.dragFlag = true;
-
       // Cropping mode (crosshair cursor)
       if (document.body.style.cursor === "crosshair") {
+        // Start drag crop mode
+        this.layer.modeManager.setMode(ImageMode.DRAG_CROP);
+        
         const rect = this.layer.canvas.getBoundingClientRect();
         const startX = e.clientX - rect.left;
         const startY = e.clientY - rect.top;
@@ -314,7 +316,9 @@ class ImageLayerEvents {
         const mouseUpHandler = () => {
           this.layer.canvas.removeEventListener("mousemove", mouseMoveHandler);
           document.removeEventListener("mouseup", mouseUpHandler);
-          this.layer.dragFlag = false;
+          
+          // Reset to cropping mode (not drag crop)
+          this.layer.modeManager.setMode(ImageMode.CROPPING);
 
           // Apply crop if valid
           if (this.layer.applyCrop) {
@@ -328,12 +332,15 @@ class ImageLayerEvents {
     });
 
     this.layer.canvas.addEventListener("mouseup", () => {
-      this.layer.dragFlag = false;
+      // Only reset if in drag crop mode
+      if (this.layer.modeManager.isDraggingCrop()) {
+        this.layer.modeManager.setMode(ImageMode.CROPPING);
+      }
     });
 
     // Magnifying glass mode
     this.layer.canvas.addEventListener("mousemove", (e) => {
-      if (!this.layer.magnifyFlag) return;
+      if (!this.layer.modeManager.isMagnifying()) return;
       
       // Cancel previous animation
       if (this.layer.magnifyAnimationId) {
@@ -386,7 +393,7 @@ class ImageLayerEvents {
     });
 
     this.layer.canvas.addEventListener("mouseleave", () => {
-      if (this.layer.magnifyFlag) {
+      if (this.layer.modeManager.isMagnifying()) {
         // Cancel animation
         if (this.layer.magnifyAnimationId) {
           cancelAnimationFrame(this.layer.magnifyAnimationId);

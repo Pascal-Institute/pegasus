@@ -19,6 +19,7 @@ const path = require('path');
 
 const { ImageLayerEvents } = require('./image-layer-events');
 const { ImageProcessor } = require('./image-processor');
+const { ImageMode, ModeManager } = require('./image-mode');
 
 /**
  * ImageLayer class - Represents a single image panel with canvas and controls
@@ -55,13 +56,10 @@ class ImageLayer {
     this.showImageOnly = false; // Hide all UI elements except canvas?
 
     // --------------------------------------------------------------------------
-    // DRAWING/CROPPING STATE
+    // INTERACTION MODE MANAGEMENT
     // --------------------------------------------------------------------------
-
-    // Used for drawing/painting and crop operations
-    this.drawFlag = false; // Is user currently drawing?
-    this.dragFlag = false; // Is user currently dragging to crop?
-    this.magnifyFlag = false; // Is magnifying glass mode active?
+    // Unified mode system replaces individual flags (drawFlag, dragFlag, magnifyFlag)
+    this.modeManager = new ModeManager();
     this.cropData = { x: 0, y: 0, width: 0, height: 0 }; // Crop selection area
     
     // Magnifying glass state (for partial redraw)

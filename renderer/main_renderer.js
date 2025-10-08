@@ -1,5 +1,5 @@
 const { ipcRenderer } = require("electron");
-const { imgKitRenderer, createDefaultImage } = require("imgkit");
+const { imgKitRenderer, createDefaultImage, ImageMode } = require("imgkit");
 const sharp = require("sharp");
 
 // Get imageLayerQueue from renderer
@@ -20,10 +20,9 @@ buttons.forEach((btnId) => {
     event.currentTarget.style.borderBottom = "none";
 
     ipcRenderer.send(`${btnId.replace("Btn", "")}ImgREQ`);
-    // Reset draw flag and magnify flag for all layers
+    // Reset mode for all layers
     imageLayerQueue.forEach((layer) => {
-      layer.drawFlag = false;
-      layer.magnifyFlag = false;
+      layer.modeManager.reset();
     });
   });
 });
@@ -271,21 +270,19 @@ ipcRenderer.on("cropImgCMD", (event, res) => {
 
   currentLayer.canvas.setAttribute("draggable", false);
   document.body.style.cursor = "crosshair";
-  currentLayer.magnifyFlag = false;
+  currentLayer.modeManager.setMode(ImageMode.CROPPING);
 });
 
 ipcRenderer.on("drawImgCMD", (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer) return;
 
-  currentLayer.drawFlag = res;
-  currentLayer.dragFlag = false;
-  currentLayer.magnifyFlag = false;
-
-  if (currentLayer.drawFlag) {
+  if (res) {
+    currentLayer.modeManager.setMode(ImageMode.DRAWING);
     currentLayer.canvas.setAttribute("draggable", false);
     document.body.style.cursor = "url('./assets/drawCursor.ico'), default";
   } else {
+    currentLayer.modeManager.reset();
     currentLayer.canvas.setAttribute("draggable", true);
     document.body.style.cursor = "default";
   }
@@ -350,24 +347,9 @@ document.addEventListener("keydown", function (event) {
       currentLayer.redo();
     }
   } else if (event.altKey && (event.key === "a" || event.key === "A")) {
-    // Alt+A: Toggle magnifying glass mode
-    if (currentLayer) {
-      currentLayer.magnifyFlag = !currentLayer.magnifyFlag;
-      
-      if (currentLayer.magnifyFlag) {
-        currentLayer.canvas.setAttribute("draggable", false);
-        document.body.style.cursor = "crosshair";
-        // Disable other modes
-        currentLayer.drawFlag = false;
-        currentLayer.dragFlag = false;
-      } else {
-        currentLayer.canvas.setAttribute("draggable", true);
-        document.body.style.cursor = "default";
-        // Redraw the image to remove any magnifying glass artifacts
-        currentLayer.ctx.clearRect(0, 0, currentLayer.canvas.width, currentLayer.canvas.height);
-        currentLayer.ctx.drawImage(currentLayer.image, 0, 0);
-      }
-    }
+    // Alt+A: Toggle magnifying glass mode (handled globally in renderer.js now)
+    // This local handler is kept for backwards compatibility but does nothing
+    // since setupGlobalMagnifyShortcut in renderer.js handles Alt+A globally
   } else if (event.which === 122) {
     if (!fullScreenFlag) {
       ipcRenderer.send("FullScreenREQ");
@@ -382,7 +364,7 @@ document.addEventListener("keydown", function (event) {
 document.addEventListener("wheel", function (event) {
   if (event.ctrlKey) {
     const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
-    if (currentLayer && currentLayer.drawFlag) {
+    if (currentLayer && currentLayer.modeManager.isDrawing()) {
       if (event.deltaY > 0 || event.detail < 0) {
         // scroll up
         lineWidth++;

@@ -5,6 +5,7 @@
 // - ImageProcessor: Pure image processing functions (no UI dependencies)
 // - ImgKitRenderer: UI manager for image panels
 // - ImageLayer: Individual image panel component
+// - ImageMode: Unified mode system for interaction states
 // - createDefaultImage: Helper function
 // - getCurrentLayer: Helper function
 
@@ -12,8 +13,8 @@ const { ImageProcessor } = require('./image-processor');
 const { 
   imgKitRenderer,
   createDefaultImage,
-  drawFlag,
 } = require('./renderer');
+const { ImageMode, ModeManager } = require('./image-mode');
 
 // Export only what's actually used in the project
 module.exports = {
@@ -24,6 +25,7 @@ module.exports = {
   imgKitRenderer,
   createDefaultImage,
   
-  // State flags (used by crop_renderer.js)
-  drawFlag,
+  // Mode system (replaces old flag-based system)
+  ImageMode,
+  ModeManager,
 };

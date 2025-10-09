@@ -12,8 +12,8 @@
 // - History: Each layer keeps track of changes for undo/redo functionality
 
 const { ipcRenderer } = require("electron");
-const { ImageLayer } = require("./image-layer.js");
-const { ImageMode } = require('./image-mode.js');
+const { ImageLayer } = require("./image_layer.js");
+const { ImageMode } = require('./image_mode.js');
 
 // ============================================================================
 // MAIN CLASS: ImgKitRenderer

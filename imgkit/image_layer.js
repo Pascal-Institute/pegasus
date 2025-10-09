@@ -17,9 +17,9 @@
 
 const path = require('path');
 
-const { ImageLayerEvents } = require('./image-layer-events');
-const { ImageProcessor } = require('./image-processor');
-const { ImageMode, ModeManager } = require('./image-mode');
+const { ImageLayerEvents } = require('./image_layer_events');
+const { ImageProcessor } = require('./image_processor');
+const { ImageMode, ModeManager } = require('./image_mode');
 
 /**
  * ImageLayer class - Represents a single image panel with canvas and controls

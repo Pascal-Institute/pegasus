@@ -36,9 +36,13 @@ npm install -g electron
 npm update
 ```
 
+## Coding Convention
+
+### Use Underbar for filename
+
 #### imgkit is local module.
 
-## 2-1. How to execute
+## 3-1. How to execute
 
 ### window
 ```bash
@@ -56,23 +60,23 @@ npm start
 electron . --ozone-platform=x11
 ```
 
-## 2-2. How to build
+## 3-2. How to build
 
 ```bash
 npm run build
 ```
 
-## 3. Application Specification
+## 4. Application Specification
 
-### 3-1. Availiable file extension
+### 4-1. Availiable file extension
 
 ```bash
 png jpg jpeg webp gif bmp ico tiff tif
 ```
 
-#### 3-2. extension converting
+#### 4-2. extension converting
 
-### 3-3. Image Processing
+### 4-3. Image Processing
 
 #### resize
 

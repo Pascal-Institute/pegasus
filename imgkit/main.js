@@ -9,12 +9,12 @@
 // - createDefaultImage: Helper function
 // - getCurrentLayer: Helper function
 
-const { ImageProcessor } = require('./image-processor');
+const { ImageProcessor } = require('./image_processor');
 const { 
   imgKitRenderer,
   createDefaultImage,
 } = require('./renderer');
-const { ImageMode, ModeManager } = require('./image-mode');
+const { ImageMode, ModeManager } = require('./image_mode');
 
 // Export only what's actually used in the project
 module.exports = {

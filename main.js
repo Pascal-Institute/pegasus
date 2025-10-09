@@ -82,6 +82,7 @@ app.whenReady().then(() => {
     "filterImgREQ",
     "rotateImgREQ",
     "paintImgREQ",
+    "image_analysisImgREQ"
   ].forEach((item, index, arr) => {
     ipcMain.on(item, (event) => {
       mainWindow

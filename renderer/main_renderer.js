@@ -7,7 +7,7 @@ const imageLayerQueue = imgKitRenderer.imageLayerQueue;
 var fullScreenFlag = false;
 var lineWidth = 1;
 
-const buttons = ["resizeBtn", "cropBtn", "filterBtn", "rotateBtn", "paintBtn"];
+const buttons = ["resizeBtn", "cropBtn", "filterBtn", "rotateBtn", "paintBtn", "image_analysisBtn"];
 
 buttons.forEach((btnId) => {
   const btn = document.getElementById(btnId);

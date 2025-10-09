@@ -36,8 +36,10 @@ class ImageLayerEvents {
         // Extract color at clicked position
         const color = await ImageProcessor.extractColorAt(this.layer.buffer, this.layer.info, x, y);
         
+        const color_name = await ImageProcessor.getColorName(color);
+
         // Send color to main renderer
-        ipcRenderer.send('colorpickerValueSEND', color);
+        ipcRenderer.send('colorpickerValueSEND', color, color_name);
       }
     });
 

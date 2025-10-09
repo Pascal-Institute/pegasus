@@ -44,6 +44,7 @@
   border-radius: 5px;
   display: flex;
   flex-direction: row;
+  align-items: center;
   width: 217px;
   border: 1px solid black;
   position: relative;
@@ -62,5 +63,12 @@
   width: 36px;
   height: 36px;
   border: 1px solid black;
-  background-color: white;
+  background-color: black;
+}
+
+#colorpickerIndicator {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-left: 5px;
 }

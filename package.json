@@ -4,6 +4,7 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
+    "color-namer": "^1.4.0",
     "fs": "^0.0.1-security",
     "imgkit": "file:imgkit",
     "sharp": "^0.34.3",

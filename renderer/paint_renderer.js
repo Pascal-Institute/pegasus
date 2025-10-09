@@ -5,10 +5,11 @@ var drawFlagState = false;
 var colorpickerActive = false;
 
 // Receive color from color picker
-ipcRenderer.on("colorpickerValueRECV", (event, color) => {
+ipcRenderer.on("colorpickerValueRECV", (event, color, color_name) => {
   if (!color) return;
   document.getElementById("colorpickerBox").style.backgroundColor = color;
   document.getElementById("colorpickerValue").textContent = color;
+  document.getElementById("colorpickerName").textContent = color_name;
 });
 
 document.getElementById("drawBtn").addEventListener("click", () => {

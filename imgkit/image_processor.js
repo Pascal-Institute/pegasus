@@ -15,6 +15,7 @@ const ico = require("sharp-ico");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const namer = require('color-namer');
 
 // ============================================================================
 // IMAGE PROCESSOR CLASS
@@ -302,6 +303,11 @@ class ImageProcessor {
       console.error("Color extraction failed:", error);
       return null;
     }
+  }
+
+  static async getColorName(hex) {
+    const names = namer(hex);
+    return names.ntc[0].name; // Using 'ntc' color names
   }
 
   /**

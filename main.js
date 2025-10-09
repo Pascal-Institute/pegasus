@@ -183,11 +183,11 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
-  ipcMain.on('colorpickerValueSEND', (event, color) => {
+  ipcMain.on('colorpickerValueSEND', (event, color, color_name) => {
     const views = mainWindow.getBrowserViews();
     
     views.forEach(view => {
-      view.webContents.send('colorpickerValueRECV', color);
+      view.webContents.send('colorpickerValueRECV', color, color_name);
     });
   });
 

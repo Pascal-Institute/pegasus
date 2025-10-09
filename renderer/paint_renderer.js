@@ -1,17 +1,27 @@
 const { ipcRenderer } = require("electron");
-var { drawFlag } = require("imgkit");
 
 var rgb = { r: "123", g: "123", b: "123" };
+var drawFlagState = false;
+var colorpickerActive = false;
+
+// Receive color from color picker
+ipcRenderer.on("colorpickerValueRECV", (event, color, color_name) => {
+  if (!color) return;
+  document.getElementById("colorpickerBox").style.backgroundColor = color;
+  document.getElementById("colorpickerValue").textContent = color;
+  document.getElementById("colorpickerName").textContent = color_name;
+});
 
 document.getElementById("drawBtn").addEventListener("click", () => {
-  if (!drawFlag) {
-    drawFlag = true;
+  drawFlagState = !drawFlagState;
+
+  if (drawFlagState) {
     document.getElementById("drawBtn").style.backgroundColor = "gray";
   } else {
-    drawFlag = false;
     document.getElementById("drawBtn").style.backgroundColor = "#efefef";
   }
-  ipcRenderer.send("drawImgREQ", drawFlag);
+
+  ipcRenderer.send("drawImgREQ", drawFlagState);
 });
 
 document.getElementById("grayScaleBtn").addEventListener("click", () => {
@@ -25,6 +35,17 @@ document.getElementById("tintExecuteBtn").addEventListener("click", () => {
 document.getElementById("watermarkBtn").addEventListener("click", () => {
   ipcRenderer.send("watermarkImgREQ");
 });
+
+document.getElementById("colorpickerBtn").addEventListener("click", () => {
+  colorpickerActive = !colorpickerActive; 
+  if (colorpickerActive) {
+    document.getElementById("colorpickerBtn").style.backgroundColor = "gray";
+  } else {
+    document.getElementById("colorpickerBtn").style.backgroundColor = "#efefef";
+  }
+  ipcRenderer.send("colorpickerImgREQ", colorpickerActive);
+});
+
 
 document.getElementById("redValue").addEventListener("input", (event) => {
   rgb.r = event.target.value; //parseInt(event.target.value, 10).toString(16).padStart(2, "0");

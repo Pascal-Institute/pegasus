@@ -1,6 +1,6 @@
 const electron = require("electron");
 const pkg = require("./package.json");
-const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu } = electron;
+const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu, MenuItem, clipboard, nativeImage } = electron;
 
 //electron refresh (only develop)
 if (process.env.NODE_ENV === "development") {
@@ -23,7 +23,6 @@ function createMainWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true,
       // devTools: true,
       //   preload: path.join(__dirname, "preload.js"),
     },
@@ -42,7 +41,6 @@ function createView(type, mainWindow) {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true,
       // devTools: true,
       //   preload: path.join(__dirname, "preload.js"),
     },
@@ -68,13 +66,13 @@ app.whenReady().then(() => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true,
       // devTools: true,
       //   preload: path.join(__dirname, "preload.js"),
     },
   });
 
   mainWindow.loadFile("index.html");
+  
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 
@@ -84,6 +82,7 @@ app.whenReady().then(() => {
     "filterImgREQ",
     "rotateImgREQ",
     "paintImgREQ",
+    "image_analysisImgREQ"
   ].forEach((item, index, arr) => {
     ipcMain.on(item, (event) => {
       mainWindow
@@ -126,6 +125,11 @@ app.whenReady().then(() => {
 
   ipcMain.on("tintValueSEND", (event, res) => {
     mainWindow.webContents.send("tintImgCMD", res);
+    mainWindow.webContents.focus();
+  });
+
+  ipcMain.on("colorpickerImgREQ", (event, res) => {
+    mainWindow.webContents.send("colorpickerImgCMD", res);
     mainWindow.webContents.focus();
   });
 
@@ -179,6 +183,99 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on('colorpickerValueSEND', (event, color, color_name) => {
+    const views = mainWindow.getBrowserViews();
+    
+    views.forEach(view => {
+      view.webContents.send('colorpickerValueRECV', color, color_name);
+    });
+  });
+
+  // ImgKit Context Menu Handler
+  ipcMain.on("show-imgkit-context-menu", (event, options) => {
+    const { hasUndo, hasRedo } = options;
+    const menu = new Menu();
+
+    // Copy
+    menu.append(new MenuItem({
+      label: 'Copy',
+      accelerator: 'Ctrl+C',
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'copy');
+      }
+    }));
+
+    // Paste
+    menu.append(new MenuItem({
+      label: 'Paste',
+      accelerator: 'Ctrl+V',
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'paste');
+      }
+    }));
+
+    // Separator
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    // Delete
+    menu.append(new MenuItem({
+      label: 'Delete',
+      accelerator: 'Delete',
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'delete');
+      }
+    }));
+
+    // Separator
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    // Undo
+    menu.append(new MenuItem({
+      label: 'Undo',
+      accelerator: 'Ctrl+Z',
+      enabled: hasUndo,
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'undo');
+      }
+    }));
+
+    // Redo
+    menu.append(new MenuItem({
+      label: 'Redo',
+      accelerator: 'Ctrl+Y',
+      enabled: hasRedo,
+      click: () => {
+        event.sender.send('imgkit-context-menu-action', 'redo');
+      }
+    }));
+
+    // Show menu at cursor position
+    menu.popup({ window: BrowserWindow.fromWebContents(event.sender) });
+  });
+
+  // Native Clipboard Handlers
+  ipcMain.on('copy-image-to-clipboard', (event, imageBuffer) => {
+    try {
+      const image = nativeImage.createFromBuffer(Buffer.from(imageBuffer));
+      clipboard.writeImage(image);
+    } catch (error) {
+      console.error('Failed to copy image to clipboard:', error);
+    }
+  });
+
+  ipcMain.handle('paste-image-from-clipboard', () => {
+    try {
+      const image = clipboard.readImage();
+      if (!image.isEmpty()) {
+        return image.toPNG();
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to paste image from clipboard:', error);
+      return null;
+    }
+  });
+
   ipcMain.on("FullScreenREQ", (event) => {
     mainWindow.setSimpleFullScreen(true);
     mainWindow.show();
@@ -227,7 +324,7 @@ app.whenReady().then(() => {
             click: () => {
               dialog
                 .showOpenDialog({
-                  properties: ["openFile"],
+                  properties: ["openFile", "multiSelections"],
                   filters: [
                     {
                       name: "Image file",
@@ -309,7 +406,7 @@ app.whenReady().then(() => {
               dialog.showMessageBox({
                 title: "About",
                 buttons: ["Ok"],
-                message: `Author : ${pkg.author}\nVersion : v${pkg.version}\nLicense : ${pkg.license}\n`,
+                message: `Author : ${pkg.author.name}\nEmail : ${pkg.author.email}\nVersion : v${pkg.version}\nLicense : ${pkg.license}\n`,
               });
             },
           },

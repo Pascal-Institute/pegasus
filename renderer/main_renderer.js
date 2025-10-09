@@ -1,16 +1,13 @@
 const { ipcRenderer } = require("electron");
-const {
-  ImageLayer,
-  Parameter,
-  imageLayerQueue,
-  createDefaultImage,
-} = require("imgkit");
-var { num } = require("imgkit");
+const { imgKitRenderer, createDefaultImage, ImageMode } = require("imgkit");
 const sharp = require("sharp");
+
+// Get imageLayerQueue from renderer
+const imageLayerQueue = imgKitRenderer.imageLayerQueue;
 var fullScreenFlag = false;
 var lineWidth = 1;
 
-const buttons = ["resizeBtn", "cropBtn", "filterBtn", "rotateBtn", "paintBtn"];
+const buttons = ["resizeBtn", "cropBtn", "filterBtn", "rotateBtn", "paintBtn", "image_analysisBtn"];
 
 buttons.forEach((btnId) => {
   const btn = document.getElementById(btnId);
@@ -23,228 +20,345 @@ buttons.forEach((btnId) => {
     event.currentTarget.style.borderBottom = "none";
 
     ipcRenderer.send(`${btnId.replace("Btn", "")}ImgREQ`);
-    ImageLayer.drawFlag = false;
+    // Reset mode for all layers
+    imageLayerQueue.forEach((layer) => {
+      layer.modeManager.reset();
+    });
   });
 });
 
 ipcRenderer.send("showMenuREQ", "ping");
 
-ipcRenderer.on("resizeImgCMD", (event, res) => {
-  const newWidth = Math.floor(
-    imageLayerQueue[Parameter.num].canvas.width * res
-  );
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .resize({ width: newWidth })
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("resizeImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  const newWidth = Math.floor(currentLayer.canvas.width * res);
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .resize({ width: newWidth })
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Resize failed:", error);
+  }
 });
 
-ipcRenderer.on("blurImgCMD", (event, res) => {
-  console.log(num);
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .blur(res)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("blurImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .blur(res)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Blur failed:", error);
+  }
 });
 
-ipcRenderer.on("sharpenImgCMD", (event, res) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .sharpen(res, 1.0, 2.0)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("sharpenImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .sharpen(res, 1.0, 2.0)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Sharpen failed:", error);
+  }
 });
 
-ipcRenderer.on("normalizeImgCMD", (event) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .normalize(true)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("normalizeImgCMD", async (event) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .normalize(true)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Normalize failed:", error);
+  }
 });
 
-ipcRenderer.on("medianImgCMD", (event, res) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .median(res)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("medianImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .median(res)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Median failed:", error);
+  }
 });
 
-ipcRenderer.on("rotateImgCMD", (event, res) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .rotate(res)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("rotateImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .rotate(res)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Rotate failed:", error);
+  }
 });
 
-ipcRenderer.on("rotateRightImgCMD", (event) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .rotate(90)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("rotateRightImgCMD", async (event) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .rotate(90)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Rotate right failed:", error);
+  }
 });
 
-ipcRenderer.on("rotateLeftImgCMD", (event) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .rotate(-90)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("rotateLeftImgCMD", async (event) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .rotate(-90)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Rotate left failed:", error);
+  }
 });
 
-ipcRenderer.on("flipImgCMD", (event) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .flip()
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("flipImgCMD", async (event) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .flip()
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Flip failed:", error);
+  }
 });
 
-ipcRenderer.on("flopImgCMD", (event) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .flop()
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("flopImgCMD", async (event) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .flop()
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Flop failed:", error);
+  }
 });
 
-ipcRenderer.on("bitwiseImgCMD", (event) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .threshold()
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("bitwiseImgCMD", async (event) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .threshold()
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Bitwise failed:", error);
+  }
 });
 
-ipcRenderer.on("negativeImgCMD", (event) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .negate(true)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("negativeImgCMD", async (event) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .negate(true)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Negative failed:", error);
+  }
 });
 
-ipcRenderer.on("grayScaleImgCMD", (event) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .grayscale(true)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("grayScaleImgCMD", async (event) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .grayscale(true)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Grayscale failed:", error);
+  }
 });
 
-ipcRenderer.on("tintImgCMD", (event, res) => {
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .tint(res)
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+ipcRenderer.on("tintImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .tint(res)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Tint failed:", error);
+  }
 });
 
 ipcRenderer.on("watermarkImgCMD", async (event) => {
-  const watermark = await sharp("./assets/icon.png").resize(32, 32).toBuffer();
-  sharp(imageLayerQueue[Parameter.num].buffer)
-    .composite([
-      {
-        input: watermark,
-        gravity: "southeast",
-      },
-    ])
-    .toBuffer((err, buf, info) => {
-      imageLayerQueue[Parameter.num].updatePreviewImg(buf, info);
-    });
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const watermark = await sharp("./assets/icon.png")
+      .resize(32, 32)
+      .toBuffer();
+    const result = await sharp(currentLayer.buffer)
+      .composite([
+        {
+          input: watermark,
+          gravity: "southeast",
+        },
+      ])
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Watermark failed:", error);
+  }
+});
+
+ipcRenderer.on("colorpickerImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer) return;
+  if (res) {
+    currentLayer.modeManager.setMode(ImageMode.COLORPICKER);
+    currentLayer.canvas.setAttribute("draggable", false);
+  } else {
+    currentLayer.modeManager.reset();
+    currentLayer.canvas.setAttribute("draggable", true);
+  }
 });
 
 ipcRenderer.on("cropImgCMD", (event, res) => {
-  imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", false);
-  document.body.style.cursor = "crosshair";
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer) return;
+
+  currentLayer.canvas.setAttribute("draggable", false);
+  currentLayer.modeManager.setMode(ImageMode.CROPPING);
 });
 
 ipcRenderer.on("drawImgCMD", (event, res) => {
-  ImageLayer.drawFlag = res;
-  ImageLayer.dragFlag = false;
-  if (ImageLayer.drawFlag) {
-    imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", false);
-    document.body.style.cursor = "url('./assets/drawCursor.ico'), default";
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer) return;
+
+  if (res) {
+    currentLayer.modeManager.setMode(ImageMode.DRAWING);
+    currentLayer.canvas.setAttribute("draggable", false);
   } else {
-    imageLayerQueue[Parameter.num].canvas.setAttribute("draggable", true);
-    document.body.style.cursor = "default";
+    currentLayer.modeManager.reset();
+    currentLayer.canvas.setAttribute("draggable", true);
   }
 });
 
-createDefaultImage();
 var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
 
 sioCheckBox.addEventListener("click", (event) => {
-  if (sioCheckBox.checked) {
-    imageLayerQueue[Parameter.num].deleteBtn.style.visibility = "hidden";
-    imageLayerQueue[Parameter.num].nameSpan.style.visibility = "hidden";
-    imageLayerQueue[Parameter.num].mainColorBox.style.visibility = "hidden";
-    imageLayerQueue[Parameter.num].imgInfoText.style.visibility = "hidden";
-    imageLayerQueue[Parameter.num].extensionComboBox.style.visibility =
-      "hidden";
-    imageLayerQueue[Parameter.num].sio = true;
-  } else {
-    imageLayerQueue[Parameter.num].deleteBtn.style.visibility = "visible";
-    imageLayerQueue[Parameter.num].nameSpan.style.visibility = "visible";
-    imageLayerQueue[Parameter.num].mainColorBox.style.visibility = "visible";
-    imageLayerQueue[Parameter.num].imgInfoText.style.visibility = "visible";
-    imageLayerQueue[Parameter.num].extensionComboBox.style.visibility =
-      "visible";
-    imageLayerQueue[Parameter.num].sio = false;
-  }
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer) return;
+
+  const isChecked = sioCheckBox.checked;
+  currentLayer.toggleShowImageOnly(isChecked);
 });
 
-ipcRenderer.on("openImgCMD", (event, res) => {
-  Parameter.num = imageLayerQueue.length - 1;
-  imageLayerQueue[Parameter.num].filepath = res;
-  if (
-    imageLayerQueue[Parameter.num].filepath !== undefined &&
-    imageLayerQueue[Parameter.num].filepath !== null
-  ) {
-    imageLayerQueue[Parameter.num].openImg(
-      imageLayerQueue[Parameter.num].filepath
-    );
+ipcRenderer.on("openImgCMD", async (event, res) => {
+  // Get the last layer (should be the default placeholder)
+  const lastLayer = imageLayerQueue[imageLayerQueue.length - 1];
+
+  if (res && lastLayer && lastLayer.openImage) {
+    await lastLayer.openImage(res);
     createDefaultImage();
   }
 });
 
 ipcRenderer.on("setExtensionCMD", (event) => {
-  ipcRenderer.send(
-    "extensionValueSEND",
-    imageLayerQueue[Parameter.num].extension
-  );
-});
-
-ipcRenderer.on("saveImgCMD", (event) => {
-  if (imageLayerQueue[Parameter.num].filepath !== "./assets/addImage.png") {
-    imageLayerQueue[Parameter.num].saveImg(
-      imageLayerQueue[Parameter.num].filepath
-    );
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (currentLayer && currentLayer.extension) {
+    ipcRenderer.send("extensionValueSEND", currentLayer.extension);
   }
 });
 
-ipcRenderer.on("saveAsImgCMD", (event, res) => {
-  imageLayerQueue[Parameter.num].saveImg(res);
+ipcRenderer.on("saveImgCMD", async (event) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+
+  if (
+    currentLayer &&
+    currentLayer.filepath &&
+    currentLayer.filepath !== "./assets/addImage.png"
+  ) {
+    await currentLayer.saveImage(currentLayer.filepath);
+  }
 });
 
-document.getElementById("undoBtn").addEventListener("click", (event) => {
-  imageLayerQueue[Parameter.num].undoPreviewImg();
-});
+ipcRenderer.on("saveAsImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
 
-document.getElementById("redoBtn").addEventListener("click", (event) => {
-  imageLayerQueue[Parameter.num].redoPreviewImg();
+  if (currentLayer && res) {
+    await currentLayer.saveImage(res);
+  }
 });
 
 document.addEventListener("keydown", function (event) {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+
   if (event.ctrlKey && event.key === "z") {
-    imageLayerQueue[Parameter.num].undoPreviewImg();
+    if (currentLayer && currentLayer.undo) {
+      currentLayer.undo();
+    }
   } else if (event.ctrlKey && event.key === "y") {
-    imageLayerQueue[Parameter.num].redoPreviewImg();
+    if (currentLayer && currentLayer.redo) {
+      currentLayer.redo();
+    }
+  } else if (event.altKey && (event.key === "a" || event.key === "A")) {
+    // Alt+A: Toggle magnifying glass mode (handled globally in renderer.js now)
+    // This local handler is kept for backwards compatibility but does nothing
+    // since setupGlobalMagnifyShortcut in renderer.js handles Alt+A globally
   } else if (event.which === 122) {
     if (!fullScreenFlag) {
       ipcRenderer.send("FullScreenREQ");
@@ -258,7 +372,8 @@ document.addEventListener("keydown", function (event) {
 
 document.addEventListener("wheel", function (event) {
   if (event.ctrlKey) {
-    if (ImageLayer.drawFlag) {
+    const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+    if (currentLayer && currentLayer.modeManager.isDrawing()) {
       if (event.deltaY > 0 || event.detail < 0) {
         // scroll up
         lineWidth++;
@@ -268,7 +383,7 @@ document.addEventListener("wheel", function (event) {
           lineWidth--;
         }
       }
-      imageLayerQueue[Parameter.num].ctx.lineWidth = lineWidth;
+      currentLayer.ctx.lineWidth = lineWidth;
     }
   }
 });

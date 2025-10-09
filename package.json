@@ -35,8 +35,7 @@
             "x64"
           ]
         }
-      ],
-      "signAndEditExecutable": false
+      ]
     },
     "mac": {
       "target": []

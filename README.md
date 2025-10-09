@@ -36,11 +36,9 @@ npm install -g electron
 npm update
 ```
 
-## Coding Convention
+## 2. Coding Convention
 
 ### Use Underbar for filename
-
-#### imgkit is local module.
 
 ## 3-1. How to execute
 

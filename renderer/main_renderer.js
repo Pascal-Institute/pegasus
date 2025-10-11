@@ -308,11 +308,33 @@ sioCheckBox.addEventListener("click", (event) => {
 });
 
 ipcRenderer.on("openImgCMD", async (event, res) => {
-  // Get the last layer (should be the default placeholder)
-  const lastLayer = imageLayerQueue[imageLayerQueue.length - 1];
+  // Handle both single file path (string) and multiple file paths (array)
+  const filePaths = Array.isArray(res) ? res : [res];
+  
+  // Filter out any invalid paths
+  const validPaths = filePaths.filter(path => path && typeof path === 'string');
+  
+  if (validPaths.length === 0) return;
 
-  if (res && lastLayer && lastLayer.openImage) {
-    await lastLayer.openImage(res);
+  // Open each file in sequence
+  for (let i = 0; i < validPaths.length; i++) {
+    const filepath = validPaths[i];
+    
+    // Get the last layer (should be the default placeholder)
+    const lastLayer = imageLayerQueue[imageLayerQueue.length - 1];
+    
+    if (lastLayer && lastLayer.openImage) {
+      await lastLayer.openImage(filepath);
+      // Only create a new default image if this is not the last file
+      // or if we're opening a single file
+      if (i < validPaths.length - 1 || validPaths.length === 1) {
+        createDefaultImage();
+      }
+    }
+  }
+  
+  // Always create a default image at the end for the next operation
+  if (validPaths.length > 1) {
     createDefaultImage();
   }
 });

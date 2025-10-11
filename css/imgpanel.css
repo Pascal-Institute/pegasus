@@ -79,6 +79,26 @@
   outline: none;
 }
 
+/* Panel draggable states */
+.imgPanel[draggable="true"] {
+  cursor: grab;
+}
+
+.imgPanel[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Panel drag states */
+.imgPanel.panel-dragging {
+  opacity: 0.5;
+  border: 2px dashed #999;
+  cursor: grabbing;
+}
+
+.imgPanel.panel-drag-over {
+  border-top: 3px solid #4caf50;
+}
+
 .imgPanel:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }

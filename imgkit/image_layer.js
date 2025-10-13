@@ -15,11 +15,11 @@
 // - Manage undo/redo history
 // - Bridge UI events to backend operations (via ImageProcessor)
 
-const path = require('path');
+const path = require("path");
 
-const { ImageLayerEvents } = require('./image_layer_events');
-const { ImageProcessor } = require('./image_processor');
-const { ImageMode, ModeManager } = require('./image_mode');
+const { ImageLayerEvents } = require("./image_layer_events");
+const { ImageProcessor } = require("./image_processor");
+const { ImageMode, ModeManager } = require("./image_mode");
 
 /**
  * ImageLayer class - Represents a single image panel with canvas and controls
@@ -61,14 +61,14 @@ class ImageLayer {
     // Unified mode system replaces individual flags (drawFlag, dragFlag, magnifyFlag)
     this.modeManager = new ModeManager();
     this.cropData = { x: 0, y: 0, width: 0, height: 0 }; // Crop selection area
-    
+
     // Magnifying glass state (for partial redraw)
     this.lastMagnifyPos = null; // { x, y, radius } - previous magnifying glass position
     this.magnifyAnimationId = null; // requestAnimationFrame ID
 
     // Create DOM elements and setup event listeners
     this.createPanelFromTemplate();
-    
+
     // Setup event handlers using ImageLayerEvents class
     this.eventHandler = new ImageLayerEvents(this);
   }
@@ -96,23 +96,23 @@ class ImageLayer {
     this.canvas.id = this.isDefault ? "default" : "full";
     this.ctx = this.canvas.getContext("2d"); // 2D drawing context
     this.image = new Image(); // For loading image data
-    
+
     // Create overlay canvas for magnifying glass (on top of main canvas)
-    this.overlayCanvas = document.createElement('canvas');
-    this.overlayCanvas.style.position = 'absolute';
-    this.overlayCanvas.style.pointerEvents = 'none'; // Pass through mouse events
-    this.overlayCanvas.style.left = '0';
-    this.overlayCanvas.style.top = '0';
-    this.overlayCanvas.style.width = '100%';
-    this.overlayCanvas.style.height = '100%';
+    this.overlayCanvas = document.createElement("canvas");
+    this.overlayCanvas.style.position = "absolute";
+    this.overlayCanvas.style.pointerEvents = "none"; // Pass through mouse events
+    this.overlayCanvas.style.left = "0";
+    this.overlayCanvas.style.top = "0";
+    this.overlayCanvas.style.width = "100%";
+    this.overlayCanvas.style.height = "100%";
     this.overlayCtx = this.overlayCanvas.getContext("2d");
-    
+
     // Wrap canvas in a container for proper overlay positioning
-    const canvasWrapper = document.createElement('div');
-    canvasWrapper.style.position = 'relative';
-    canvasWrapper.style.display = 'inline-block';
-    canvasWrapper.style.lineHeight = '0'; // Remove extra spacing
-    
+    const canvasWrapper = document.createElement("div");
+    canvasWrapper.style.position = "relative";
+    canvasWrapper.style.display = "inline-block";
+    canvasWrapper.style.lineHeight = "0"; // Remove extra spacing
+
     // Move canvas into wrapper
     this.canvas.parentElement.insertBefore(canvasWrapper, this.canvas);
     canvasWrapper.appendChild(this.canvas);
@@ -148,15 +148,15 @@ class ImageLayer {
     // Update main canvas size
     this.canvas.width = info.width;
     this.canvas.height = info.height;
-    
+
     // Update overlay canvas size and position to match exactly
     this.overlayCanvas.width = info.width;
     this.overlayCanvas.height = info.height;
     // Ensure overlay stays perfectly aligned
-    this.overlayCanvas.style.width = info.width + 'px';
-    this.overlayCanvas.style.height = info.height + 'px';
-    this.overlayCanvas.style.left = '0';
-    this.overlayCanvas.style.top = '0';
+    this.overlayCanvas.style.width = info.width + "px";
+    this.overlayCanvas.style.height = info.height + "px";
+    this.overlayCanvas.style.left = "0";
+    this.overlayCanvas.style.top = "0";
 
     this.image.src = `data:image/${this.extension};base64,${buffer.toString(
       "base64"
@@ -164,9 +164,14 @@ class ImageLayer {
     this.image.onload = () => {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.drawImage(this.image, 0, 0);
-      
+
       // Clear overlay canvas when image changes
-      this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
+      this.overlayCtx.clearRect(
+        0,
+        0,
+        this.overlayCanvas.width,
+        this.overlayCanvas.height
+      );
     };
 
     this.infoText.textContent = `${info.width} x ${info.height}`;
@@ -356,7 +361,7 @@ class ImageLayer {
       if (filepath !== "./assets/addImage.png") {
         this.canvas.id = "full";
         this.isDefault = false;
-        this.panel.draggable = true; 
+        this.panel.draggable = true;
       }
 
       return true;

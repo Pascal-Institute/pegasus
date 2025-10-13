@@ -13,7 +13,7 @@
 
 const { ipcRenderer } = require("electron");
 const { ImageLayer } = require("./image_layer.js");
-const { ImageMode } = require('./image_mode.js');
+const { ImageMode } = require("./image_mode.js");
 
 // ============================================================================
 // MAIN CLASS: ImgKitRenderer
@@ -135,9 +135,9 @@ class ImgKitRenderer {
         e.preventDefault();
         console.log("🔍 Magnifying glass ACTIVATED (Alt + A)");
         this.globalMode = ImageMode.MAGNIFY;
-        
+
         // Enable magnify mode on all layers
-        this.imageLayerQueue.forEach(layer => {
+        this.imageLayerQueue.forEach((layer) => {
           layer.modeManager.setMode(ImageMode.MAGNIFY);
         });
       }
@@ -152,15 +152,23 @@ class ImgKitRenderer {
       }
 
       // Deactivate magnifying glass when either Alt or A is released
-      if ((!isAltPressed || !isAPressed) && this.globalMode === ImageMode.MAGNIFY) {
+      if (
+        (!isAltPressed || !isAPressed) &&
+        this.globalMode === ImageMode.MAGNIFY
+      ) {
         console.log("🔍 Magnifying glass DEACTIVATED");
         this.globalMode = ImageMode.NORMAL;
-        
+
         // Disable magnify on all layers and clear overlays
-        this.imageLayerQueue.forEach(layer => {
+        this.imageLayerQueue.forEach((layer) => {
           layer.modeManager.reset();
           if (layer.overlayCanvas) {
-            layer.overlayCtx.clearRect(0, 0, layer.overlayCanvas.width, layer.overlayCanvas.height);
+            layer.overlayCtx.clearRect(
+              0,
+              0,
+              layer.overlayCanvas.width,
+              layer.overlayCanvas.height
+            );
           }
           if (layer.magnifyAnimationId) {
             cancelAnimationFrame(layer.magnifyAnimationId);
@@ -248,16 +256,16 @@ class ImgKitRenderer {
   /**
    * Swap two layers by index
    * Used for drag & drop reordering
-   * 
+   *
    * @param {number} fromIndex - Source layer index
    * @param {number} toIndex - Target layer index
    */
   swapLayers(fromIndex, toIndex) {
     if (
-      fromIndex < 0 || 
-      fromIndex >= this.imageLayerQueue.length -1 ||
-      toIndex < 0 || 
-      toIndex >= this.imageLayerQueue.length -1
+      fromIndex < 0 ||
+      fromIndex >= this.imageLayerQueue.length - 1 ||
+      toIndex < 0 ||
+      toIndex >= this.imageLayerQueue.length - 1
     ) {
       return;
     }
@@ -332,18 +340,18 @@ class ImgKitRenderer {
     if (current && current.buffer) {
       try {
         // Send image to native clipboard via IPC
-        ipcRenderer.send('copy-image-to-clipboard', current.buffer);
-        
+        ipcRenderer.send("copy-image-to-clipboard", current.buffer);
+
         // Also keep internal copy for fallback
         this.copiedLayer = {
           buffer: current.buffer,
           filename: current.filename,
           extension: current.extension,
         };
-        
+
         this.showMessage("img-copy");
       } catch (error) {
-        console.error('Failed to copy image:', error);
+        console.error("Failed to copy image:", error);
       }
     }
   }
@@ -360,20 +368,22 @@ class ImgKitRenderer {
 
     try {
       // Try to get image from native clipboard first
-      const imageBuffer = await ipcRenderer.invoke('paste-image-from-clipboard');
-      
+      const imageBuffer = await ipcRenderer.invoke(
+        "paste-image-from-clipboard"
+      );
+
       if (imageBuffer) {
         // Got image from clipboard
-        const filename = 'pasted_image.png';
+        const filename = "pasted_image.png";
         await current.openImageBuffer(Buffer.from(imageBuffer), filename);
         this.showMessage("img-paste");
         if (this.currentIndex === this.imageLayerQueue.length - 1) {
-            this.createDefaultImage();  
+          this.createDefaultImage();
         }
         return;
       }
     } catch (error) {
-      console.error('Failed to paste from clipboard:', error);
+      console.error("Failed to paste from clipboard:", error);
     }
 
     // Fallback: paste from internally copied layer
@@ -382,7 +392,6 @@ class ImgKitRenderer {
       await current.openImageBuffer(this.copiedLayer.buffer, filename);
       this.showMessage("img-paste");
     }
-      
   }
 
   // --------------------------------------------------------------------------

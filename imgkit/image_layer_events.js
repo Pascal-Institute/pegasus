@@ -1,5 +1,5 @@
 const { ipcRenderer, webUtils } = require("electron");
-const { ImageMode } = require('./image_mode');
+const { ImageMode } = require("./image_mode");
 const { ImageProcessor } = require("./image_processor");
 
 /**
@@ -12,7 +12,7 @@ class ImageLayerEvents {
    */
   constructor(imageLayer) {
     this.layer = imageLayer;
-    
+
     // Setup all event listeners
     this.setupEvents();
   }
@@ -32,14 +32,19 @@ class ImageLayerEvents {
         const rect = this.layer.canvas.getBoundingClientRect();
         const x = Math.floor(e.clientX - rect.left);
         const y = Math.floor(e.clientY - rect.top);
-        
+
         // Extract color at clicked position
-        const color = await ImageProcessor.extractColorAt(this.layer.buffer, this.layer.info, x, y);
-        
+        const color = await ImageProcessor.extractColorAt(
+          this.layer.buffer,
+          this.layer.info,
+          x,
+          y
+        );
+
         const color_name = await ImageProcessor.getColorName(color);
 
         // Send color to main renderer
-        ipcRenderer.send('colorpickerValueSEND', color, color_name);
+        ipcRenderer.send("colorpickerValueSEND", color, color_name);
       }
     });
 
@@ -102,54 +107,54 @@ class ImageLayerEvents {
     this.layer.panel.draggable = false; // Initially false, set to true when image is loaded
 
     // Drag start - store the dragged layer index
-    this.layer.panel.addEventListener('dragstart', (e) => {
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/html', this.layer.panel.innerHTML);
-      
+    this.layer.panel.addEventListener("dragstart", (e) => {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/html", this.layer.panel.innerHTML);
+
       // Store the index of dragged layer
       const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
-      e.dataTransfer.setData('layerIndex', index.toString());
-      
+      e.dataTransfer.setData("layerIndex", index.toString());
+
       // Add visual feedback
-      this.layer.panel.style.opacity = '0.5';
+      this.layer.panel.style.opacity = "0.5";
     });
 
     // Drag end - restore opacity
-    this.layer.panel.addEventListener('dragend', (e) => {
-      this.layer.panel.style.opacity = '1';
+    this.layer.panel.addEventListener("dragend", (e) => {
+      this.layer.panel.style.opacity = "1";
     });
 
     // Drag over - allow drop
-    this.layer.panel.addEventListener('dragover', (e) => {
+    this.layer.panel.addEventListener("dragover", (e) => {
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      
+      e.dataTransfer.dropEffect = "move";
+
       // Add visual feedback
-      this.layer.panel.style.borderTop = '3px solid #4CAF50';
+      this.layer.panel.style.borderTop = "3px solid #4CAF50";
       return false;
     });
 
     // Drag leave - remove visual feedback
-    this.layer.panel.addEventListener('dragleave', (e) => {
-      this.layer.panel.style.borderTop = '';
+    this.layer.panel.addEventListener("dragleave", (e) => {
+      this.layer.panel.style.borderTop = "";
     });
 
     // Drop - swap positions
-    this.layer.panel.addEventListener('drop', (e) => {
+    this.layer.panel.addEventListener("drop", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       // Remove visual feedback
-      this.layer.panel.style.borderTop = '';
-      
+      this.layer.panel.style.borderTop = "";
+
       // Get dragged layer index
-      const fromIndex = parseInt(e.dataTransfer.getData('layerIndex'));
+      const fromIndex = parseInt(e.dataTransfer.getData("layerIndex"));
       const toIndex = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
-      
+
       if (fromIndex !== toIndex && fromIndex >= 0 && toIndex >= 0) {
         this.layer.renderer.swapLayers(fromIndex, toIndex);
       }
-      
+
       return false;
     });
   }
@@ -167,43 +172,79 @@ class ImageLayerEvents {
 
     this.layer.canvas.addEventListener("drop", async (e) => {
       e.preventDefault();
-      const file = e.dataTransfer.files[0];
-      if (!file) return;
+      const files = e.dataTransfer.files;
 
-      const tryOpenImg = async (filepathOrBuffer) => {
-        let isOpened;
-        if (typeof filepathOrBuffer === "string") {
-          isOpened = await this.layer.openImage(filepathOrBuffer);
-        } else {
-          const filePath = webUtils.getPathForFile(file);
-          isOpened = await this.layer.openImageBuffer(
-            filepathOrBuffer,
-            file.name,
-            filePath
-          );
+      if (!files || files.length === 0) return;
+
+      const fileArray = Array.from(files);
+
+      // Process files sequentially
+      for (let index = 0; index < fileArray.length; index++) {
+        const file = fileArray[index];
+        if (!file) continue;
+
+        // Determine target layer: first file goes to current layer, rest to new layers
+        let targetLayer = this.layer;
+        if (index > 0) {
+          // Create new layer for additional files
+          targetLayer = this.layer.renderer.createDefaultImage();
+          // Set the new layer as current so we can open image in it
+          const newIndex = this.layer.renderer.imageLayerQueue.length - 1;
+          this.layer.renderer.setCurrentLayer(newIndex);
         }
-        if (!isOpened) return;
 
-        // Only create a new default layer if dropping on an empty canvas
-        if (!this.layer.isDefault && 
-          this.layer.renderer.currentIndex === this.layer.renderer.imageLayerQueue.length - 1) {
-          // Make panel draggable
-          this.layer.panel.draggable = true;
-          this.layer.renderer.createDefaultImage();
-        }
-      };
+        const tryOpenImg = async (filepathOrBuffer) => {
+          let isOpened;
+          if (typeof filepathOrBuffer === "string") {
+            isOpened = await targetLayer.openImage(filepathOrBuffer);
+          } else {
+            let filePath;
+            try {
+              filePath = webUtils.getPathForFile(file);
+            } catch (err) {
+              console.log("Could not get file path:", err);
+            }
 
-      if (!file.path) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const arrayBuffer = e.target.result;
-          const buffer = Buffer.from(arrayBuffer);
-          tryOpenImg(buffer);
+            isOpened = await targetLayer.openImageBuffer(
+              filepathOrBuffer,
+              file.name,
+              filePath
+            );
+          }
+
+          if (isOpened) {
+            // Make panel draggable after successful load
+            targetLayer.panel.draggable = true;
+          }
+
+          return isOpened;
         };
-        reader.readAsArrayBuffer(file);
-      } else {
-        tryOpenImg(file.path);
+
+        // Open the file
+        if (!file.path) {
+          // Use FileReader for files without path
+          await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+              const arrayBuffer = evt.target.result;
+              const buffer = Buffer.from(arrayBuffer);
+              await tryOpenImg(buffer);
+              resolve();
+            };
+            reader.onerror = () => {
+              console.error("FileReader error:", reader.error);
+              resolve();
+            };
+            reader.readAsArrayBuffer(file);
+          });
+        } else {
+          // Use file path directly
+          await tryOpenImg(file.path);
+        }
       }
+
+      // Create one more default layer at the end
+      this.layer.renderer.createDefaultImage();
     });
   }
 
@@ -213,21 +254,21 @@ class ImageLayerEvents {
    */
   setupContextMenu() {
     // Listen for menu action responses from Main Process
-    ipcRenderer.on('imgkit-context-menu-action', (event, action) => {
+    ipcRenderer.on("imgkit-context-menu-action", (event, action) => {
       switch (action) {
-        case 'copy':
+        case "copy":
           this.layer.renderer.copyImage();
           break;
-        case 'paste':
+        case "paste":
           this.layer.renderer.pasteImage();
           break;
-        case 'delete':
+        case "delete":
           this.layer.renderer.deleteImage();
           break;
-        case 'undo':
+        case "undo":
           this.layer.undo();
           break;
-        case 'redo':
+        case "redo":
           this.layer.redo();
           break;
       }
@@ -237,9 +278,10 @@ class ImageLayerEvents {
       e.preventDefault();
 
       // Send request to Main Process to show context menu
-      ipcRenderer.send('show-imgkit-context-menu', {
+      ipcRenderer.send("show-imgkit-context-menu", {
         hasUndo: this.layer.history.index > 0,
-        hasRedo: this.layer.history.index < this.layer.history.buffers.length - 1
+        hasRedo:
+          this.layer.history.index < this.layer.history.buffers.length - 1,
       });
     });
   }
@@ -249,7 +291,7 @@ class ImageLayerEvents {
    */
   setupKeyboardShortcuts() {
     // Note: Alt + A for magnifying glass is handled globally in renderer.js
-    
+
     document.addEventListener("keydown", (e) => {
       // Only handle if this panel is focused
       if (document.activeElement !== this.layer.panel) return;
@@ -305,8 +347,8 @@ class ImageLayerEvents {
     this.layer.canvas.addEventListener("mousedown", (e) => {
       // Only handle if in cropping mode
       if (!this.layer.modeManager.isCropping()) return;
-      this.layer.panel.setAttribute("draggable", false); 
-      
+      this.layer.panel.setAttribute("draggable", false);
+
       const rect = this.layer.canvas.getBoundingClientRect();
       const startX = e.clientX - rect.left;
       const startY = e.clientY - rect.top;
@@ -316,7 +358,12 @@ class ImageLayerEvents {
       this.layer.ctx.setLineDash([2]);
 
       const mouseMoveHandler = (evt) => {
-        this.layer.ctx.clearRect(0, 0, this.layer.canvas.width, this.layer.canvas.height);
+        this.layer.ctx.clearRect(
+          0,
+          0,
+          this.layer.canvas.width,
+          this.layer.canvas.height
+        );
         this.layer.ctx.drawImage(this.layer.image, 0, 0);
 
         const currX = evt.clientX - rect.left;
@@ -353,7 +400,6 @@ class ImageLayerEvents {
   setupDrawing() {
     // Drawing mode will be implemented here
     // Currently handled by main_renderer.js with drawImgCMD
-    
     // TODO: Add canvas drawing logic when in DRAWING mode
     // this.layer.canvas.addEventListener("mousedown", (e) => {
     //   if (!this.layer.modeManager.isDrawing()) return;
@@ -368,12 +414,12 @@ class ImageLayerEvents {
     // Magnifying glass mode
     this.layer.canvas.addEventListener("mousemove", (e) => {
       if (!this.layer.modeManager.isMagnifying()) return;
-      
+
       // Cancel previous animation
       if (this.layer.magnifyAnimationId) {
         cancelAnimationFrame(this.layer.magnifyAnimationId);
       }
-      
+
       // Schedule next frame
       this.layer.magnifyAnimationId = requestAnimationFrame(() => {
         const rect = this.layer.canvas.getBoundingClientRect();
@@ -389,7 +435,12 @@ class ImageLayerEvents {
         mouseY = Math.max(0, Math.min(mouseY, this.layer.canvas.height));
 
         // Clear overlay canvas (main canvas stays untouched = no flicker!)
-        this.layer.overlayCtx.clearRect(0, 0, this.layer.overlayCanvas.width, this.layer.overlayCanvas.height);
+        this.layer.overlayCtx.clearRect(
+          0,
+          0,
+          this.layer.overlayCanvas.width,
+          this.layer.overlayCanvas.height
+        );
 
         // Draw magnifying glass on overlay
         this.layer.overlayCtx.save();
@@ -399,15 +450,30 @@ class ImageLayerEvents {
 
         const sourceSize = magnifySize / magnifyScale;
         // Clamp source coordinates to prevent reading outside image bounds
-        const sourceX = Math.max(0, Math.min(mouseX - sourceSize / 2, this.layer.image.width - sourceSize));
-        const sourceY = Math.max(0, Math.min(mouseY - sourceSize / 2, this.layer.image.height - sourceSize));
-        
+        const sourceX = Math.max(
+          0,
+          Math.min(mouseX - sourceSize / 2, this.layer.image.width - sourceSize)
+        );
+        const sourceY = Math.max(
+          0,
+          Math.min(
+            mouseY - sourceSize / 2,
+            this.layer.image.height - sourceSize
+          )
+        );
+
         this.layer.overlayCtx.drawImage(
           this.layer.image,
-          sourceX, sourceY, sourceSize, sourceSize,
-          mouseX - radius, mouseY - radius, magnifySize, magnifySize
+          sourceX,
+          sourceY,
+          sourceSize,
+          sourceSize,
+          mouseX - radius,
+          mouseY - radius,
+          magnifySize,
+          magnifySize
         );
-        
+
         this.layer.overlayCtx.restore();
 
         // Draw border on overlay
@@ -426,9 +492,14 @@ class ImageLayerEvents {
           cancelAnimationFrame(this.layer.magnifyAnimationId);
           this.layer.magnifyAnimationId = null;
         }
-        
+
         // Clear overlay (main canvas untouched!)
-        this.layer.overlayCtx.clearRect(0, 0, this.layer.overlayCanvas.width, this.layer.overlayCanvas.height);
+        this.layer.overlayCtx.clearRect(
+          0,
+          0,
+          this.layer.overlayCanvas.width,
+          this.layer.overlayCanvas.height
+        );
       }
     });
   }

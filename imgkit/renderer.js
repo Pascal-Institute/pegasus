@@ -41,49 +41,9 @@ class ImgKitRenderer {
 
     // Initialize if DOM elements exist
     if (this.scrollContainer && this.scrollLeftBtn && this.scrollRightBtn) {
-      this.initializeMessages();
       this.setupScrollEvents();
       this.setupGlobalMagnifyShortcut(); // Setup Alt + A globally
     }
-  }
-
-  // --------------------------------------------------------------------------
-  // NOTIFICATION SYSTEM
-  // --------------------------------------------------------------------------
-
-  /**
-   * Initialize notification message elements (from existing HTML)
-   * These are the small popup messages that appear when you copy, save, etc.
-   */
-  initializeMessages() {
-    const messageIds = [
-      "copy",
-      "img-copy",
-      "img-paste",
-      "delete",
-      "save",
-      "convert",
-      "error",
-    ];
-
-    messageIds.forEach((id) => {
-      const msg = document.getElementById(`imgkit-${id}`);
-      if (msg) {
-        this.messages[id] = msg;
-      }
-    });
-  }
-
-  /**
-   * Show notification message with fade animation
-   * @param {string} id - Message identifier (e.g., 'copy', 'save')
-   */
-  showMessage(id) {
-    if (!this.messages[id]) return;
-    this.messages[id].animate([{ opacity: "1" }, { opacity: "0" }], {
-      duration: 1800,
-      iterations: 1,
-    });
   }
 
   // --------------------------------------------------------------------------
@@ -348,8 +308,7 @@ class ImgKitRenderer {
           filename: current.filename,
           extension: current.extension,
         };
-
-        this.showMessage("img-copy");
+        ipcRenderer.send("showNotificationREQ", "imgkit-img-copy");
       } catch (error) {
         console.error("Failed to copy image:", error);
       }
@@ -376,7 +335,7 @@ class ImgKitRenderer {
         // Got image from clipboard
         const filename = "pasted_image.png";
         await current.openImageBuffer(Buffer.from(imageBuffer), filename);
-        this.showMessage("img-paste");
+        ipcRenderer.send("showNotificationREQ", "imgkit-img-paste");
         if (this.currentIndex === this.imageLayerQueue.length - 1) {
           this.createDefaultImage();
         }
@@ -390,7 +349,7 @@ class ImgKitRenderer {
     if (this.copiedLayer) {
       const filename = `${this.copiedLayer.filename}_copy.${this.copiedLayer.extension}`;
       await current.openImageBuffer(this.copiedLayer.buffer, filename);
-      this.showMessage("img-paste");
+      ipcRenderer.send("showNotificationREQ", "imgkit-img-paste");
     }
   }
 
@@ -422,7 +381,7 @@ class ImgKitRenderer {
         this.createDefaultImage();
       }
 
-      this.showMessage("delete");
+      ipcRenderer.send("showNotificationREQ", "imgkit-delete");
       this.updateScrollUI();
     }
   }

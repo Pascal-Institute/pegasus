@@ -2,7 +2,8 @@
 #grayScaleBtn:hover,
 #tintExecuteBtn:hover,
 #watermarkBtn:hover,
-#colorpickerBtn:hover {
+#colorpickerBtn:hover,
+#colorpickerBox:hover {
   cursor: pointer;
 }
 

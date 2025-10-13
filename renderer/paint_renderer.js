@@ -12,6 +12,17 @@ ipcRenderer.on("colorpickerValueRECV", (event, color, color_name) => {
   document.getElementById("colorpickerName").textContent = color_name;
 });
 
+// Color copy on click
+document.getElementById("colorpickerBox").addEventListener("click", () => {
+  const color = document.getElementById("colorpickerBox").style.backgroundColor;
+  if (color && color !== "empty") {
+    navigator.clipboard.writeText(color).then(() => {
+      // Send notification request to main window via IPC
+      ipcRenderer.send("showNotificationREQ", "imgkit-copy");
+    });
+  }
+});
+
 document.getElementById("drawBtn").addEventListener("click", () => {
   drawFlagState = !drawFlagState;
 
@@ -37,7 +48,7 @@ document.getElementById("watermarkBtn").addEventListener("click", () => {
 });
 
 document.getElementById("colorpickerBtn").addEventListener("click", () => {
-  colorpickerActive = !colorpickerActive; 
+  colorpickerActive = !colorpickerActive;
   if (colorpickerActive) {
     document.getElementById("colorpickerBtn").style.backgroundColor = "gray";
   } else {
@@ -45,7 +56,6 @@ document.getElementById("colorpickerBtn").addEventListener("click", () => {
   }
   ipcRenderer.send("colorpickerImgREQ", colorpickerActive);
 });
-
 
 document.getElementById("redValue").addEventListener("input", (event) => {
   rgb.r = event.target.value; //parseInt(event.target.value, 10).toString(16).padStart(2, "0");

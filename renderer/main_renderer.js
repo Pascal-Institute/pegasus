@@ -7,7 +7,14 @@ const imageLayerQueue = imgKitRenderer.imageLayerQueue;
 var fullScreenFlag = false;
 var lineWidth = 1;
 
-const buttons = ["resizeBtn", "cropBtn", "filterBtn", "rotateBtn", "paintBtn", "image_analysisBtn"];
+const buttons = [
+  "resizeBtn",
+  "cropBtn",
+  "filterBtn",
+  "rotateBtn",
+  "paintBtn",
+  "image_analysisBtn",
+];
 
 buttons.forEach((btnId) => {
   const btn = document.getElementById(btnId);
@@ -310,19 +317,21 @@ sioCheckBox.addEventListener("click", (event) => {
 ipcRenderer.on("openImgCMD", async (event, res) => {
   // Handle both single file path (string) and multiple file paths (array)
   const filePaths = Array.isArray(res) ? res : [res];
-  
+
   // Filter out any invalid paths
-  const validPaths = filePaths.filter(path => path && typeof path === 'string');
-  
+  const validPaths = filePaths.filter(
+    (path) => path && typeof path === "string"
+  );
+
   if (validPaths.length === 0) return;
 
   // Open each file in sequence
   for (let i = 0; i < validPaths.length; i++) {
     const filepath = validPaths[i];
-    
+
     // Get the last layer (should be the default placeholder)
     const lastLayer = imageLayerQueue[imageLayerQueue.length - 1];
-    
+
     if (lastLayer && lastLayer.openImage) {
       await lastLayer.openImage(filepath);
       // Only create a new default image if this is not the last file
@@ -332,7 +341,7 @@ ipcRenderer.on("openImgCMD", async (event, res) => {
       }
     }
   }
-  
+
   // Always create a default image at the end for the next operation
   if (validPaths.length > 1) {
     createDefaultImage();
@@ -389,6 +398,17 @@ document.addEventListener("keydown", function (event) {
       ipcRenderer.send("DefaultScreenREQ");
       fullScreenFlag = false;
     }
+  }
+});
+
+// Handle notification requests from other renderers (e.g., paint_renderer)
+ipcRenderer.on("showNotificationCMD", (event, notificationId) => {
+  const element = document.getElementById(notificationId);
+  if (element) {
+    element.animate([{ opacity: "1" }, { opacity: "0" }], {
+      duration: 1800,
+      iterations: 1,
+    });
   }
 });
 

@@ -147,12 +147,13 @@
 }
 
 .name-input {
+  width: 100px;
   font-size: 14px;
   font-weight: 600;
   color: #333;
   position: absolute;
-  left: 20px;
-  top: 12px;
+  left: 18px;
+  top: 8px;
 }
 
 .color-box-container {

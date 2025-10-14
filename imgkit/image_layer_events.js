@@ -63,6 +63,28 @@ class ImageLayerEvents {
       this.layer.renderer.deleteImage();
     });
 
+    // Name input - prevent panel click event from interfering
+    this.layer.nameInput.addEventListener("click", (e) => {
+      e.stopPropagation(); // Don't trigger panel click
+    });
+
+    // Name input - update filename on change
+    this.layer.nameInput.addEventListener("change", (e) => {
+      const newFilename = e.target.value.trim();
+      if (newFilename) {
+        this.layer.filename = newFilename;
+        // If we have a filepath, update it with the new filename
+        if (this.layer.filepath) {
+          const dir = require("path").dirname(this.layer.filepath);
+          const ext = this.layer.extension;
+          this.layer.filepath = require("path").join(
+            dir,
+            `${newFilename}.${ext}`
+          );
+        }
+      }
+    });
+
     // Color copy on click
     this.layer.colorBox.colors.forEach((colorDiv) => {
       colorDiv.addEventListener("click", () => {

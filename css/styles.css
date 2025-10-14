@@ -90,7 +90,7 @@ select#extensionComboBox {
   transform: translateY(1px);
 }
 
-#nameSpan {
+#nameInput {
   position: absolute;
   top: 8px;
   left: 8px;

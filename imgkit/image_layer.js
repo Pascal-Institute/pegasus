@@ -120,7 +120,7 @@ class ImageLayer {
 
     // Get UI control elements
     this.deleteBtn = this.panel.querySelector(".delete-btn");
-    this.nameSpan = this.panel.querySelector(".name-span");
+    this.nameInput = this.panel.querySelector(".name-input");
     this.infoText = this.panel.querySelector(".info-text");
     this.extensionCombo = this.panel.querySelector(".extension-combo");
 
@@ -323,7 +323,7 @@ class ImageLayer {
     const visibility = show ? "hidden" : "visible";
     [
       this.deleteBtn,
-      this.nameSpan,
+      this.nameInput,
       this.colorBox.container,
       this.infoText,
       this.extensionCombo,
@@ -354,7 +354,7 @@ class ImageLayer {
       this.filepath = filepath;
       this.filename = result.filename;
       this.extension = result.extension;
-      this.nameSpan.textContent = this.filename;
+      this.nameInput.value = this.filename;
       this.extensionCombo.value = this.extension;
       this.updatePreview(result.buffer, result.info);
 
@@ -389,7 +389,7 @@ class ImageLayer {
       this.filepath = filepath || ""; // Store the file path from drag & drop
 
       this.extension = result.extension;
-      this.nameSpan.textContent = this.filename;
+      this.nameInput.value = this.filename;
       this.extensionCombo.value = this.extension;
       this.updatePreview(result.buffer, result.info);
 

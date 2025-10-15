@@ -1,5 +1,11 @@
 const { ipcRenderer } = require("electron");
-const { imgKitRenderer, createDefaultImage, ImageMode } = require("imgkit");
+const {
+  imgKitRenderer,
+  createDefaultImage,
+  ImageMode,
+  ImageProcessor,
+} = require("imgkit");
+const { getCurrentLayer } = require("imgkit/renderer");
 const sharp = require("sharp");
 
 // Get imageLayerQueue from renderer
@@ -86,46 +92,19 @@ ipcRenderer.on("sharpenImgCMD", async (event, res) => {
 ipcRenderer.on("normalizeImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .normalize(true)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Normalize failed:", error);
-  }
+  currentLayer.processImage({ normalize: true });
 });
 
 ipcRenderer.on("medianImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .median(res)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Median failed:", error);
-  }
+  currentLayer.processImage({ median: res });
 });
 
 ipcRenderer.on("dilateImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .dilate(res)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Dilate failed:", error);
-  }
+  currentLayer.processImage({ dilate: res });
 });
 
 ipcRenderer.on("rotateImgCMD", async (event, res) => {
@@ -251,7 +230,6 @@ ipcRenderer.on("grayScaleImgCMD", async (event) => {
 ipcRenderer.on("tintImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
   try {
     const result = await sharp(currentLayer.buffer)
       .tint(res)

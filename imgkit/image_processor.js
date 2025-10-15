@@ -15,7 +15,7 @@ const ico = require("sharp-ico");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
-const namer = require('color-namer');
+const namer = require("color-namer");
 
 // ============================================================================
 // IMAGE PROCESSOR CLASS
@@ -49,7 +49,7 @@ class ImageProcessor {
         buffer: result.data,
         info: result.info,
         filename,
-        extension
+        extension,
       };
     } catch (error) {
       throw new Error(`Failed to open image: ${error.message}`);
@@ -75,7 +75,7 @@ class ImageProcessor {
         buffer: result.data,
         info: result.info,
         filename: name,
-        extension
+        extension,
       };
     } catch (error) {
       throw new Error(`Failed to open image buffer: ${error.message}`);
@@ -137,6 +137,21 @@ class ImageProcessor {
       // Apply sharpen if specified
       if (options.sharpen) {
         pipeline = pipeline.sharpen(options.sharpen);
+      }
+
+      // Apply normalize if specified
+      if (options.normalize) {
+        pipeline = pipeline.normalize(options.normalize);
+      }
+
+      // Apply median if specified
+      if (options.median) {
+        pipeline = pipeline.median(options.median);
+      }
+
+      // Apply dilate if specified
+      if (options.dilate) {
+        pipeline = pipeline.dilate(options.dilate);
       }
 
       // Apply format conversion if specified
@@ -264,7 +279,7 @@ class ImageProcessor {
   // COLOR EXTRACTION
   // --------------------------------------------------------------------------
 
-   /**
+  /**
    * Extract color from (x, y) position in image
    * This is used to show color palette in UI
    *
@@ -452,7 +467,10 @@ class ImageProcessor {
    * @private
    */
   static async _convertToBmp(buffer) {
-    const tempPath = ImageProcessor.createTempFileFromBuffer(buffer, `temp.bmp`);
+    const tempPath = ImageProcessor.createTempFileFromBuffer(
+      buffer,
+      `temp.bmp`
+    );
     await bmp.sharpToBmp(sharp(buffer), tempPath);
     const resultBuffer = await fs.promises.readFile(tempPath);
 
@@ -469,7 +487,10 @@ class ImageProcessor {
    * @private
    */
   static async _convertToIco(buffer) {
-    const tempPath = ImageProcessor.createTempFileFromBuffer(buffer, `temp.ico`);
+    const tempPath = ImageProcessor.createTempFileFromBuffer(
+      buffer,
+      `temp.ico`
+    );
     await ico.sharpsToIco([sharp(buffer)], tempPath);
     const resultBuffer = await fs.promises.readFile(tempPath);
 

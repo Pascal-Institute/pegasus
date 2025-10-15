@@ -13,7 +13,7 @@
 
 const { ipcRenderer } = require("electron");
 const { ImageLayer } = require("./image_layer.js");
-const { ImageMode } = require("./image_mode.js");
+const { ImageMode } = require("../features/image_mode.js");
 
 // ============================================================================
 // MAIN CLASS: ImgKitRenderer

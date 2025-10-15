@@ -9,22 +9,19 @@
 // - createDefaultImage: Helper function
 // - getCurrentLayer: Helper function
 
-const { ImageProcessor } = require('./image_processor');
-const { 
-  imgKitRenderer,
-  createDefaultImage,
-} = require('./renderer');
-const { ImageMode, ModeManager } = require('./image_mode');
+const { ImageProcessor } = require("./processing/image_processor");
+const { imgKitRenderer, createDefaultImage } = require("./core/renderer");
+const { ImageMode, ModeManager } = require("./features/image_mode");
 
 // Export only what's actually used in the project
 module.exports = {
   // Core (used by image-layer.js internally)
   ImageProcessor,
-  
+
   // UI components (used by main_renderer.js)
   imgKitRenderer,
   createDefaultImage,
-  
+
   // Mode system (replaces old flag-based system)
   ImageMode,
   ModeManager,

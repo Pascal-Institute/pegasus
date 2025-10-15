@@ -1,11 +1,5 @@
 const { ipcRenderer } = require("electron");
-const {
-  imgKitRenderer,
-  createDefaultImage,
-  ImageMode,
-  ImageProcessor,
-} = require("imgkit");
-const { getCurrentLayer } = require("imgkit/renderer");
+const { imgKitRenderer, createDefaultImage, ImageMode } = require("imgkit");
 const sharp = require("sharp");
 
 // Get imageLayerQueue from renderer

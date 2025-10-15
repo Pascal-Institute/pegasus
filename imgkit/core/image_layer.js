@@ -16,10 +16,10 @@
 // - Bridge UI events to backend operations (via ImageProcessor)
 
 const { ipcRenderer } = require("electron");
-const { ImageLayerEvents } = require("./image_layer_events");
-const { ImageProcessor } = require("./image_processor");
-const { ImageMode, ModeManager } = require("./image_mode");
-const { LayerHistory } = require("./layer_history");
+const { ImageLayerEvents } = require("../features/image_layer_events");
+const { ImageProcessor } = require("../processing/image_processor");
+const { ImageMode, ModeManager } = require("../features/image_mode");
+const { LayerHistory } = require("../features/layer_history");
 
 /**
  * ImageLayer class - Represents a single image panel with canvas and controls

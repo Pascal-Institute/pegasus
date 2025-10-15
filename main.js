@@ -128,6 +128,11 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on("dilateValueSEND", (event, res) => {
+    mainWindow.webContents.send("dilateImgCMD", res);
+    mainWindow.webContents.focus();
+  });
+
   ipcMain.on("rotateValueSEND", (event, res) => {
     mainWindow.webContents.send("rotateImgCMD", res);
     mainWindow.webContents.focus();

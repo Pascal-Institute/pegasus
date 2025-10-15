@@ -113,6 +113,21 @@ ipcRenderer.on("medianImgCMD", async (event, res) => {
   }
 });
 
+ipcRenderer.on("dilateImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+
+  try {
+    const result = await sharp(currentLayer.buffer)
+      .dilate(res)
+      .toBuffer({ resolveWithObject: true });
+
+    currentLayer.updatePreview(result.data, result.info);
+  } catch (error) {
+    console.error("Dilate failed:", error);
+  }
+});
+
 ipcRenderer.on("rotateImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;

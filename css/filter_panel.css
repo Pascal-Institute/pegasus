@@ -3,6 +3,7 @@
 #medianBtn:hover,
 #bitwiseBtn:hover,
 #negativeBtn:hover,
-#normalizeBtn:hover {
+#normalizeBtn:hover,
+#dilateBtn:hover {
   cursor: pointer;
 }

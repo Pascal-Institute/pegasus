@@ -15,8 +15,7 @@
 // - Manage undo/redo history
 // - Bridge UI events to backend operations (via ImageProcessor)
 
-const path = require("path");
-
+const { ipcRenderer } = require("electron");
 const { ImageLayerEvents } = require("./image_layer_events");
 const { ImageProcessor } = require("./image_processor");
 const { ImageMode, ModeManager } = require("./image_mode");
@@ -366,7 +365,7 @@ class ImageLayer {
 
       return true;
     } catch (error) {
-      this.renderer.showMessage("error");
+      ipcRenderer.send("showNotificationREQ", "imgkit-open-error");
       console.error("Error opening image:", error);
       this.canvas.id = "default";
       return false;
@@ -398,7 +397,7 @@ class ImageLayer {
       this.panel.draggable = true;
       return true;
     } catch (error) {
-      this.renderer.showMessage("error");
+      ipcRenderer.send("showNotificationREQ", "imgkit-error");
       console.error("Error opening image buffer:", error);
       this.canvas.id = "default";
       return false;
@@ -430,9 +429,9 @@ class ImageLayer {
       }
 
       this.updatePreview(result.buffer, result.info);
-      this.renderer.showMessage("convert");
+      ipcRenderer.send("showNotificationREQ", "imgkit-convert");
     } catch (error) {
-      this.renderer.showMessage("error");
+      ipcRenderer.send("showNotificationREQ", "imgkit-error");
       console.error("Error converting format:", error);
     }
   }
@@ -456,9 +455,9 @@ class ImageLayer {
 
       await ImageProcessor.saveImage(buffer, savePath);
       this.filepath = savePath;
-      this.renderer.showMessage("save");
+      ipcRenderer.send("showNotificationREQ", "imgkit-save");
     } catch (error) {
-      this.renderer.showMessage("error");
+      ipcRenderer.send("showNotificationREQ", "imgkit-error");
       console.error("Error saving image:", error);
     }
   }
@@ -474,7 +473,7 @@ class ImageLayer {
       const result = await ImageProcessor.processImage(this.buffer, options);
       this.updatePreview(result.buffer, result.info);
     } catch (error) {
-      this.renderer.showMessage("error");
+      ipcRenderer.send("showNotificationREQ", "imgkit-error");
       console.error("Error processing image:", error);
     }
   }
@@ -495,7 +494,7 @@ class ImageLayer {
 
       this.updatePreview(result.buffer, result.info);
     } catch (error) {
-      this.renderer.showMessage("error");
+      ipcRenderer.send("showNotificationREQ", "imgkit-error");
       console.error("Crop failed:", error);
     }
   }

@@ -19,6 +19,7 @@ const { ipcRenderer } = require("electron");
 const { ImageLayerEvents } = require("./image_layer_events");
 const { ImageProcessor } = require("./image_processor");
 const { ImageMode, ModeManager } = require("./image_mode");
+const { LayerHistory } = require("./layer_history");
 
 /**
  * ImageLayer class - Represents a single image panel with canvas and controls
@@ -40,14 +41,8 @@ class ImageLayer {
     // --------------------------------------------------------------------------
     // UNDO/REDO HISTORY
     // --------------------------------------------------------------------------
-    // Stores previous states so user can undo/redo changes
-    this.history = {
-      buffers: [], // Array of previous image buffers
-      infos: [], // Array of previous image infos
-      extensions: [], // Array of previous extensions
-      index: -1, // Current position in history
-      maxSize: 10, // Maximum number of undo steps
-    };
+    // History manager handles all undo/redo functionality
+    this.history = new LayerHistory(10); // Max 10 undo steps
 
     // --------------------------------------------------------------------------
     // UI STATE
@@ -174,8 +169,7 @@ class ImageLayer {
     };
 
     this.infoText.textContent = `${info.width} x ${info.height}`;
-    this.addToHistory(buffer, info, this.extension);
-
+    this.history.add(buffer, info, this.extension);
     // Extract colors and update color boxes
     let extractedColors = colors;
     if (!extractedColors) {
@@ -221,82 +215,45 @@ class ImageLayer {
     }, 0);
   }
 
-  // --------------------------------------------------------------------------
-  // HISTORY MANAGEMENT
-  // --------------------------------------------------------------------------
-
-  /**
-   * Add current state to history
-   * @param {Buffer} buffer - Image buffer
-   * @param {Object} info - Image info
-   * @param {string} extension - File extension
-   */
-  addToHistory(buffer, info, extension) {
-    this.history.index++;
-
-    // Remove future history if we're not at the end
-    if (this.history.buffers[this.history.index]) {
-      this.history.buffers = this.history.buffers.slice(0, this.history.index);
-      this.history.infos = this.history.infos.slice(0, this.history.index);
-      this.history.extensions = this.history.extensions.slice(
-        0,
-        this.history.index
-      );
-    }
-
-    // Limit history size
-    if (this.history.index >= this.history.maxSize) {
-      this.history.buffers.shift();
-      this.history.infos.shift();
-      this.history.extensions.shift();
-      this.history.index = this.history.maxSize - 1;
-    }
-
-    this.history.buffers.push(buffer);
-    this.history.infos.push(info);
-    this.history.extensions.push(extension);
-  }
-
   /**
    * Undo last change
    */
   undo() {
-    if (this.history.index <= 0) return;
-    this.history.index--;
-    this.restoreFromHistory();
+    const state = this.history.undo();
+    if (state) {
+      this.restoreFromHistory(state);
+    }
   }
 
   /**
    * Redo last undone change
    */
   redo() {
-    if (this.history.index >= this.history.buffers.length - 1) return;
-    this.history.index++;
-    this.restoreFromHistory();
+    const state = this.history.redo();
+    if (state) {
+      this.restoreFromHistory(state);
+    }
   }
 
   /**
    * Restore state from history
+   * @param {Object} state - State object with buffer, info, extension
    */
-  restoreFromHistory() {
-    const buffer = this.history.buffers[this.history.index];
-    const info = this.history.infos[this.history.index];
-    const extension = this.history.extensions[this.history.index];
+  restoreFromHistory(state) {
+    this.buffer = state.buffer;
+    this.info = state.info;
+    this.extension = state.extension;
 
-    this.buffer = buffer;
-    this.info = info;
-    this.extension = extension;
+    this.canvas.width = state.info.width;
+    this.canvas.height = state.info.height;
 
-    this.canvas.width = info.width;
-    this.canvas.height = info.height;
-
-    this.image.src = `data:image/${extension};base64,${buffer.toString(
-      "base64"
-    )}`;
+    this.image.src = `data:image/${
+      state.extension
+    };base64,${state.buffer.toString("base64")}`;
     this.image.onload = () => this.ctx.drawImage(this.image, 0, 0);
 
-    this.infoText.textContent = `${info.width} x ${info.height}`;
-    this.extensionCombo.value = extension;
+    this.infoText.textContent = `${state.info.width} x ${state.info.height}`;
+    this.extensionCombo.value = state.extension;
   }
 
   // --------------------------------------------------------------------------

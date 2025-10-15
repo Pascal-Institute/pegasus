@@ -301,9 +301,8 @@ class ImageLayerEvents {
 
       // Send request to Main Process to show context menu
       ipcRenderer.send("show-imgkit-context-menu", {
-        hasUndo: this.layer.history.index > 0,
-        hasRedo:
-          this.layer.history.index < this.layer.history.buffers.length - 1,
+        hasUndo: this.layer.history.canUndo(),
+        hasRedo: this.layer.history.canRedo(),
       });
     });
   }

@@ -149,16 +149,7 @@ ipcRenderer.on("rotateLeftImgCMD", async (event) => {
 ipcRenderer.on("flipImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .flip()
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Flip failed:", error);
-  }
+  currentLayer.processImage({ flip: true });
 });
 
 ipcRenderer.on("flopImgCMD", async (event) => {

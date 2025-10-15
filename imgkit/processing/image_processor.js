@@ -154,6 +154,11 @@ class ImageProcessor {
         pipeline = pipeline.dilate(options.dilate);
       }
 
+      // Apply flip if specified
+      if (options.flip) {
+        pipeline = pipeline.flip(options.flip);
+      }
+
       // Apply format conversion if specified
       if (options.format) {
         pipeline = pipeline.toFormat(options.format);

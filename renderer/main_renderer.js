@@ -155,16 +155,7 @@ ipcRenderer.on("flipImgCMD", async (event) => {
 ipcRenderer.on("flopImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .flop()
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Flop failed:", error);
-  }
+  currentLayer.processImage({ flop: true });
 });
 
 ipcRenderer.on("bitwiseImgCMD", async (event) => {

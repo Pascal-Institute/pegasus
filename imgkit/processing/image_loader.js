@@ -13,6 +13,13 @@ class ImageLoader {
     try {
       const extension = path.extname(filepath).replace(".", "");
       const filename = path.basename(filepath, path.extname(filepath));
+      
+      // For GIF files, first check if they're animated
+      let gifMetadata = null;
+      if (extension === "gif") {
+        gifMetadata = await sharp(filepath).metadata();
+      }
+      
       const loader = ImageLoader.getImageLoader(filepath, extension);
       const result = await loader.toBuffer({ resolveWithObject: true });
       return {
@@ -20,6 +27,7 @@ class ImageLoader {
         info: result.info,
         filename,
         extension,
+        gifMetadata, // Include GIF animation metadata if available
       };
     } catch (error) {
       throw new Error(`Failed to open image: ${error.message}`);
@@ -30,6 +38,13 @@ class ImageLoader {
     try {
       const extension = path.extname(filename).replace(".", "");
       const name = path.basename(filename, path.extname(filename));
+      
+      // For GIF files, first check if they're animated
+      let gifMetadata = null;
+      if (extension === "gif") {
+        gifMetadata = await sharp(buffer).metadata();
+      }
+      
       const loader = ImageLoader.getBufferLoader(buffer, extension);
       const result = await loader.toBuffer({ resolveWithObject: true });
       return {
@@ -37,6 +52,7 @@ class ImageLoader {
         info: result.info,
         filename: name,
         extension,
+        gifMetadata, // Include GIF animation metadata if available
       };
     } catch (error) {
       throw new Error(`Failed to open image buffer: ${error.message}`);
@@ -82,6 +98,26 @@ class ImageLoader {
       return bmp.sharpFromBmp(buffer).png();
     }
     return sharp(buffer);
+  }
+
+  /**
+   * Extract a specific frame from an animated GIF
+   * @param {Buffer|string} input - GIF buffer or file path
+   * @param {number} frameIndex - Frame index to extract (0-based)
+   * @returns {Promise<{buffer: Buffer, info: Object}>}
+   */
+  static async extractGifFrame(input, frameIndex) {
+    try {
+      const result = await sharp(input, { page: frameIndex })
+        .png()
+        .toBuffer({ resolveWithObject: true });
+      return {
+        buffer: result.data,
+        info: result.info,
+      };
+    } catch (error) {
+      throw new Error(`Failed to extract GIF frame ${frameIndex}: ${error.message}`);
+    }
   }
 }
 

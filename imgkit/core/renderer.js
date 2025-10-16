@@ -42,6 +42,7 @@ class ImgKitRenderer {
     // Initialize if DOM elements exist
     if (this.scrollContainer && this.scrollLeftBtn && this.scrollRightBtn) {
       this.setupScrollEvents();
+      this.setupGlobalDragPrevention();
       this.setupGlobalMagnifyShortcut(); // Setup Alt + A globally
     }
   }
@@ -70,6 +71,32 @@ class ImgKitRenderer {
     // Update UI when user scrolls manually
     this.scrollContainer.addEventListener("scroll", () =>
       this.updateScrollUI()
+    );
+  }
+
+  /**
+   * Prevent browser's default drag behavior globally
+   */
+  setupGlobalDragPrevention() {
+    // Prevent default drag behavior on entire document
+    ["dragover", "dragenter", "dragleave", "drop"].forEach((eventName) => {
+      document.addEventListener(
+        eventName,
+        (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        },
+        false
+      );
+    });
+
+    // Set drag effect for visual feedback
+    document.addEventListener(
+      "dragover",
+      (e) => {
+        e.dataTransfer.dropEffect = "copy";
+      },
+      false
     );
   }
 

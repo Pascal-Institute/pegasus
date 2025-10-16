@@ -39,6 +39,15 @@ class ImageLayer {
     this.extension = ""; // File extension (png, jpg, etc.)
     this.filepath = ""; // Full path on disk (if saved)
     this.svgData = null; // SVG string data (for SVG format only)
+    
+    // --------------------------------------------------------------------------
+    // GIF ANIMATION DATA
+    // --------------------------------------------------------------------------
+    this.gifMetadata = null; // GIF animation metadata (pages, delay, loop)
+    this.gifOriginalBuffer = null; // Original GIF buffer (for frame extraction)
+    this.gifAnimationId = null; // Animation timer ID
+    this.gifCurrentFrame = 0; // Current frame index
+    this.gifIsPlaying = false; // Is animation playing?
 
     // --------------------------------------------------------------------------
     // UNDO/REDO HISTORY
@@ -125,6 +134,56 @@ class ImageLayer {
       container: this.panel.querySelector(".color-box-container"),
       colors: Array.from(this.panel.querySelectorAll(".color-box")),
     };
+    
+    // Create GIF animation controls (initially hidden)
+    this.createGifControls();
+  }
+
+  /**
+   * Create GIF animation control buttons
+   */
+  createGifControls() {
+    // Create container for GIF controls
+    this.gifControlsContainer = document.createElement("div");
+    this.gifControlsContainer.className = "gif-controls";
+    this.gifControlsContainer.style.display = "none"; // Hidden by default
+    this.gifControlsContainer.style.marginTop = "5px";
+    this.gifControlsContainer.style.textAlign = "center";
+
+    // Play/Pause button
+    this.gifPlayPauseBtn = document.createElement("button");
+    this.gifPlayPauseBtn.textContent = "▶";
+    this.gifPlayPauseBtn.title = "Play/Pause";
+    this.gifPlayPauseBtn.style.margin = "0 2px";
+    this.gifPlayPauseBtn.style.padding = "5px 10px";
+    this.gifPlayPauseBtn.style.cursor = "pointer";
+    this.gifPlayPauseBtn.addEventListener("click", () => this.toggleGifPlayback());
+
+    // Stop button
+    this.gifStopBtn = document.createElement("button");
+    this.gifStopBtn.textContent = "■";
+    this.gifStopBtn.title = "Stop";
+    this.gifStopBtn.style.margin = "0 2px";
+    this.gifStopBtn.style.padding = "5px 10px";
+    this.gifStopBtn.style.cursor = "pointer";
+    this.gifStopBtn.addEventListener("click", () => this.stopGifPlayback());
+
+    // Frame counter
+    this.gifFrameCounter = document.createElement("span");
+    this.gifFrameCounter.style.margin = "0 5px";
+    this.gifFrameCounter.style.fontSize = "12px";
+    this.gifFrameCounter.textContent = "0/0";
+
+    // Add buttons to container
+    this.gifControlsContainer.appendChild(this.gifPlayPauseBtn);
+    this.gifControlsContainer.appendChild(this.gifStopBtn);
+    this.gifControlsContainer.appendChild(this.gifFrameCounter);
+
+    // Add controls to panel (after extension combo)
+    this.extensionCombo.parentNode.insertBefore(
+      this.gifControlsContainer,
+      this.extensionCombo.nextSibling
+    );
   }
 
   // --------------------------------------------------------------------------
@@ -221,6 +280,11 @@ class ImageLayer {
    * Undo last change
    */
   undo() {
+    // Pause GIF animation when undoing
+    if (this.gifIsPlaying) {
+      this.pauseGifAnimation();
+    }
+    
     const state = this.history.undo();
     if (state) {
       this.restoreFromHistory(state);
@@ -231,6 +295,11 @@ class ImageLayer {
    * Redo last undone change
    */
   redo() {
+    // Pause GIF animation when redoing
+    if (this.gifIsPlaying) {
+      this.pauseGifAnimation();
+    }
+    
     const state = this.history.redo();
     if (state) {
       this.restoreFromHistory(state);
@@ -292,8 +361,152 @@ class ImageLayer {
    * Destroy layer and cleanup
    */
   destroy() {
+    // Stop GIF animation if playing
+    this.stopGifPlayback();
+    
     if (this.panel.parentNode) {
       this.panel.parentNode.removeChild(this.panel);
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // GIF ANIMATION METHODS
+  // --------------------------------------------------------------------------
+
+  /**
+   * Check if current image is an animated GIF
+   * @returns {boolean}
+   */
+  isAnimatedGif() {
+    return (
+      this.extension === "gif" &&
+      this.gifMetadata &&
+      this.gifMetadata.pages > 1
+    );
+  }
+
+  /**
+   * Show GIF controls if the image is an animated GIF
+   */
+  showGifControlsIfAnimated() {
+    if (this.isAnimatedGif()) {
+      this.gifControlsContainer.style.display = "block";
+      this.updateGifFrameCounter();
+      // Auto-play animated GIFs
+      this.playGifAnimation();
+    } else {
+      this.gifControlsContainer.style.display = "none";
+    }
+  }
+
+  /**
+   * Update frame counter display
+   */
+  updateGifFrameCounter() {
+    if (this.isAnimatedGif()) {
+      this.gifFrameCounter.textContent = `${this.gifCurrentFrame + 1}/${
+        this.gifMetadata.pages
+      }`;
+    }
+  }
+
+  /**
+   * Toggle GIF playback (play/pause)
+   */
+  toggleGifPlayback() {
+    if (this.gifIsPlaying) {
+      this.pauseGifAnimation();
+    } else {
+      this.playGifAnimation();
+    }
+  }
+
+  /**
+   * Play GIF animation
+   */
+  playGifAnimation() {
+    if (!this.isAnimatedGif() || this.gifIsPlaying) return;
+
+    this.gifIsPlaying = true;
+    this.gifPlayPauseBtn.textContent = "⏸";
+    this.gifPlayPauseBtn.title = "Pause";
+
+    this.scheduleNextFrame();
+  }
+
+  /**
+   * Pause GIF animation
+   */
+  pauseGifAnimation() {
+    if (!this.gifIsPlaying) return;
+
+    this.gifIsPlaying = false;
+    this.gifPlayPauseBtn.textContent = "▶";
+    this.gifPlayPauseBtn.title = "Play";
+
+    if (this.gifAnimationId !== null) {
+      clearTimeout(this.gifAnimationId);
+      this.gifAnimationId = null;
+    }
+  }
+
+  /**
+   * Stop GIF animation and reset to first frame
+   */
+  stopGifPlayback() {
+    this.pauseGifAnimation();
+    this.gifCurrentFrame = 0;
+    this.updateGifFrameCounter();
+    
+    if (this.isAnimatedGif()) {
+      this.displayGifFrame(0);
+    }
+  }
+
+  /**
+   * Schedule the next frame to be displayed
+   */
+  scheduleNextFrame() {
+    if (!this.gifIsPlaying || !this.isAnimatedGif()) return;
+
+    const delay = this.gifMetadata.delay[this.gifCurrentFrame] || 100;
+
+    this.gifAnimationId = setTimeout(async () => {
+      // Move to next frame
+      this.gifCurrentFrame = (this.gifCurrentFrame + 1) % this.gifMetadata.pages;
+      this.updateGifFrameCounter();
+
+      // Display the frame
+      await this.displayGifFrame(this.gifCurrentFrame);
+
+      // Schedule next frame
+      this.scheduleNextFrame();
+    }, delay);
+  }
+
+  /**
+   * Display a specific GIF frame
+   * @param {number} frameIndex - Frame index to display
+   */
+  async displayGifFrame(frameIndex) {
+    if (!this.isAnimatedGif() || !this.gifOriginalBuffer) return;
+
+    try {
+      const frameResult = await ImageLoader.extractGifFrame(
+        this.gifOriginalBuffer,
+        frameIndex
+      );
+
+      // Draw the frame to canvas
+      this.image.src = `data:image/png;base64,${frameResult.buffer.toString(
+        "base64"
+      )}`;
+      this.image.onload = () => {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.drawImage(this.image, 0, 0);
+      };
+    } catch (error) {
+      console.error(`Error displaying frame ${frameIndex}:`, error);
     }
   }
 
@@ -314,7 +527,23 @@ class ImageLayer {
       this.extension = result.extension;
       this.nameInput.value = this.filename;
       this.extensionCombo.value = this.extension;
+      
+      // Store GIF animation data if available
+      if (result.gifMetadata && result.gifMetadata.pages > 1) {
+        this.gifMetadata = result.gifMetadata;
+        // Store original GIF buffer by reading the file again
+        const fs = require("fs");
+        this.gifOriginalBuffer = await fs.promises.readFile(filepath);
+        this.gifCurrentFrame = 0;
+      } else {
+        this.gifMetadata = null;
+        this.gifOriginalBuffer = null;
+      }
+      
       this.updatePreview(result.buffer, result.info);
+      
+      // Show GIF controls if animated
+      this.showGifControlsIfAnimated();
 
       if (filepath !== "./assets/addImage.png") {
         this.canvas.id = "full";
@@ -349,7 +578,22 @@ class ImageLayer {
       this.extension = result.extension;
       this.nameInput.value = this.filename;
       this.extensionCombo.value = this.extension;
+      
+      // Store GIF animation data if available
+      if (result.gifMetadata && result.gifMetadata.pages > 1) {
+        this.gifMetadata = result.gifMetadata;
+        // Store the original buffer for frame extraction
+        this.gifOriginalBuffer = buffer;
+        this.gifCurrentFrame = 0;
+      } else {
+        this.gifMetadata = null;
+        this.gifOriginalBuffer = null;
+      }
+      
       this.updatePreview(result.buffer, result.info);
+      
+      // Show GIF controls if animated
+      this.showGifControlsIfAnimated();
 
       this.canvas.id = "full";
       this.isDefault = false;
@@ -371,6 +615,11 @@ class ImageLayer {
     if (!this.buffer) return;
 
     try {
+      // Stop GIF animation if playing
+      if (this.gifIsPlaying) {
+        this.stopGifPlayback();
+      }
+      
       const result = await ImageProcessor.convertFormat(
         this.buffer,
         this.extension,
@@ -384,6 +633,15 @@ class ImageLayer {
         this.svgData = result.svgData;
       } else {
         this.svgData = null;
+      }
+      
+      // Clear GIF animation data when converting from GIF
+      if (this.gifMetadata) {
+        this.gifMetadata = null;
+        this.gifOriginalBuffer = null;
+        this.gifCurrentFrame = 0;
+        this.gifIsPlaying = false;
+        this.gifControlsContainer.style.display = "none";
       }
 
       // Update filepath extension using backend helper
@@ -444,6 +702,11 @@ class ImageLayer {
     if (!this.buffer) return;
 
     try {
+      // Stop GIF animation if playing
+      if (this.gifIsPlaying) {
+        this.pauseGifAnimation();
+      }
+      
       const result = await ImageProcessor.processImage(this.buffer, options);
       this.updatePreview(result.buffer, result.info);
     } catch (error) {
@@ -460,6 +723,11 @@ class ImageLayer {
     if (!this.buffer || !this.info) return;
 
     try {
+      // Stop GIF animation if playing
+      if (this.gifIsPlaying) {
+        this.pauseGifAnimation();
+      }
+      
       const result = await ImageProcessor.applyCrop(
         this.buffer,
         this.info,

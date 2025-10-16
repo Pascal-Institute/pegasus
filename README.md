@@ -77,6 +77,8 @@ npm run build
 png svg jpg jpeg webp gif bmp ico tiff tif
 ```
 
+**Note:** Animated GIF files are now supported! When you load an animated GIF, playback controls appear automatically. See [GIF Animation Documentation](docs/GIF_ANIMATION.md) for details.
+
 #### 4-2. extension converting
 
 ### 4-3. Image Processing

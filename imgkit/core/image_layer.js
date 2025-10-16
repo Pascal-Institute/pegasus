@@ -280,6 +280,11 @@ class ImageLayer {
    * Undo last change
    */
   undo() {
+    // Pause GIF animation when undoing
+    if (this.gifIsPlaying) {
+      this.pauseGifAnimation();
+    }
+    
     const state = this.history.undo();
     if (state) {
       this.restoreFromHistory(state);
@@ -290,6 +295,11 @@ class ImageLayer {
    * Redo last undone change
    */
   redo() {
+    // Pause GIF animation when redoing
+    if (this.gifIsPlaying) {
+      this.pauseGifAnimation();
+    }
+    
     const state = this.history.redo();
     if (state) {
       this.restoreFromHistory(state);
@@ -605,6 +615,11 @@ class ImageLayer {
     if (!this.buffer) return;
 
     try {
+      // Stop GIF animation if playing
+      if (this.gifIsPlaying) {
+        this.stopGifPlayback();
+      }
+      
       const result = await ImageProcessor.convertFormat(
         this.buffer,
         this.extension,
@@ -618,6 +633,15 @@ class ImageLayer {
         this.svgData = result.svgData;
       } else {
         this.svgData = null;
+      }
+      
+      // Clear GIF animation data when converting from GIF
+      if (this.gifMetadata) {
+        this.gifMetadata = null;
+        this.gifOriginalBuffer = null;
+        this.gifCurrentFrame = 0;
+        this.gifIsPlaying = false;
+        this.gifControlsContainer.style.display = "none";
       }
 
       // Update filepath extension using backend helper
@@ -678,6 +702,11 @@ class ImageLayer {
     if (!this.buffer) return;
 
     try {
+      // Stop GIF animation if playing
+      if (this.gifIsPlaying) {
+        this.pauseGifAnimation();
+      }
+      
       const result = await ImageProcessor.processImage(this.buffer, options);
       this.updatePreview(result.buffer, result.info);
     } catch (error) {
@@ -694,6 +723,11 @@ class ImageLayer {
     if (!this.buffer || !this.info) return;
 
     try {
+      // Stop GIF animation if playing
+      if (this.gifIsPlaying) {
+        this.pauseGifAnimation();
+      }
+      
       const result = await ImageProcessor.applyCrop(
         this.buffer,
         this.info,

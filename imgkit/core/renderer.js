@@ -89,15 +89,6 @@ class ImgKitRenderer {
         false
       );
     });
-
-    // Set drag effect for visual feedback
-    document.addEventListener(
-      "dragover",
-      (e) => {
-        e.dataTransfer.dropEffect = "copy";
-      },
-      false
-    );
   }
 
   /**

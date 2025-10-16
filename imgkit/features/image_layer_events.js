@@ -185,11 +185,12 @@ class ImageLayerEvents {
    * Setup drag and drop handlers
    */
   setupDragDrop() {
+    // Prevent default browser behavior
     this.layer.canvas.addEventListener("dragover", (e) => e.preventDefault());
+
     this.layer.canvas.addEventListener("dragenter", (e) => {
       e.preventDefault();
-      const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
-      this.layer.renderer.setCurrentLayer(index);
+      this.focusCurrentLayer();
     });
 
     this.layer.canvas.addEventListener("drop", async (e) => {
@@ -198,75 +199,117 @@ class ImageLayerEvents {
 
       if (!files || files.length === 0) return;
 
-      const fileArray = Array.from(files);
+      await this.processDroppedFiles(Array.from(files));
+    });
+  }
 
-      // Process files sequentially
-      for (let index = 0; index < fileArray.length; index++) {
-        const file = fileArray[index];
-        if (!file) continue;
+  /**
+   * Focus this layer when drag enters
+   * @private
+   */
+  focusCurrentLayer() {
+    const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
+    this.layer.renderer.setCurrentLayer(index);
+  }
 
-        // Determine target layer: first file goes to current layer, rest to new layers
-        let targetLayer = this.layer;
-        if (index > 0) {
-          // Create new layer for additional files
-          targetLayer = this.layer.renderer.createDefaultImage();
-          // Set the new layer as current so we can open image in it
-          const newIndex = this.layer.renderer.imageLayerQueue.length - 1;
-          this.layer.renderer.setCurrentLayer(newIndex);
+  /**
+   * Process multiple dropped files
+   * @private
+   * @param {File[]} files - Array of dropped files
+   */
+  async processDroppedFiles(files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file) continue;
+
+      const targetLayer = this.getTargetLayer(i);
+      await this.loadFileToLayer(file, targetLayer);
+    }
+
+    // Add one more empty layer for next image
+    this.layer.renderer.createDefaultImage();
+  }
+
+  /**
+   * Get target layer for file at index
+   * First file goes to current layer, rest to new layers
+   * @private
+   * @param {number} fileIndex - Index of file in dropped files array
+   * @returns {ImageLayer} Target layer
+   */
+  getTargetLayer(fileIndex) {
+    if (fileIndex === 0) {
+      return this.layer;
+    }
+
+    // Create new layer for additional files
+    const newLayer = this.layer.renderer.createDefaultImage();
+    const newIndex = this.layer.renderer.imageLayerQueue.length - 1;
+    this.layer.renderer.setCurrentLayer(newIndex);
+    return newLayer;
+  }
+
+  /**
+   * Load file into target layer
+   * @private
+   * @param {File} file - File to load
+   * @param {ImageLayer} targetLayer - Target layer
+   */
+  async loadFileToLayer(file, targetLayer) {
+    let isOpened = false;
+
+    if (file.path) {
+      // Desktop file with path
+      isOpened = await targetLayer.openImage(file.path);
+    } else {
+      // Web file or clipboard - read as buffer
+      isOpened = await this.loadFileAsBuffer(file, targetLayer);
+    }
+
+    if (isOpened) {
+      // Enable panel dragging after successful load
+      targetLayer.panel.draggable = true;
+    }
+  }
+
+  /**
+   * Load file as buffer using FileReader
+   * @private
+   * @param {File} file - File to load
+   * @param {ImageLayer} targetLayer - Target layer
+   * @returns {Promise<boolean>} Success status
+   */
+  async loadFileAsBuffer(file, targetLayer) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+
+      reader.onload = async (evt) => {
+        const arrayBuffer = evt.target.result;
+        const buffer = Buffer.from(arrayBuffer);
+
+        // Try to get file path (may not be available)
+        let filePath;
+        try {
+          filePath = webUtils.getPathForFile(file);
+        } catch (err) {
+          console.log("Could not get file path:", err);
         }
 
-        const tryOpenImg = async (filepathOrBuffer) => {
-          let isOpened;
-          if (typeof filepathOrBuffer === "string") {
-            isOpened = await targetLayer.openImage(filepathOrBuffer);
-          } else {
-            let filePath;
-            try {
-              filePath = webUtils.getPathForFile(file);
-            } catch (err) {
-              console.log("Could not get file path:", err);
-            }
+        const isOpened = await targetLayer.openImageBuffer(
+          buffer,
+          file.name,
+          filePath
+        );
 
-            isOpened = await targetLayer.openImageBuffer(
-              filepathOrBuffer,
-              file.name,
-              filePath
-            );
-          }
+        resolve(isOpened);
+      };
 
-          if (isOpened) {
-            // Make panel draggable after successful load
-            targetLayer.panel.draggable = true;
-          }
+      reader.onerror = () => {
+        console.error("FileReader error:", reader.error);
+        resolve(false);
+      };
 
-          return isOpened;
-        };
-
-        // Open the file
-        if (!file.path) {
-          // Use FileReader for files without path
-          await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = async (evt) => {
-              const arrayBuffer = evt.target.result;
-              const buffer = Buffer.from(arrayBuffer);
-              await tryOpenImg(buffer);
-              resolve();
-            };
-            reader.onerror = () => {
-              console.error("FileReader error:", reader.error);
-              resolve();
-            };
-            reader.readAsArrayBuffer(file);
-          });
-        } else {
-          // Use file path directly
-          await tryOpenImg(file.path);
-        }
-      }
-
-      // Create one more default layer at the end
-      this.layer.renderer.createDefaultImage();
+      reader.readAsArrayBuffer(file);
     });
   }
 

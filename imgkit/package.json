@@ -11,10 +11,11 @@
   },
   "files": [
     "main.js",
-    "image-processor.js",
+    "image_processor.js",
     "renderer.js",
-    "image-layer.js",
-    "image-layer-events.js",
+    "image_layer.js",
+    "image_layer_events.js",
+    "layer_history.js",
     "README.md"
   ],
   "scripts": {

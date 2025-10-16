@@ -6,6 +6,10 @@
 
 #### The Image Processing Tool based on Electron framework & sharp npm package
 
+## 0. Application mission
+
+#### Give wings to pixels
+
 <img width="3071" height="1806" alt="image" src="https://github.com/user-attachments/assets/853e02b8-dffb-44e4-a5f8-d74b81265c3e" />
 
 ## 1. Requirements

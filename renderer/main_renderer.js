@@ -101,6 +101,12 @@ ipcRenderer.on("dilateImgCMD", async (event, res) => {
   currentLayer.processImage({ dilate: res });
 });
 
+ipcRenderer.on("erodeImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+  currentLayer.processImage({ erode: res });
+});
+
 ipcRenderer.on("rotateImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;

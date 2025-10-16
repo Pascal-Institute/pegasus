@@ -4,6 +4,8 @@
 #bitwiseBtn:hover,
 #negativeBtn:hover,
 #normalizeBtn:hover,
-#dilateBtn:hover {
+#dilateBtn:hover,
+#erodeBtn:hover {
+  background-color: #e0e0e0;
   cursor: pointer;
 }

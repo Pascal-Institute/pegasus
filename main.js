@@ -133,6 +133,11 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on("erodeValueSEND", (event, res) => {
+    mainWindow.webContents.send("erodeImgCMD", res);
+    mainWindow.webContents.focus();
+  });
+
   ipcMain.on("rotateValueSEND", (event, res) => {
     mainWindow.webContents.send("rotateImgCMD", res);
     mainWindow.webContents.focus();

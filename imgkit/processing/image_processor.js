@@ -154,6 +154,11 @@ class ImageProcessor {
         pipeline = pipeline.dilate(options.dilate);
       }
 
+      // Apply erode if specified
+      if (options.erode) {
+        pipeline = pipeline.erode(options.erode);
+      }
+
       // Apply flip if specified
       if (options.flip) {
         pipeline = pipeline.flip(options.flip);

@@ -43,3 +43,7 @@ document.getElementById("normalizeBtn").addEventListener("click", () => {
 document.getElementById("dilateBtn").addEventListener("click", () => {
   ipcRenderer.send("dilateValueSEND", Number(1));
 });
+
+document.getElementById("erodeBtn").addEventListener("click", () => {
+  ipcRenderer.send("erodeValueSEND", Number(1));
+});

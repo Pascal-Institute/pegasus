@@ -18,6 +18,7 @@
 const { ipcRenderer } = require("electron");
 const { ImageLayerEvents } = require("../features/image_layer_events");
 const { ImageProcessor } = require("../processing/image_processor");
+const { ImageLoader } = require("../processing/image_loader");
 const { ImageMode, ModeManager } = require("../features/image_mode");
 const { LayerHistory } = require("../features/layer_history");
 
@@ -306,7 +307,7 @@ class ImageLayer {
    */
   async openImage(filepath) {
     try {
-      const result = await ImageProcessor.openImage(filepath);
+      const result = await ImageLoader.openImage(filepath);
 
       this.filepath = filepath;
       this.filename = result.filename;
@@ -339,7 +340,7 @@ class ImageLayer {
    */
   async openImageBuffer(buffer, filename, filepath = null) {
     try {
-      const result = await ImageProcessor.openImageBuffer(buffer, filename);
+      const result = await ImageLoader.openImageBuffer(buffer, filename);
 
       this.buffer = result.buffer;
       this.filename = result.filename;
@@ -426,7 +427,7 @@ class ImageLayer {
         buffer = Buffer.from(base64Data, "base64");
       }
 
-      await ImageProcessor.saveImage(buffer, savePath);
+      await ImageLoader.saveImage(buffer, savePath);
       this.filepath = savePath;
       ipcRenderer.send("showNotificationREQ", "imgkit-save");
     } catch (error) {

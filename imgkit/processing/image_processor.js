@@ -1,125 +1,26 @@
 // ImageProcessor - Pure Image Processing Functions
-// No dependencies on renderer, layer, or any UI components
-// Only handles image manipulation using Sharp library
-//
-// This module provides pure functions for:
-// - Opening images from files or buffers
-// - Format conversion (PNG, JPG, BMP, ICO, etc.)
-// - Resize, crop, blur, sharpen operations
-// - Color extraction
-// - File I/O operations
+// Handles image processing operations (resize, crop, color extraction)
+// No longer handles file I/O - use ImageLoader directly for that
 
 const sharp = require("sharp");
-const bmp = require("sharp-bmp");
-const ico = require("sharp-ico");
-const fs = require("fs");
-const path = require("path");
-const os = require("os");
 const namer = require("color-namer");
-
-// ============================================================================
-// IMAGE PROCESSOR CLASS
-// ============================================================================
-// Static class with pure image processing functions
-// No state, no dependencies on UI components
+const { FormatConverter } = require("./format_converter");
 
 class ImageProcessor {
-  // Temporary file tracking (for cleanup)
-  static tempFiles = [];
-
-  // --------------------------------------------------------------------------
-  // FILE I/O OPERATIONS
-  // --------------------------------------------------------------------------
-
-  /**
-   * Open image from file path
-   * @param {string} filepath - Path to image file
-   * @returns {Promise<{buffer: Buffer, info: Object, filename: string, extension: string, colors: string[]}>}
-   */
-  static async openImage(filepath) {
-    try {
-      const extension = path.extname(filepath).replace(".", "");
-      const filename = path.basename(filepath, path.extname(filepath));
-
-      // Load image (handles special formats)
-      const loader = ImageProcessor._getImageLoader(filepath, extension);
-      const result = await loader.toBuffer({ resolveWithObject: true });
-
-      return {
-        buffer: result.data,
-        info: result.info,
-        filename,
-        extension,
-      };
-    } catch (error) {
-      throw new Error(`Failed to open image: ${error.message}`);
-    }
+  // Delegate to FormatConverter
+  static async convertFormat(buffer, fromExt, toExt) {
+    return FormatConverter.convert(buffer, fromExt, toExt);
   }
 
-  /**
-   * Open image from buffer (for drag & drop, paste)
-   * @param {Buffer} buffer - Image buffer
-   * @param {string} filename - Filename with extension
-   * @returns {Promise<{buffer: Buffer, info: Object, filename: string, extension: string, colors: string[]}>}
-   */
-  static async openImageBuffer(buffer, filename) {
-    try {
-      const extension = path.extname(filename).replace(".", "");
-      const name = path.basename(filename, path.extname(filename));
-
-      // Load image (handles special formats)
-      const loader = ImageProcessor._getBufferLoader(buffer, extension);
-      const result = await loader.toBuffer({ resolveWithObject: true });
-
-      return {
-        buffer: result.data,
-        info: result.info,
-        filename: name,
-        extension,
-      };
-    } catch (error) {
-      throw new Error(`Failed to open image buffer: ${error.message}`);
-    }
+  static updateFileExtension(filepath, newExtension) {
+    return FormatConverter.updateFileExtension(filepath, newExtension);
   }
 
-  /**
-   * Save image buffer to file
-   * @param {Buffer} buffer - Image buffer to save
-   * @param {string} filepath - Destination file path
-   * @returns {Promise<void>}
-   */
-  static async saveImage(buffer, filepath) {
-    try {
-      // Convert base64 data URL to buffer if needed
-      let saveBuffer = buffer;
-      if (buffer.toString().startsWith("data:image")) {
-        const base64Data = buffer
-          .toString()
-          .replace(/^data:image\/\w+;base64,/, "");
-        saveBuffer = Buffer.from(base64Data, "base64");
-      }
-
-      await fs.promises.writeFile(filepath, saveBuffer);
-    } catch (error) {
-      throw new Error(`Failed to save image: ${error.message}`);
-    }
+  static cleanupAllTempFiles() {
+    FormatConverter.cleanupTempFiles();
   }
 
-  // --------------------------------------------------------------------------
-  // IMAGE PROCESSING OPERATIONS
-  // --------------------------------------------------------------------------
-
-  /**
-   * Process image with various operations (resize, blur, sharpen, etc.)
-   * @param {Buffer} buffer - Image buffer
-   * @param {Object} options - Processing options
-   * @param {Object} [options.resize] - Resize options {width, height}
-   * @param {number} [options.blur] - Blur sigma value
-   * @param {boolean} [options.sharpen] - Apply sharpening
-   * @param {string} [options.format] - Output format (png, jpg, etc.)
-   * @param {Object} [options.extract] - Crop options {left, top, width, height}
-   * @returns {Promise<{buffer: Buffer, info: Object}>}
-   */
+  // Image Processing Operations (kept in ImageProcessor)
   static async processImage(buffer, options = {}) {
     try {
       let pipeline = sharp(buffer);
@@ -248,56 +149,7 @@ class ImageProcessor {
     }
   }
 
-  // --------------------------------------------------------------------------
-  // FORMAT CONVERSION
-  // --------------------------------------------------------------------------
-
-  /**
-   * Convert image format (handles special formats like bmp, ico)
-   * @param {Buffer} buffer - Source image buffer
-   * @param {string} fromExt - Source extension (not used, kept for compatibility)
-   * @param {string} toExt - Target extension (png, jpg, bmp, ico, etc.)
-   * @returns {Promise<{buffer: Buffer, info: Object}>}
-   */
-  static async convertFormat(buffer, fromExt, toExt) {
-    try {
-      // Special case: SVG format
-      if (toExt === "svg") {
-        return await ImageProcessor._convertToSvg(buffer);
-      }
-
-      // Special case: BMP format
-      if (toExt === "bmp") {
-        return await ImageProcessor._convertToBmp(buffer);
-      }
-
-      // Special case: ICO format
-      if (toExt === "ico") {
-        return await ImageProcessor._convertToIco(buffer);
-      }
-
-      // Standard formats (png, jpg, webp, etc.)
-      return await ImageProcessor._convertToStandardFormat(buffer, toExt);
-    } catch (error) {
-      throw new Error(`Format conversion failed: ${error.message}`);
-    }
-  }
-
-  /**
-   * Update file path extension
-   * Helper method to change extension in a filepath
-   * @param {string} filepath - Original file path
-   * @param {string} newExtension - New extension (without dot)
-   * @returns {string} Updated file path
-   */
-  static updateFileExtension(filepath, newExtension) {
-    if (!filepath) return "";
-    return filepath.replace(path.extname(filepath), `.${newExtension}`);
-  }
-
-  // --------------------------------------------------------------------------
-  // COLOR EXTRACTION
-  // --------------------------------------------------------------------------
+  // Color Extraction
 
   /**
    * Extract color from (x, y) position in image
@@ -385,226 +237,27 @@ class ImageProcessor {
     }
   }
 
-  // --------------------------------------------------------------------------
-  // TEMP FILE MANAGEMENT
-  // --------------------------------------------------------------------------
-
-  /**
-   * Create temporary file from buffer
-   * Used for special format conversions (BMP, ICO)
-   *
-   * @param {Buffer} buffer - File buffer
-   * @param {string} filename - Temporary filename
-   * @returns {string} Temporary file path
-   */
-  static createTempFileFromBuffer(buffer, filename) {
-    const tempPath = path.join(os.tmpdir(), filename);
-    fs.writeFileSync(tempPath, buffer);
-    ImageProcessor.tempFiles.push(tempPath);
-    return tempPath;
-  }
-
-  /**
-   * Cleanup specific temporary file
-   * @param {string} filepath - Path to temporary file
-   */
-  static cleanupTempFile(filepath) {
-    try {
-      if (fs.existsSync(filepath)) {
-        fs.unlinkSync(filepath);
-        ImageProcessor.tempFiles = ImageProcessor.tempFiles.filter(
-          (f) => f !== filepath
-        );
-      }
-    } catch (error) {
-      console.error("Temp file cleanup failed:", error);
-    }
-  }
-
-  /**
-   * Cleanup all temporary files
-   * Should be called on application exit
-   */
-  static cleanupAllTempFiles() {
-    ImageProcessor.tempFiles.forEach((filepath) => {
-      try {
-        if (fs.existsSync(filepath)) {
-          fs.unlinkSync(filepath);
-        }
-      } catch (error) {
-        console.error("Temp file cleanup failed:", error);
-      }
-    });
-    ImageProcessor.tempFiles = [];
-  }
-
-  // --------------------------------------------------------------------------
-  // PRIVATE HELPER METHODS
-  // --------------------------------------------------------------------------
-
-  /**
-   * Get appropriate image loader based on file format
-   * @private
-   */
-  static _getImageLoader(filepath, extension) {
-    // Special format handlers
-    if (["tiff", "tif"].includes(extension)) {
-      return sharp(filepath).png();
-    }
-    if (extension === "ico") {
-      return ico.sharpsFromIco(filepath)[0].png();
-    }
-    if (extension === "bmp") {
-      return bmp.sharpFromBmp(filepath).png();
-    }
-
-    // Standard formats
-    return sharp(filepath);
-  }
-
-  /**
-   * Get appropriate buffer loader based on format
-   * @private
-   */
-  static _getBufferLoader(buffer, extension) {
-    // Special format handlers
-    if (["tiff", "tif"].includes(extension)) {
-      return sharp(buffer).png();
-    }
-    if (extension === "ico") {
-      return ico.sharpsFromIco(buffer)[0].png();
-    }
-    if (extension === "bmp") {
-      return bmp.sharpFromBmp(buffer).png();
-    }
-
-    // Standard formats
-    return sharp(buffer);
-  }
-
-  /**
-   * Convert image to BMP format
-   * @private
-   */
-  static async _convertToBmp(buffer) {
-    const tempPath = ImageProcessor.createTempFileFromBuffer(
-      buffer,
-      `temp.bmp`
-    );
-    await bmp.sharpToBmp(sharp(buffer), tempPath);
-    const resultBuffer = await fs.promises.readFile(tempPath);
-
-    // Convert to PNG for preview
-    const pngResult = await sharp(resultBuffer)
-      .png()
-      .toBuffer({ resolveWithObject: true });
-
-    return { buffer: pngResult.data, info: pngResult.info };
-  }
-
-  /**
-   * Convert image to SVG format
-   * Embeds the raster image as base64 data inside SVG wrapper
-   * @private
-   */
-  static async _convertToSvg(buffer) {
-    // Get image metadata
-    const metadata = await sharp(buffer).metadata();
-
-    // Convert to PNG for embedding (most compatible)
-    const pngBuffer = await sharp(buffer).png().toBuffer();
-    const base64Data = pngBuffer.toString("base64");
-
-    // Create SVG wrapper with embedded image
-    const svgContent = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="${metadata.width}" height="${metadata.height}" 
-     xmlns="http://www.w3.org/2000/svg" 
-     xmlns:xlink="http://www.w3.org/1999/xlink"
-     version="1.1">
-  <title>Converted Image</title>
-  <image width="${metadata.width}" height="${metadata.height}" 
-         xlink:href="data:image/png;base64,${base64Data}"/>
-</svg>`;
-
-    // Store SVG string as buffer for saving
-    const svgBuffer = Buffer.from(svgContent, "utf-8");
-
-    // Return PNG for preview (canvas can't display SVG directly)
-    return {
-      buffer: pngBuffer,
-      info: metadata,
-      svgData: svgContent, // Actual SVG content for saving
-    };
-  }
-
-  /**
-   * Convert image to ICO format
-   * @private
-   */
-  static async _convertToIco(buffer) {
-    const tempPath = ImageProcessor.createTempFileFromBuffer(
-      buffer,
-      `temp.ico`
-    );
-    await ico.sharpsToIco([sharp(buffer)], tempPath);
-    const resultBuffer = await fs.promises.readFile(tempPath);
-
-    // Convert to PNG for preview
-    const sharpList = ico.sharpsFromIco(resultBuffer);
-    const pngResult = await sharpList[0]
-      .png()
-      .toBuffer({ resolveWithObject: true });
-
-    return { buffer: pngResult.data, info: pngResult.info };
-  }
-
-  /**
-   * Convert image to standard format
-   * @private
-   */
-  static async _convertToStandardFormat(buffer, format) {
-    const result = await sharp(buffer)
-      .toFormat(format)
-      .toBuffer({ resolveWithObject: true });
-
-    return { buffer: result.data, info: result.info };
-  }
-
-  /**
-   * Count frequency of each color in image
-   * @private
-   */
+  // Private Helper Methods for Color Extraction
   static _countColorFrequency(rawBuffer, rawInfo) {
     const colors = {};
-    const channels = rawInfo.channels; // 3 for RGB, 4 for RGBA
+    const channels = rawInfo.channels;
     const pixelCount = rawBuffer.length / channels;
-
     for (let i = 0; i < pixelCount; i++) {
       const r = rawBuffer[channels * i];
       const g = rawBuffer[channels * i + 1];
       const b = rawBuffer[channels * i + 2];
       const key = `${r} ${g} ${b}`;
-
       colors[key] = (colors[key] || 0) + 1;
     }
-
     return colors;
   }
 
-  /**
-   * Get top N most frequent colors
-   * @private
-   */
   static _getTopColors(colorFrequency, count) {
     return Object.entries(colorFrequency)
       .sort(([, a], [, b]) => b - a)
       .slice(0, count);
   }
 
-  /**
-   * Convert RGB color strings to hex format
-   * @private
-   */
   static _convertToHexColors(topColors) {
     return topColors.map(([rgbString]) => {
       const [r, g, b] = rgbString.split(" ").map(Number);
@@ -614,9 +267,5 @@ class ImageProcessor {
     });
   }
 }
-
-// ============================================================================
-// MODULE EXPORTS
-// ============================================================================
 
 module.exports = { ImageProcessor };

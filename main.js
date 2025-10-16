@@ -370,6 +370,8 @@ app.whenReady().then(() => {
                         "jpg",
                         "jpeg",
                         "webp",
+                        "bmp",
+                        "gif",
                         "ico",
                         "tiff",
                         "tif",

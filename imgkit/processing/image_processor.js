@@ -261,6 +261,11 @@ class ImageProcessor {
    */
   static async convertFormat(buffer, fromExt, toExt) {
     try {
+      // Special case: SVG format
+      if (toExt === "svg") {
+        return await ImageProcessor._convertToSvg(buffer);
+      }
+
       // Special case: BMP format
       if (toExt === "bmp") {
         return await ImageProcessor._convertToBmp(buffer);
@@ -495,6 +500,41 @@ class ImageProcessor {
       .toBuffer({ resolveWithObject: true });
 
     return { buffer: pngResult.data, info: pngResult.info };
+  }
+
+  /**
+   * Convert image to SVG format
+   * Embeds the raster image as base64 data inside SVG wrapper
+   * @private
+   */
+  static async _convertToSvg(buffer) {
+    // Get image metadata
+    const metadata = await sharp(buffer).metadata();
+
+    // Convert to PNG for embedding (most compatible)
+    const pngBuffer = await sharp(buffer).png().toBuffer();
+    const base64Data = pngBuffer.toString("base64");
+
+    // Create SVG wrapper with embedded image
+    const svgContent = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="${metadata.width}" height="${metadata.height}" 
+     xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1">
+  <title>Converted Image</title>
+  <image width="${metadata.width}" height="${metadata.height}" 
+         xlink:href="data:image/png;base64,${base64Data}"/>
+</svg>`;
+
+    // Store SVG string as buffer for saving
+    const svgBuffer = Buffer.from(svgContent, "utf-8");
+
+    // Return PNG for preview (canvas can't display SVG directly)
+    return {
+      buffer: pngBuffer,
+      info: metadata,
+      svgData: svgContent, // Actual SVG content for saving
+    };
   }
 
   /**

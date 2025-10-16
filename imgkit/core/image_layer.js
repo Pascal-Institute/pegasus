@@ -37,6 +37,7 @@ class ImageLayer {
     this.filename = ""; // Name without extension
     this.extension = ""; // File extension (png, jpg, etc.)
     this.filepath = ""; // Full path on disk (if saved)
+    this.svgData = null; // SVG string data (for SVG format only)
 
     // --------------------------------------------------------------------------
     // UNDO/REDO HISTORY
@@ -377,6 +378,13 @@ class ImageLayer {
 
       this.extension = newExtension;
 
+      // Store SVG data if converting to SVG
+      if (newExtension === "svg" && result.svgData) {
+        this.svgData = result.svgData;
+      } else {
+        this.svgData = null;
+      }
+
       // Update filepath extension using backend helper
       if (this.filepath) {
         this.filepath = ImageProcessor.updateFileExtension(
@@ -404,11 +412,19 @@ class ImageLayer {
     if (!savePath) return;
 
     try {
-      const base64Data = this.image.src.replace(
-        `data:image/${this.extension};base64,`,
-        ""
-      );
-      const buffer = Buffer.from(base64Data, "base64");
+      let buffer;
+
+      // If saving as SVG and we have SVG data, save the actual SVG
+      if (this.extension === "svg" && this.svgData) {
+        buffer = Buffer.from(this.svgData, "utf-8");
+      } else {
+        // For other formats, extract from canvas
+        const base64Data = this.image.src.replace(
+          `data:image/${this.extension};base64,`,
+          ""
+        );
+        buffer = Buffer.from(base64Data, "base64");
+      }
 
       await ImageProcessor.saveImage(buffer, savePath);
       this.filepath = savePath;

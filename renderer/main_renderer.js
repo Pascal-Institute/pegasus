@@ -56,16 +56,7 @@ ipcRenderer.on("resizeImgCMD", async (event, res) => {
 ipcRenderer.on("blurImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .blur(res)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Blur failed:", error);
-  }
+  currentLayer.processImage({ blur: res });
 });
 
 ipcRenderer.on("sharpenImgCMD", async (event, res) => {

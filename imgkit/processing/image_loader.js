@@ -13,13 +13,13 @@ class ImageLoader {
     try {
       const extension = path.extname(filepath).replace(".", "");
       const filename = path.basename(filepath, path.extname(filepath));
-      
+
       // For GIF files, first check if they're animated
       let gifMetadata = null;
       if (extension === "gif") {
         gifMetadata = await sharp(filepath).metadata();
       }
-      
+
       const loader = ImageLoader.getImageLoader(filepath, extension);
       const result = await loader.toBuffer({ resolveWithObject: true });
       return {
@@ -38,13 +38,13 @@ class ImageLoader {
     try {
       const extension = path.extname(filename).replace(".", "");
       const name = path.basename(filename, path.extname(filename));
-      
+
       // For GIF files, first check if they're animated
       let gifMetadata = null;
       if (extension === "gif") {
         gifMetadata = await sharp(buffer).metadata();
       }
-      
+
       const loader = ImageLoader.getBufferLoader(buffer, extension);
       const result = await loader.toBuffer({ resolveWithObject: true });
       return {
@@ -116,7 +116,9 @@ class ImageLoader {
         info: result.info,
       };
     } catch (error) {
-      throw new Error(`Failed to extract GIF frame ${frameIndex}: ${error.message}`);
+      throw new Error(
+        `Failed to extract GIF frame ${frameIndex}: ${error.message}`
+      );
     }
   }
 }

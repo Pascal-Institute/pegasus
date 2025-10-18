@@ -39,18 +39,8 @@ ipcRenderer.send("showMenuREQ", "ping");
 ipcRenderer.on("resizeImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
   const newWidth = Math.floor(currentLayer.canvas.width * res);
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .resize({ width: newWidth })
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Resize failed:", error);
-  }
+  currentLayer.processImage({ resize: newWidth });
 });
 
 ipcRenderer.on("blurImgCMD", async (event, res) => {

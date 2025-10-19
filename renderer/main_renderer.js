@@ -106,31 +106,13 @@ ipcRenderer.on("rotateImgCMD", async (event, res) => {
 ipcRenderer.on("rotateRightImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .rotate(90)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Rotate right failed:", error);
-  }
+  currentLayer.processImage({ rotate: 90 });
 });
 
 ipcRenderer.on("rotateLeftImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .rotate(-90)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Rotate left failed:", error);
-  }
+  currentLayer.processImage({ rotate: -90 });
 });
 
 ipcRenderer.on("flipImgCMD", async (event) => {

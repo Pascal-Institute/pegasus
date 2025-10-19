@@ -70,6 +70,10 @@ class ImageProcessor {
         pipeline = pipeline.flop(options.flop);
       }
 
+      if (options.rotate) {
+        pipeline = pipeline.rotate(options.rotate);
+      }
+
       // Apply format conversion if specified
       if (options.format) {
         pipeline = pipeline.toFormat(options.format);

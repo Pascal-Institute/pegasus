@@ -89,6 +89,25 @@ class ImgKitRenderer {
         false
       );
     });
+
+    document.addEventListener(
+      "drop",
+      (e) => {
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      false
+    );
+
+    document.addEventListener(
+      "dragover",
+      (e) => {
+        e.dataTransfer.dropEffect = "copy";
+      },
+      false
+    );
   }
 
   /**

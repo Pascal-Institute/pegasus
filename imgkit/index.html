@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link href="./css/styles.css" rel="stylesheet" />
+    <link href="imgpanel.css" rel="stylesheet" />
+    <title>ImgKit UI Components</title>
+  </head>
+  <body>
+    <!-- ImgKit Scroll Container and Buttons -->
+    <div id="scroll-container"></div>
+    <button id="scroll-left-btn" class="scroll-btn">&lt;</button>
+    <button id="scroll-right-btn" class="scroll-btn">&gt;</button>
+
+    <!-- ImgKit Notification Messages -->
+    <div id="imgkit-copy" class="imgkit-notification success">Color Copied</div>
+    <div id="imgkit-img-copy" class="imgkit-notification success">
+      Image Copied
+    </div>
+    <div id="imgkit-img-paste" class="imgkit-notification success">
+      Image Pasted
+    </div>
+    <div id="imgkit-delete" class="imgkit-notification error">Deleted</div>
+    <div id="imgkit-save" class="imgkit-notification success">
+      Saved Successfully
+    </div>
+    <div id="imgkit-convert" class="imgkit-notification success">
+      Converted Successfully
+    </div>
+    <div id="imgkit-error" class="imgkit-notification error">ERROR</div>
+    <div id="imgkit-open-error" class="imgkit-notification error">
+      Sorry. Couldn't open image...
+    </div>
+
+    <!-- ImgKit Image Panel Template -->
+    <template id="image-panel-template">
+      <div class="imgPanel" tabindex="0">
+        <button class="delete-btn">
+          <img src="./assets/close.ico" alt="Delete" />
+        </button>
+
+        <canvas class="img-canvas"></canvas>
+
+        <div class="color-box-container">
+          <div class="color-box" title=""></div>
+          <div class="color-box" title=""></div>
+          <div class="color-box" title=""></div>
+        </div>
+        <input
+          type="text"
+          class="name-input"
+          id="image-name-input"
+          value="Untitled"
+        />
+        <h2 class="info-text">0 x 0</h2>
+        <select class="extension-combo">
+          <option value="png">png</option>
+          <option value="svg">svg</option>
+          <option value="jpg">jpg</option>
+          <option value="jpeg">jpeg</option>
+          <option value="webp">webp</option>
+          <option value="gif">gif</option>
+          <option value="bmp">bmp</option>
+          <option value="ico">ico</option>
+          <option value="tif">tif</option>
+          <option value="tiff">tiff</option>
+        </select>
+      </div>
+    </template>
+  </body>
+</html>

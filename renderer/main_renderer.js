@@ -91,16 +91,7 @@ ipcRenderer.on("erodeImgCMD", async (event, res) => {
 ipcRenderer.on("rotateImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .rotate(res)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Rotate failed:", error);
-  }
+  currentLayer.processImage({ rotate: res });
 });
 
 ipcRenderer.on("rotateRightImgCMD", async (event) => {

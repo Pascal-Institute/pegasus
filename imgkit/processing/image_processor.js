@@ -74,6 +74,10 @@ class ImageProcessor {
         pipeline = pipeline.rotate(options.rotate);
       }
 
+      if (options.negative) {
+        pipeline = pipeline.negate(options.negative);
+      }
+
       // Apply format conversion if specified
       if (options.format) {
         pipeline = pipeline.toFormat(options.format);

@@ -136,16 +136,7 @@ ipcRenderer.on("bitwiseImgCMD", async (event) => {
 ipcRenderer.on("negativeImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .negate(true)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Negative failed:", error);
-  }
+  currentLayer.processImage({ negative: true });
 });
 
 ipcRenderer.on("grayScaleImgCMD", async (event) => {

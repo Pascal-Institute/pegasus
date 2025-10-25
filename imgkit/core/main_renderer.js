@@ -56,16 +56,17 @@ class ImgKitRenderer {
    * Left/Right buttons scroll the container horizontally
    */
   setupScrollEvents() {
-    // Scroll left button
+    // Scroll left button - scroll to the very beginning
     this.scrollLeftBtn.addEventListener("click", () => {
-      this.scrollContainer.scrollBy({ left: -400, behavior: "smooth" });
-      setTimeout(() => this.updateScrollUI(), 400);
+      this.scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
     });
 
-    // Scroll right button
+    // Scroll right button - scroll to the very end
     this.scrollRightBtn.addEventListener("click", () => {
-      this.scrollContainer.scrollBy({ left: 400, behavior: "smooth" });
-      setTimeout(() => this.updateScrollUI(), 400);
+      this.scrollContainer.scrollTo({
+        left: this.scrollContainer.scrollWidth,
+        behavior: "smooth",
+      });
     });
 
     // Update UI when user scrolls manually
@@ -233,12 +234,6 @@ class ImgKitRenderer {
         boxSizing: "border-box",
       });
     });
-
-    // Step 3: Enable/disable scroll buttons based on scroll position
-    this.scrollLeftBtn.disabled = this.scrollContainer.scrollLeft <= 0;
-    this.scrollRightBtn.disabled =
-      this.scrollContainer.scrollLeft + this.scrollContainer.clientWidth >=
-      this.scrollContainer.scrollWidth - 2;
   }
 
   // --------------------------------------------------------------------------

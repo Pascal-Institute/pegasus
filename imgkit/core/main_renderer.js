@@ -76,13 +76,18 @@ class ImgKitRenderer {
 
   /**
    * Prevent browser's default drag behavior globally
+   * But allow panel swapping
    */
   setupGlobalDragPrevention() {
-    // Prevent default drag behavior on entire document
-    ["dragover", "dragenter", "dragleave", "drop"].forEach((eventName) => {
+    // Prevent default drag behavior on entire document, except for drop
+    ["dragover", "dragenter", "dragleave"].forEach((eventName) => {
       document.addEventListener(
         eventName,
         (e) => {
+          // Allow drag events on panels for swapping
+          if (e.target.closest && e.target.closest(".imgPanel")) {
+            return;
+          }
           e.preventDefault();
           e.stopPropagation();
         },
@@ -90,9 +95,11 @@ class ImgKitRenderer {
       );
     });
 
+    // Handle drop separately to distinguish file drops from panel swaps
     document.addEventListener(
       "drop",
       (e) => {
+        // Only prevent if it's a file drop (not a panel swap)
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
           e.preventDefault();
           e.stopPropagation();
@@ -104,7 +111,10 @@ class ImgKitRenderer {
     document.addEventListener(
       "dragover",
       (e) => {
-        e.dataTransfer.dropEffect = "copy";
+        // Set drop effect for file drops
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          e.dataTransfer.dropEffect = "copy";
+        }
       },
       false
     );

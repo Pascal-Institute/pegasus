@@ -125,13 +125,19 @@ class ImageLayerEvents {
    * Setup drag and drop for reordering panels
    */
   setupPanelDragging() {
-    // Make panel draggable
-    this.layer.panel.draggable = false; // Initially false, set to true when image is loaded
+    // Make panel draggable initially false, set to true when image is loaded
+    this.layer.panel.draggable = false;
 
     // Drag start - store the dragged layer index
     this.layer.panel.addEventListener("dragstart", (e) => {
+      // Only allow drag if this is not the default layer
+      if (this.layer.isDefault) {
+        e.preventDefault();
+        return;
+      }
+
       e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/html", this.layer.panel.innerHTML);
+      e.dataTransfer.setData("text/plain", "panel-swap"); // Mark as panel swap
 
       // Store the index of dragged layer
       const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
@@ -148,11 +154,15 @@ class ImageLayerEvents {
 
     // Drag over - allow drop
     this.layer.panel.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
+      // Check if this is a panel swap (not a file drop)
+      const types = e.dataTransfer.types;
+      if (types.includes("layerindex") || types.includes("text/plain")) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
 
-      // Add visual feedback
-      this.layer.panel.style.borderTop = "3px solid #4CAF50";
+        // Add visual feedback
+        this.layer.panel.style.borderTop = "3px solid #4CAF50";
+      }
       return false;
     });
 
@@ -163,21 +173,29 @@ class ImageLayerEvents {
 
     // Drop - swap positions
     this.layer.panel.addEventListener("drop", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+      // Check if this is a panel swap
+      const layerIndexStr = e.dataTransfer.getData("layerIndex");
 
-      // Remove visual feedback
-      this.layer.panel.style.borderTop = "";
+      if (layerIndexStr) {
+        // This is a panel swap
+        e.preventDefault();
+        e.stopPropagation();
 
-      // Get dragged layer index
-      const fromIndex = parseInt(e.dataTransfer.getData("layerIndex"));
-      const toIndex = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
+        // Remove visual feedback
+        this.layer.panel.style.borderTop = "";
 
-      if (fromIndex !== toIndex && fromIndex >= 0 && toIndex >= 0) {
-        this.layer.renderer.swapLayers(fromIndex, toIndex);
+        // Get dragged layer index
+        const fromIndex = parseInt(layerIndexStr);
+        const toIndex = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
+
+        if (fromIndex !== toIndex && fromIndex >= 0 && toIndex >= 0) {
+          console.log(`🔄 Swapping panels: ${fromIndex} ↔ ${toIndex}`);
+          this.layer.renderer.swapLayers(fromIndex, toIndex);
+        }
+
+        return false;
       }
-
-      return false;
+      // Otherwise, let the file drop handler in setupDragDrop() handle it
     });
   }
 

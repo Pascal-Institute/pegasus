@@ -43,7 +43,7 @@ class ImgKitRenderer {
     if (this.scrollContainer && this.scrollLeftBtn && this.scrollRightBtn) {
       this.setupScrollEvents();
       this.setupGlobalDragPrevention();
-      this.setupGlobalMagnifyShortcut(); // Setup Alt + A globally
+      this.setupGlobalMagnifyShortcut(); // Setup Alt + M globally
     }
   }
 
@@ -140,7 +140,6 @@ class ImgKitRenderer {
       // Activate magnifying glass when both Alt and A are pressed
       if (isAltPressed && isAPressed && this.globalMode !== ImageMode.MAGNIFY) {
         e.preventDefault();
-        console.log("🔍 Magnifying glass ACTIVATED (Alt + A)");
         this.globalMode = ImageMode.MAGNIFY;
 
         // Enable magnify mode on all layers
@@ -154,7 +153,7 @@ class ImgKitRenderer {
       if (e.key === "Alt") {
         isAltPressed = false;
       }
-      if (e.key.toLowerCase() === "a") {
+      if (e.key.toLowerCase() === "m") {
         isAPressed = false;
       }
 

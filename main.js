@@ -211,6 +211,11 @@ app.whenReady().then(() => {
     });
   });
 
+  ipcMain.on("padImgREQ", (event) => {
+    mainWindow.webContents.send("padImgCMD");
+    mainWindow.webContents.focus();
+  });
+
   // Notification Handler - Forward to main window
   ipcMain.on("showNotificationREQ", (event, notificationId) => {
     // Send to main window renderer

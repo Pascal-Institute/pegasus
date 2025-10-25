@@ -60,6 +60,10 @@ class ImageProcessor {
         pipeline = pipeline.erode(options.erode);
       }
 
+      if (options.extend) {
+        pipeline = pipeline.extend(options.extend);
+      }
+
       // Apply flip if specified
       if (options.flip) {
         pipeline = pipeline.flip(options.flip);

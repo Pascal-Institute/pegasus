@@ -97,7 +97,7 @@ class LayerHistory {
    * @returns {boolean} True if can undo
    */
   canUndo() {
-    return this.index > 0;
+    return this.index > 1;
   }
 
   /**

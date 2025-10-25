@@ -3,7 +3,8 @@
 #tintExecuteBtn:hover,
 #watermarkBtn:hover,
 #colorpickerBtn:hover,
-#colorpickerBox:hover {
+#colorpickerBox:hover,
+#padBtn:hover {
   cursor: pointer;
 }
 

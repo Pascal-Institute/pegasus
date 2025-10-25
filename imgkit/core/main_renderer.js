@@ -121,25 +121,26 @@ class ImgKitRenderer {
   }
 
   /**
-   * Setup global magnifying glass shortcut (Alt + A)
+   * Setup global magnifying glass shortcut (Alt + M)
    * This works regardless of which layer is focused
    */
   setupGlobalMagnifyShortcut() {
     let isAltPressed = false;
-    let isAPressed = false;
+    let isMPressed = false;
 
     // Track Alt key
     document.addEventListener("keydown", (e) => {
       if (e.key === "Alt") {
         isAltPressed = true;
       }
-      if (e.key.toLowerCase() === "a") {
-        isAPressed = true;
+      if (e.key.toLowerCase() === "m") {
+        isMPressed = true;
       }
 
-      // Activate magnifying glass when both Alt and A are pressed
-      if (isAltPressed && isAPressed && this.globalMode !== ImageMode.MAGNIFY) {
+      // Activate magnifying glass when both Alt and M are pressed
+      if (isAltPressed && isMPressed && this.globalMode !== ImageMode.MAGNIFY) {
         e.preventDefault();
+        console.log("🔍 Magnifying glass ACTIVATED (Alt + M)");
         this.globalMode = ImageMode.MAGNIFY;
 
         // Enable magnify mode on all layers
@@ -154,12 +155,12 @@ class ImgKitRenderer {
         isAltPressed = false;
       }
       if (e.key.toLowerCase() === "m") {
-        isAPressed = false;
+        isMPressed = false;
       }
 
-      // Deactivate magnifying glass when either Alt or A is released
+      // Deactivate magnifying glass when either Alt or M is released
       if (
-        (!isAltPressed || !isAPressed) &&
+        (!isAltPressed || !isMPressed) &&
         this.globalMode === ImageMode.MAGNIFY
       ) {
         console.log("🔍 Magnifying glass DEACTIVATED");

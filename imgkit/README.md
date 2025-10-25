@@ -343,10 +343,10 @@ updateScrollUI();
   globalMode: ImageMode.NORMAL  // ✨ Global mode state
 }
 
-// Alt + A shortcut affects all layers
+// Alt + M shortcut affects all layers
 setupGlobalMagnifyShortcut() {
   document.addEventListener("keydown", (e) => {
-    if (e.altKey && e.key === "a") {
+    if (e.altKey && e.key === "m") {
       this.globalMode = ImageMode.MAGNIFY;
       this.imageLayerQueue.forEach(layer => {
         layer.modeManager.setMode(ImageMode.MAGNIFY);

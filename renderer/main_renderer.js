@@ -206,9 +206,10 @@ ipcRenderer.on("colorpickerImgCMD", async (event, res) => {
 ipcRenderer.on("padImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer) return;
-  currentLayer.processImage({ extend: { top: 1, bottom: 1, left: 1, right: 1 } });
+  currentLayer.processImage({
+    extend: { top: 1, bottom: 1, left: 1, right: 1 },
+  });
 });
-
 
 ipcRenderer.on("cropImgCMD", (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
@@ -313,10 +314,10 @@ document.addEventListener("keydown", function (event) {
     if (currentLayer && currentLayer.redo) {
       currentLayer.redo();
     }
-  } else if (event.altKey && (event.key === "a" || event.key === "A")) {
-    // Alt+A: Toggle magnifying glass mode (handled globally in renderer.js now)
+  } else if (event.altKey && (event.key === "m" || event.key === "M")) {
+    // Alt+M: Toggle magnifying glass mode (handled globally in renderer.js now)
     // This local handler is kept for backwards compatibility but does nothing
-    // since setupGlobalMagnifyShortcut in renderer.js handles Alt+A globally
+    // since setupGlobalMagnifyShortcut in renderer.js handles Alt+M globally
   } else if (event.which === 122) {
     if (!fullScreenFlag) {
       ipcRenderer.send("FullScreenREQ");

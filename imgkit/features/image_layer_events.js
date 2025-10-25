@@ -372,7 +372,7 @@ class ImageLayerEvents {
    * Setup keyboard shortcuts
    */
   setupKeyboardShortcuts() {
-    // Note: Alt + A for magnifying glass is handled globally in renderer.js
+    // Note: Alt + M for magnifying glass is handled globally in main_renderer.js
 
     document.addEventListener("keydown", (e) => {
       // Only handle if this panel is focused

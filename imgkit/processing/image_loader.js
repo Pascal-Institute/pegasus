@@ -17,7 +17,12 @@ class ImageLoader {
       // For GIF files, first check if they're animated
       let gifMetadata = null;
       if (extension === "gif") {
-        gifMetadata = await sharp(filepath).metadata();
+        try {
+          gifMetadata = await sharp(filepath, { animated: true }).metadata();
+          console.log("GIF metadata:", gifMetadata);
+        } catch (error) {
+          console.warn("Failed to read GIF metadata:", error);
+        }
       }
 
       const loader = ImageLoader.getImageLoader(filepath, extension);
@@ -42,7 +47,12 @@ class ImageLoader {
       // For GIF files, first check if they're animated
       let gifMetadata = null;
       if (extension === "gif") {
-        gifMetadata = await sharp(buffer).metadata();
+        try {
+          gifMetadata = await sharp(buffer, { animated: true }).metadata();
+          console.log("GIF metadata from buffer:", gifMetadata);
+        } catch (error) {
+          console.warn("Failed to read GIF metadata from buffer:", error);
+        }
       }
 
       const loader = ImageLoader.getBufferLoader(buffer, extension);
@@ -84,6 +94,10 @@ class ImageLoader {
     if (extension === "bmp") {
       return bmp.sharpFromBmp(filepath).png();
     }
+    if (extension === "gif") {
+      // For GIF, extract first frame as PNG
+      return sharp(filepath, { page: 0 }).png();
+    }
     return sharp(filepath);
   }
 
@@ -96,6 +110,10 @@ class ImageLoader {
     }
     if (extension === "bmp") {
       return bmp.sharpFromBmp(buffer).png();
+    }
+    if (extension === "gif") {
+      // For GIF, extract first frame as PNG
+      return sharp(buffer, { page: 0 }).png();
     }
     return sharp(buffer);
   }

@@ -203,6 +203,12 @@ ipcRenderer.on("colorpickerImgCMD", async (event, res) => {
   }
 });
 
+ipcRenderer.on("padImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer) return;
+});
+
+
 ipcRenderer.on("cropImgCMD", (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer) return;

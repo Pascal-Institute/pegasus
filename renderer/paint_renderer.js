@@ -72,6 +72,10 @@ document.getElementById("blueValue").addEventListener("input", (event) => {
   updateTintBtnBackground(rgb);
 });
 
+document.getElementById("padBtn").addEventListener("click", () => {
+  ipcRenderer.send("padImgREQ");
+});
+
 function updateTintBtnBackground(rgb) {
   console.log(rgb);
   var colorString = `#${parseInt(rgb.r, 10)

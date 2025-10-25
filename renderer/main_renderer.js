@@ -206,6 +206,7 @@ ipcRenderer.on("colorpickerImgCMD", async (event, res) => {
 ipcRenderer.on("padImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer) return;
+  currentLayer.processImage({ extend: { top: 1, bottom: 1, left: 1, right: 1 } });
 });
 
 

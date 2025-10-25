@@ -7,34 +7,40 @@
   </head>
 
   <body>
-    <div id="toolBox1">
-      <button title="resize" id="resizeBtn">
-        <img class="icon" src="assets/resize.ico" />
-      </button>
-      <button title="crop" id="cropBtn">
-        <img class="icon" src="assets/crop.ico" />
-      </button>
-      <button title="filter" id="filterBtn">
-        <img class="icon" src="assets/filter.ico" />
-      </button>
-      <button title="rotate" id="rotateBtn">
-        <img class="icon" src="assets/rotate.ico" />
-      </button>
-      <button title="paint" id="paintBtn">
-        <img class="icon" src="assets/paint.ico" />
-      </button>
-      <button title="image_analysis" id="image_analysisBtn">
-        <img class="icon" src="assets/image_analysis.ico" />
-      </button>
+    <!-- Fixed Toolbar Section -->
+    <div id="toolbar-section">
+      <div id="toolBox1">
+        <button title="resize" id="resizeBtn">
+          <img class="icon" src="assets/resize.ico" />
+        </button>
+        <button title="crop" id="cropBtn">
+          <img class="icon" src="assets/crop.ico" />
+        </button>
+        <button title="filter" id="filterBtn">
+          <img class="icon" src="assets/filter.ico" />
+        </button>
+        <button title="rotate" id="rotateBtn">
+          <img class="icon" src="assets/rotate.ico" />
+        </button>
+        <button title="paint" id="paintBtn">
+          <img class="icon" src="assets/paint.ico" />
+        </button>
+        <button title="image_analysis" id="image_analysisBtn">
+          <img class="icon" src="assets/image_analysis.ico" />
+        </button>
+      </div>
     </div>
 
-    <label id="showImageOnlyLabel"
-      ><input id="showImageOnlyCheckBox" type="checkbox" />Show Image
-      Only</label
-    >
+    <!-- Scrollable Image Display Section -->
+    <div id="image-display-section">
+      <label id="showImageOnlyLabel"
+        ><input id="showImageOnlyCheckBox" type="checkbox" />Show Image
+        Only</label
+      >
 
-    <!-- ImgKit UI Container (loaded dynamically) -->
-    <div id="imgkit-container"></div>
+      <!-- ImgKit UI Container (loaded dynamically) -->
+      <div id="imgkit-container"></div>
+    </div>
 
     <!-- Load ImgKit UI components -->
     <script src="./imgkit/ui_loader.js"></script>

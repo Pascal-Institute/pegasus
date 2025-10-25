@@ -39,3 +39,11 @@ document.getElementById("negativeBtn").addEventListener("click", () => {
 document.getElementById("normalizeBtn").addEventListener("click", () => {
   ipcRenderer.send("normalizeImgREQ");
 });
+
+document.getElementById("dilateBtn").addEventListener("click", () => {
+  ipcRenderer.send("dilateValueSEND", Number(1));
+});
+
+document.getElementById("erodeBtn").addEventListener("click", () => {
+  ipcRenderer.send("erodeValueSEND", Number(1));
+});

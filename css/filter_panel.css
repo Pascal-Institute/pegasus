@@ -3,6 +3,9 @@
 #medianBtn:hover,
 #bitwiseBtn:hover,
 #negativeBtn:hover,
-#normalizeBtn:hover {
+#normalizeBtn:hover,
+#dilateBtn:hover,
+#erodeBtn:hover {
+  background-color: #e0e0e0;
   cursor: pointer;
 }

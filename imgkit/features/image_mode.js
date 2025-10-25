@@ -1,6 +1,6 @@
 /**
  * ImageModes - Unified mode system for image layer interactions
- * 
+ *
  * Replaces individual flags (drawFlag, dragFlag, magnifyFlag) with a single mode state.
  * This makes the code more maintainable and prevents conflicting states.
  */
@@ -11,19 +11,19 @@
  */
 const ImageMode = {
   /** Default mode - no special interaction */
-  NORMAL: 'normal',
-  
+  NORMAL: "normal",
+
   /** Drawing/painting mode - user is drawing on canvas */
-  DRAWING: 'drawing',
-  
+  DRAWING: "drawing",
+
   /** Cropping mode - user is selecting a crop area (crosshair cursor) */
-  CROPPING: 'cropping',
-  
-  /** Magnifying glass mode - zoomed preview follows mouse (Alt + A) */
-  MAGNIFY: 'magnify',
+  CROPPING: "cropping",
+
+  /** Magnifying glass mode - zoomed preview follows mouse (Alt + M) */
+  MAGNIFY: "magnify",
 
   /** Color picker mode - user is picking a color from the image */
-  COLORPICKER: 'colorpicker'
+  COLORPICKER: "colorpicker",
 };
 
 /**
@@ -127,15 +127,15 @@ class ModeManager {
   getCursor() {
     switch (this.currentMode) {
       case ImageMode.CROPPING:
-        return 'crosshair';
+        return "crosshair";
       case ImageMode.MAGNIFY:
-        return 'zoom-in';
+        return "zoom-in";
       case ImageMode.DRAWING:
-        return 'crosshair'; // or custom drawing cursor
+        return "crosshair"; // or custom drawing cursor
       case ImageMode.COLORPICKER:
-        return 'crosshair';
+        return "crosshair";
       default:
-        return 'default';
+        return "default";
     }
   }
 }
@@ -146,5 +146,5 @@ class ModeManager {
 
 module.exports = {
   ImageMode,
-  ModeManager
+  ModeManager,
 };

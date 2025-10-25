@@ -13,7 +13,7 @@
 
 const { ipcRenderer } = require("electron");
 const { ImageLayer } = require("./image_layer.js");
-const { ImageMode } = require('./image_mode.js');
+const { ImageMode } = require("../features/image_mode.js");
 
 // ============================================================================
 // MAIN CLASS: ImgKitRenderer
@@ -41,49 +41,10 @@ class ImgKitRenderer {
 
     // Initialize if DOM elements exist
     if (this.scrollContainer && this.scrollLeftBtn && this.scrollRightBtn) {
-      this.initializeMessages();
       this.setupScrollEvents();
-      this.setupGlobalMagnifyShortcut(); // Setup Alt + A globally
+      this.setupGlobalDragPrevention();
+      this.setupGlobalMagnifyShortcut(); // Setup Alt + M globally
     }
-  }
-
-  // --------------------------------------------------------------------------
-  // NOTIFICATION SYSTEM
-  // --------------------------------------------------------------------------
-
-  /**
-   * Initialize notification message elements (from existing HTML)
-   * These are the small popup messages that appear when you copy, save, etc.
-   */
-  initializeMessages() {
-    const messageIds = [
-      "copy",
-      "img-copy",
-      "img-paste",
-      "delete",
-      "save",
-      "convert",
-      "error",
-    ];
-
-    messageIds.forEach((id) => {
-      const msg = document.getElementById(`imgkit-${id}`);
-      if (msg) {
-        this.messages[id] = msg;
-      }
-    });
-  }
-
-  /**
-   * Show notification message with fade animation
-   * @param {string} id - Message identifier (e.g., 'copy', 'save')
-   */
-  showMessage(id) {
-    if (!this.messages[id]) return;
-    this.messages[id].animate([{ opacity: "1" }, { opacity: "0" }], {
-      duration: 1800,
-      iterations: 1,
-    });
   }
 
   // --------------------------------------------------------------------------
@@ -95,16 +56,17 @@ class ImgKitRenderer {
    * Left/Right buttons scroll the container horizontally
    */
   setupScrollEvents() {
-    // Scroll left button
+    // Scroll left button - scroll to the very beginning
     this.scrollLeftBtn.addEventListener("click", () => {
-      this.scrollContainer.scrollBy({ left: -400, behavior: "smooth" });
-      setTimeout(() => this.updateScrollUI(), 400);
+      this.scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
     });
 
-    // Scroll right button
+    // Scroll right button - scroll to the very end
     this.scrollRightBtn.addEventListener("click", () => {
-      this.scrollContainer.scrollBy({ left: 400, behavior: "smooth" });
-      setTimeout(() => this.updateScrollUI(), 400);
+      this.scrollContainer.scrollTo({
+        left: this.scrollContainer.scrollWidth,
+        behavior: "smooth",
+      });
     });
 
     // Update UI when user scrolls manually
@@ -114,30 +76,76 @@ class ImgKitRenderer {
   }
 
   /**
-   * Setup global magnifying glass shortcut (Alt + A)
+   * Prevent browser's default drag behavior globally
+   * But allow panel swapping
+   */
+  setupGlobalDragPrevention() {
+    // Prevent default drag behavior on entire document, except for drop
+    ["dragover", "dragenter", "dragleave"].forEach((eventName) => {
+      document.addEventListener(
+        eventName,
+        (e) => {
+          // Allow drag events on panels for swapping
+          if (e.target.closest && e.target.closest(".imgPanel")) {
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+        },
+        false
+      );
+    });
+
+    // Handle drop separately to distinguish file drops from panel swaps
+    document.addEventListener(
+      "drop",
+      (e) => {
+        // Only prevent if it's a file drop (not a panel swap)
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      false
+    );
+
+    document.addEventListener(
+      "dragover",
+      (e) => {
+        // Set drop effect for file drops
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          e.dataTransfer.dropEffect = "copy";
+        }
+      },
+      false
+    );
+  }
+
+  /**
+   * Setup global magnifying glass shortcut (Alt + M)
    * This works regardless of which layer is focused
    */
   setupGlobalMagnifyShortcut() {
     let isAltPressed = false;
-    let isAPressed = false;
+    let isMPressed = false;
 
     // Track Alt key
     document.addEventListener("keydown", (e) => {
       if (e.key === "Alt") {
         isAltPressed = true;
       }
-      if (e.key.toLowerCase() === "a") {
-        isAPressed = true;
+      if (e.key.toLowerCase() === "m") {
+        isMPressed = true;
       }
 
-      // Activate magnifying glass when both Alt and A are pressed
-      if (isAltPressed && isAPressed && this.globalMode !== ImageMode.MAGNIFY) {
+      // Activate magnifying glass when both Alt and M are pressed
+      if (isAltPressed && isMPressed && this.globalMode !== ImageMode.MAGNIFY) {
         e.preventDefault();
-        console.log("🔍 Magnifying glass ACTIVATED (Alt + A)");
+        console.log("🔍 Magnifying glass ACTIVATED (Alt + M)");
         this.globalMode = ImageMode.MAGNIFY;
-        
+
         // Enable magnify mode on all layers
-        this.imageLayerQueue.forEach(layer => {
+        this.imageLayerQueue.forEach((layer) => {
           layer.modeManager.setMode(ImageMode.MAGNIFY);
         });
       }
@@ -147,20 +155,28 @@ class ImgKitRenderer {
       if (e.key === "Alt") {
         isAltPressed = false;
       }
-      if (e.key.toLowerCase() === "a") {
-        isAPressed = false;
+      if (e.key.toLowerCase() === "m") {
+        isMPressed = false;
       }
 
-      // Deactivate magnifying glass when either Alt or A is released
-      if ((!isAltPressed || !isAPressed) && this.globalMode === ImageMode.MAGNIFY) {
+      // Deactivate magnifying glass when either Alt or M is released
+      if (
+        (!isAltPressed || !isMPressed) &&
+        this.globalMode === ImageMode.MAGNIFY
+      ) {
         console.log("🔍 Magnifying glass DEACTIVATED");
         this.globalMode = ImageMode.NORMAL;
-        
+
         // Disable magnify on all layers and clear overlays
-        this.imageLayerQueue.forEach(layer => {
+        this.imageLayerQueue.forEach((layer) => {
           layer.modeManager.reset();
           if (layer.overlayCanvas) {
-            layer.overlayCtx.clearRect(0, 0, layer.overlayCanvas.width, layer.overlayCanvas.height);
+            layer.overlayCtx.clearRect(
+              0,
+              0,
+              layer.overlayCanvas.width,
+              layer.overlayCanvas.height
+            );
           }
           if (layer.magnifyAnimationId) {
             cancelAnimationFrame(layer.magnifyAnimationId);
@@ -218,12 +234,6 @@ class ImgKitRenderer {
         boxSizing: "border-box",
       });
     });
-
-    // Step 3: Enable/disable scroll buttons based on scroll position
-    this.scrollLeftBtn.disabled = this.scrollContainer.scrollLeft <= 0;
-    this.scrollRightBtn.disabled =
-      this.scrollContainer.scrollLeft + this.scrollContainer.clientWidth >=
-      this.scrollContainer.scrollWidth - 2;
   }
 
   // --------------------------------------------------------------------------
@@ -248,16 +258,16 @@ class ImgKitRenderer {
   /**
    * Swap two layers by index
    * Used for drag & drop reordering
-   * 
+   *
    * @param {number} fromIndex - Source layer index
    * @param {number} toIndex - Target layer index
    */
   swapLayers(fromIndex, toIndex) {
     if (
-      fromIndex < 0 || 
-      fromIndex >= this.imageLayerQueue.length -1 ||
-      toIndex < 0 || 
-      toIndex >= this.imageLayerQueue.length -1
+      fromIndex < 0 ||
+      fromIndex >= this.imageLayerQueue.length - 1 ||
+      toIndex < 0 ||
+      toIndex >= this.imageLayerQueue.length - 1
     ) {
       return;
     }
@@ -332,18 +342,17 @@ class ImgKitRenderer {
     if (current && current.buffer) {
       try {
         // Send image to native clipboard via IPC
-        ipcRenderer.send('copy-image-to-clipboard', current.buffer);
-        
+        ipcRenderer.send("copy-image-to-clipboard", current.buffer);
+
         // Also keep internal copy for fallback
         this.copiedLayer = {
           buffer: current.buffer,
           filename: current.filename,
           extension: current.extension,
         };
-        
-        this.showMessage("img-copy");
+        ipcRenderer.send("showNotificationREQ", "imgkit-img-copy");
       } catch (error) {
-        console.error('Failed to copy image:', error);
+        console.error("Failed to copy image:", error);
       }
     }
   }
@@ -360,29 +369,30 @@ class ImgKitRenderer {
 
     try {
       // Try to get image from native clipboard first
-      const imageBuffer = await ipcRenderer.invoke('paste-image-from-clipboard');
-      
+      const imageBuffer = await ipcRenderer.invoke(
+        "paste-image-from-clipboard"
+      );
+
       if (imageBuffer) {
         // Got image from clipboard
-        const filename = 'pasted_image.png';
+        const filename = "pasted_image.png";
         await current.openImageBuffer(Buffer.from(imageBuffer), filename);
-        this.showMessage("img-paste");
+        ipcRenderer.send("showNotificationREQ", "imgkit-img-paste");
         if (this.currentIndex === this.imageLayerQueue.length - 1) {
-            this.createDefaultImage();  
+          this.createDefaultImage();
         }
         return;
       }
     } catch (error) {
-      console.error('Failed to paste from clipboard:', error);
+      console.error("Failed to paste from clipboard:", error);
     }
 
     // Fallback: paste from internally copied layer
     if (this.copiedLayer) {
       const filename = `${this.copiedLayer.filename}_copy.${this.copiedLayer.extension}`;
       await current.openImageBuffer(this.copiedLayer.buffer, filename);
-      this.showMessage("img-paste");
+      ipcRenderer.send("showNotificationREQ", "imgkit-img-paste");
     }
-      
   }
 
   // --------------------------------------------------------------------------
@@ -413,7 +423,7 @@ class ImgKitRenderer {
         this.createDefaultImage();
       }
 
-      this.showMessage("delete");
+      ipcRenderer.send("showNotificationREQ", "imgkit-delete");
       this.updateScrollUI();
     }
   }

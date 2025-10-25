@@ -2,18 +2,8 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <!-- <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    /> -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; connect-src 'self';font-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'"
-    />
     <link href="./css/styles.css" rel="stylesheet" />
-    <link href="./css/imgpanel.css" rel="stylesheet" />
-    <title>pegasus - Image Processing Tool</title>
+    <title>pegasus - give wings to pixels</title>
   </head>
 
   <body>
@@ -37,68 +27,17 @@
         <img class="icon" src="assets/image_analysis.ico" />
       </button>
     </div>
-    
+
     <label id="showImageOnlyLabel"
       ><input id="showImageOnlyCheckBox" type="checkbox" />Show Image
       Only</label
     >
 
-    <!-- ImgKit UI Elements -->
-    <div id="scroll-container"></div>
-    <button id="scroll-left-btn" class="scroll-btn">&lt;</button>
-    <button id="scroll-right-btn" class="scroll-btn">&gt;</button>
+    <!-- ImgKit UI Container (loaded dynamically) -->
+    <div id="imgkit-container"></div>
 
-    <!-- ImgKit Notification Messages -->
-    <div id="imgkit-copy" class="imgkit-notification success">Color Copied</div>
-    <div id="imgkit-img-copy" class="imgkit-notification success">
-      Image Copied
-    </div>
-    <div id="imgkit-img-paste" class="imgkit-notification success">
-      Image Pasted
-    </div>
-    <div id="imgkit-delete" class="imgkit-notification error">Deleted</div>
-    <div id="imgkit-save" class="imgkit-notification success">
-      Saved Successfully
-    </div>
-    <div id="imgkit-convert" class="imgkit-notification success">
-      Converted Successfully
-    </div>
-    <div id="imgkit-error" class="imgkit-notification error">
-      Sorry. Couldn't open image...
-    </div>
-
-    <!-- ImgKit Image Panel Template -->
-    <!-- Styles: see css/imgpanel.css -->
-    <template id="image-panel-template">
-      <div class="imgPanel" tabindex="0">
-        <button class="delete-btn">
-          <img src="assets/close.ico" alt="Delete" />
-        </button>
-
-        <canvas class="img-canvas"></canvas>
-
-        <div class="color-box-container">
-          <div class="color-box" title=""></div>
-          <div class="color-box" title=""></div>
-          <div class="color-box" title=""></div>
-        </div>
-
-        <span class="name-span">Untitled</span>
-        <h2 class="info-text">0 x 0</h2>
-        <select class="extension-combo">
-          <option value="png">png</option>
-          <option value="jpg">jpg</option>
-          <option value="jpeg">jpeg</option>
-          <option value="webp">webp</option>
-          <option value="gif">gif</option>
-          <option value="bmp">bmp</option>
-          <option value="ico">ico</option>
-          <option value="tif">tif</option>
-          <option value="tiff">tiff</option>
-        </select>
-      </div>
-    </template>
-
+    <!-- Load ImgKit UI components -->
+    <script src="./imgkit/ui_loader.js"></script>
     <script src="./renderer/main_renderer.js"></script>
   </body>
 </html>

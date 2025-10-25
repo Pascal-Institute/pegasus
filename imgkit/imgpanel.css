@@ -1,14 +1,16 @@
 /* ImgKit Scroll Container Styles */
 #scroll-container {
   position: relative;
-  width: 100%;
+  width: auto !important;
+  max-width: 100vw;
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 32px;
-  padding: 128px 80px 48px 80px;
+  box-sizing: border-box;
+  padding: 128px 48px 48px 48px;
   scroll-behavior: smooth;
 }
 
@@ -29,7 +31,7 @@
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 1000;
+  z-index: 10000;
   font-size: 2em;
   background: #fff;
   border: 1px solid #ccc;
@@ -40,6 +42,7 @@
   cursor: pointer;
   transition: all 0.3s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
 }
 
 .scroll-btn:hover {
@@ -77,6 +80,26 @@
   min-width: 200px;
   flex-shrink: 0;
   outline: none;
+}
+
+/* Panel draggable states */
+.imgPanel[draggable="true"] {
+  cursor: grab;
+}
+
+.imgPanel[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Panel drag states */
+.imgPanel.panel-dragging {
+  opacity: 0.5;
+  border: 2px dashed #999;
+  cursor: grabbing;
+}
+
+.imgPanel.panel-drag-over {
+  border-top: 3px solid #4caf50;
 }
 
 .imgPanel:hover {
@@ -126,13 +149,14 @@
   object-fit: contain;
 }
 
-.name-span {
+.name-input {
+  width: 100px;
   font-size: 14px;
   font-weight: 600;
   color: #333;
   position: absolute;
-  left: 20px;
-  top: 12px;
+  left: 18px;
+  top: 8px;
 }
 
 .color-box-container {

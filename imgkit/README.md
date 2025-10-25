@@ -82,6 +82,7 @@ imgkit/
 ```
 
 **Key Improvements:**
+
 - ✅ Unified mode system (no more flag-based state)
 - ✅ Clear separation between UI and business logic
 - ✅ Mode-based event handling
@@ -96,17 +97,19 @@ imgkit/
 **Purpose:** Unified mode system replacing individual flags
 
 **Available Modes:**
+
 ```javascript
 const ImageMode = {
-  NORMAL: 'normal',           // Default mode
-  DRAWING: 'drawing',         // Drawing/painting on canvas
-  CROPPING: 'cropping',       // Selecting crop area
-  MAGNIFY: 'magnify',         // Magnifying glass (Alt + A)
-  COLORPICKER: 'colorpicker'  // Color extraction from pixel
+  NORMAL: "normal", // Default mode
+  DRAWING: "drawing", // Drawing/painting on canvas
+  CROPPING: "cropping", // Selecting crop area
+  MAGNIFY: "magnify", // Magnifying glass (Alt + A)
+  COLORPICKER: "colorpicker", // Color extraction from pixel
 };
 ```
 
 **ModeManager API:**
+
 ```javascript
 // Create mode manager (one per ImageLayer)
 const manager = new ModeManager();
@@ -115,24 +118,25 @@ const manager = new ModeManager();
 manager.setMode(ImageMode.CROPPING);
 
 // Check current mode
-manager.isNormal()        // → false
-manager.isCropping()      // → true
-manager.isDrawing()       // → false
-manager.isMagnifying()    // → false
-manager.isColorPicker()   // → false
+manager.isNormal(); // → false
+manager.isCropping(); // → true
+manager.isDrawing(); // → false
+manager.isMagnifying(); // → false
+manager.isColorPicker(); // → false
 
 // Get mode
-manager.getMode()         // → 'cropping'
+manager.getMode(); // → 'cropping'
 
 // Get cursor for current mode
-manager.getCursor()       // → 'crosshair'
+manager.getCursor(); // → 'crosshair'
 
 // Mode history
-manager.reset()           // → Back to NORMAL
-manager.restorePrevious() // → Restore previous mode
+manager.reset(); // → Back to NORMAL
+manager.restorePrevious(); // → Restore previous mode
 ```
 
 **Benefits over Flag System:**
+
 - ✅ Mutually exclusive states (can't be in DRAWING and MAGNIFYING simultaneously)
 - ✅ Type-safe enum prevents typos
 - ✅ Centralized cursor management
@@ -140,6 +144,7 @@ manager.restorePrevious() // → Restore previous mode
 - ✅ Clear state transitions with history
 
 **Comparison:**
+
 ```javascript
 // ❌ Before: Multiple flags (error-prone)
 this.drawFlag = false;
@@ -159,6 +164,7 @@ if (this.modeManager.isCropping()) { ... }
 **Purpose:** Pure image processing functions with no UI dependencies
 
 **Key Features:**
+
 - Image file I/O (open, save)
 - Format conversion (PNG, JPG, BMP, ICO, TIFF, WEBP)
 - Image operations (resize, crop, blur, sharpen)
@@ -166,6 +172,7 @@ if (this.modeManager.isCropping()) { ... }
 - Temporary file management
 
 **API:**
+
 ```javascript
 static async openImage(filepath)
 static async openImageBuffer(buffer, filename)
@@ -185,6 +192,7 @@ static async extractColors(buffer, info, count)
 **Purpose:** Pure image processing functions with no UI dependencies
 
 **Key Features:**
+
 - Image file I/O (open, save)
 - Format conversion (PNG, JPG, BMP, ICO, TIFF, WEBP)
 - Image operations (resize, crop, blur, sharpen)
@@ -192,6 +200,7 @@ static async extractColors(buffer, info, count)
 - Temporary file management
 
 **API:**
+
 ```javascript
 static async openImage(filepath)
 static async openImageBuffer(buffer, filename)
@@ -212,6 +221,7 @@ static async extractColorAt(buffer, info, x, y)  // ✨ NEW
 **Purpose:** Manages individual image panel state and operations
 
 **State Management:**
+
 - Image data (buffer, metadata, filename)
 - Undo/redo history (max 10 entries)
 - **Mode manager** (replaces individual flags) ✨
@@ -219,6 +229,7 @@ static async extractColorAt(buffer, info, x, y)  // ✨ NEW
 - Crop selection coordinates
 
 **Operations:**
+
 ```javascript
 async openImage(filepath)
 async openImageBuffer(buffer, filename)
@@ -232,6 +243,7 @@ destroy()
 ```
 
 **Mode Integration:**
+
 ```javascript
 // Each ImageLayer has its own mode manager
 constructor(renderer) {
@@ -247,17 +259,19 @@ constructor(renderer) {
 **Purpose:** Mode-specific event handling for image panels
 
 **Organized by Mode:**
+
 ```javascript
-setupCropping()      // CROPPING mode events
-setupDrawing()       // DRAWING mode events
-setupMagnifying()    // MAGNIFY mode events
-setupDragDrop()      // File upload events
-setupKeyboardShortcuts()
-setupContextMenu()
-setupPanelDragging()
+setupCropping(); // CROPPING mode events
+setupDrawing(); // DRAWING mode events
+setupMagnifying(); // MAGNIFY mode events
+setupDragDrop(); // File upload events
+setupKeyboardShortcuts();
+setupContextMenu();
+setupPanelDragging();
 ```
 
 **Mode-Based Event Handling:**
+
 ```javascript
 // Cropping only works in CROPPING mode
 setupCropping() {
@@ -277,11 +291,13 @@ setupMagnifying() {
 ```
 
 **Color Picker Integration:**
+
 ```javascript
 canvas.addEventListener("click", async (e) => {
-  if (this.layer.modeManager.isColorPicker()) {  // ✨ NEW
+  if (this.layer.modeManager.isColorPicker()) {
+    // ✨ NEW
     const color = await ImageProcessor.extractColorAt(buffer, info, x, y);
-    ipcRenderer.send('colorpickerValueSEND', color);
+    ipcRenderer.send("colorpickerValueSEND", color);
   }
 });
 ```
@@ -293,6 +309,7 @@ canvas.addEventListener("click", async (e) => {
 **Purpose:** Manages the scrollable container and coordinates image panels
 
 **Responsibilities:**
+
 - Create and delete image layers
 - Manage layer navigation and focus
 - Handle copy/paste between layers
@@ -301,20 +318,22 @@ canvas.addEventListener("click", async (e) => {
 - Control horizontal scroll behavior
 
 **API:**
+
 ```javascript
-createImageLayer(isDefault)
-createDefaultImage()
-getCurrentLayer()
-setCurrentLayer(index)
-swapLayers(fromIndex, toIndex)
-copyImage()
-pasteImage()
-deleteImage()
-showMessage(type)
-updateScrollUI()
+createImageLayer(isDefault);
+createDefaultImage();
+getCurrentLayer();
+setCurrentLayer(index);
+swapLayers(fromIndex, toIndex);
+copyImage();
+pasteImage();
+deleteImage();
+showMessage(type);
+updateScrollUI();
 ```
 
 **Global Mode Management:**
+
 ```javascript
 {
   imageLayerQueue: [],    // Array of ImageLayer instances
@@ -324,10 +343,10 @@ updateScrollUI()
   globalMode: ImageMode.NORMAL  // ✨ Global mode state
 }
 
-// Alt + A shortcut affects all layers
+// Alt + M shortcut affects all layers
 setupGlobalMagnifyShortcut() {
   document.addEventListener("keydown", (e) => {
-    if (e.altKey && e.key === "a") {
+    if (e.altKey && e.key === "m") {
       this.globalMode = ImageMode.MAGNIFY;
       this.imageLayerQueue.forEach(layer => {
         layer.modeManager.setMode(ImageMode.MAGNIFY);
@@ -346,6 +365,7 @@ setupGlobalMagnifyShortcut() {
 Each `ImageLayer` has its own `ModeManager` instance, allowing different layers to be in different modes simultaneously (though typically only the active layer's mode matters for user interaction).
 
 **Mode Flow Example (Cropping):**
+
 ```
 1. User clicks Crop button
    ↓
@@ -375,7 +395,7 @@ ipcRenderer.on("drawImgCMD", (event, res) => {
   if (res) {
     currentLayer.modeManager.setMode(ImageMode.DRAWING);
   } else {
-    currentLayer.modeManager.reset();  // Back to NORMAL
+    currentLayer.modeManager.reset(); // Back to NORMAL
   }
 });
 
@@ -391,29 +411,34 @@ ipcRenderer.on("colorpickerImgCMD", (event, res) => {
 ### Mode-Specific Behavior
 
 **NORMAL Mode:**
+
 - Default cursor (pointer on panel)
 - No special canvas interactions
 - Panel draggable for reordering
 
 **CROPPING Mode:**
+
 - Crosshair cursor
 - Mouse drag selects crop rectangle
 - Dashed rectangle preview
 - mouseup applies crop
 
 **MAGNIFY Mode:**
+
 - Zoom-in cursor
 - Mouse move shows magnified preview
 - Uses overlay canvas (no flicker)
 - Alt + A toggle (global)
 
 **DRAWING Mode:**
+
 - Custom drawing cursor
 - Canvas stroke on mouse drag
 - Line width control with Ctrl + Scroll
 - Color selection
 
 **COLORPICKER Mode:**
+
 - Crosshair cursor
 - Click extracts pixel color
 - Sends color via IPC to paint panel
@@ -426,32 +451,32 @@ ipcRenderer.on("colorpickerImgCMD", (event, res) => {
 ### Module Exports (main.js)
 
 ```javascript
-const imgkit = require('imgkit');
+const imgkit = require("imgkit");
 
 // Available exports:
-imgkit.ImageProcessor     // Pure processing functions
-imgkit.imgKitRenderer     // Singleton UI manager
-imgkit.createDefaultImage // Helper function
-imgkit.ImageMode          // ✨ Mode enum
-imgkit.ModeManager        // ✨ Mode manager class
+imgkit.ImageProcessor; // Pure processing functions
+imgkit.imgKitRenderer; // Singleton UI manager
+imgkit.createDefaultImage; // Helper function
+imgkit.ImageMode; // ✨ Mode enum
+imgkit.ModeManager; // ✨ Mode manager class
 ```
 
 ### ImageMode Enum
 
 ```javascript
-const { ImageMode } = require('imgkit');
+const { ImageMode } = require("imgkit");
 
-ImageMode.NORMAL       // 'normal'
-ImageMode.DRAWING      // 'drawing'
-ImageMode.CROPPING     // 'cropping'
-ImageMode.MAGNIFY      // 'magnify'
-ImageMode.COLORPICKER  // 'colorpicker'
+ImageMode.NORMAL; // 'normal'
+ImageMode.DRAWING; // 'drawing'
+ImageMode.CROPPING; // 'cropping'
+ImageMode.MAGNIFY; // 'magnify'
+ImageMode.COLORPICKER; // 'colorpicker'
 ```
 
 ### ModeManager Class
 
 ```javascript
-const { ModeManager, ImageMode } = require('imgkit');
+const { ModeManager, ImageMode } = require("imgkit");
 
 const manager = new ModeManager();
 
@@ -459,64 +484,70 @@ const manager = new ModeManager();
 manager.setMode(ImageMode.CROPPING);
 
 // Check mode
-manager.isNormal()      // → boolean
-manager.isDrawing()     // → boolean
-manager.isCropping()    // → boolean
-manager.isMagnifying()  // → boolean
-manager.isColorPicker() // → boolean
+manager.isNormal(); // → boolean
+manager.isDrawing(); // → boolean
+manager.isCropping(); // → boolean
+manager.isMagnifying(); // → boolean
+manager.isColorPicker(); // → boolean
 
 // Get mode
-manager.getMode()       // → 'cropping'
+manager.getMode(); // → 'cropping'
 
 // Utilities
-manager.getCursor()     // → 'crosshair' (based on current mode)
-manager.reset()         // → Set to NORMAL
-manager.restorePrevious() // → Restore previous mode
+manager.getCursor(); // → 'crosshair' (based on current mode)
+manager.reset(); // → Set to NORMAL
+manager.restorePrevious(); // → Restore previous mode
 ```
 
 ### ImageProcessor Methods
 
 **openImage(filepath)**
+
 ```javascript
-const result = await ImageProcessor.openImage('/path/to/image.png');
+const result = await ImageProcessor.openImage("/path/to/image.png");
 // Returns: { buffer, info, filename, extension, colors }
 ```
 
 **extractColorAt(buffer, info, x, y)** ✨ NEW
+
 ```javascript
 const color = await ImageProcessor.extractColorAt(buffer, info, 150, 200);
 // Returns: '#ff5733' (hex color at pixel x=150, y=200)
 ```
 
 **processImage(buffer, options)**
+
 ```javascript
 const result = await ImageProcessor.processImage(buffer, {
   resize: { width: 800, height: 600 },
   blur: 2,
   sharpen: true,
-  format: 'jpg'
+  format: "jpg",
 });
 // Returns: { buffer, info }
 ```
 
 **applyCrop(buffer, imageInfo, cropData)**
+
 ```javascript
 const result = await ImageProcessor.applyCrop(buffer, imageInfo, {
   x: 100,
   y: 100,
   width: 500,
-  height: 500
+  height: 500,
 });
 // Returns: { buffer, info }
 ```
 
 **convertFormat(buffer, fromExt, toExt)**
+
 ```javascript
-const result = await ImageProcessor.convertFormat(buffer, 'png', 'jpg');
+const result = await ImageProcessor.convertFormat(buffer, "png", "jpg");
 // Returns: { buffer, info }
 ```
 
 **extractColors(buffer, info, count)**
+
 ```javascript
 const colors = await ImageProcessor.extractColors(buffer, info, 3);
 // Returns: ['#ff5733', '#33ff57', '#3357ff']
@@ -597,20 +628,20 @@ Show success message
 ### Basic Image Loading
 
 ```javascript
-const { imgKitRenderer } = require('imgkit');
+const { imgKitRenderer } = require("imgkit");
 
 // Renderer initializes automatically with default placeholder
 // User can drag and drop images onto canvas
 
 // Programmatic image loading
 const layer = imgKitRenderer.createImageLayer();
-await layer.openImage('/path/to/photo.jpg');
+await layer.openImage("/path/to/photo.jpg");
 ```
 
 ### Using Mode System
 
 ```javascript
-const { imgKitRenderer, ImageMode } = require('imgkit');
+const { imgKitRenderer, ImageMode } = require("imgkit");
 
 const currentLayer = imgKitRenderer.getCurrentLayer();
 
@@ -624,7 +655,7 @@ currentLayer.modeManager.setMode(ImageMode.MAGNIFY);
 
 // Check current mode
 if (currentLayer.modeManager.isCropping()) {
-  console.log('In cropping mode');
+  console.log("In cropping mode");
 }
 
 // Reset to normal
@@ -634,7 +665,7 @@ currentLayer.modeManager.reset();
 ### Color Picker Workflow
 
 ```javascript
-const { ImageMode } = require('imgkit');
+const { ImageMode } = require("imgkit");
 
 // 1. Activate color picker mode
 currentLayer.modeManager.setMode(ImageMode.COLORPICKER);
@@ -646,9 +677,9 @@ canvas.addEventListener("click", async (e) => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const color = await ImageProcessor.extractColorAt(buffer, info, x, y);
-    
+
     // Send color to paint panel
-    ipcRenderer.send('colorpickerValueSEND', color);
+    ipcRenderer.send("colorpickerValueSEND", color);
   }
 });
 
@@ -661,20 +692,20 @@ ipcRenderer.on("colorpickerValueRECV", (event, color) => {
 ### Image Processing
 
 ```javascript
-const { imgKitRenderer, ImageProcessor } = require('imgkit');
+const { imgKitRenderer, ImageProcessor } = require("imgkit");
 
 const currentLayer = imgKitRenderer.getCurrentLayer();
 
 // Using layer methods (recommended)
 await currentLayer.processImage({
   resize: { width: 1920, height: 1080 },
-  sharpen: true
+  sharpen: true,
 });
 
 // Using ImageProcessor directly
 const result = await ImageProcessor.processImage(currentLayer.buffer, {
   blur: 5,
-  format: 'png'
+  format: "png",
 });
 currentLayer.updatePreview(result.buffer, result.info);
 ```
@@ -698,7 +729,7 @@ layer.redo();
 ### Color Extraction
 
 ```javascript
-const { ImageProcessor } = require('imgkit');
+const { ImageProcessor } = require("imgkit");
 
 const layer = imgKitRenderer.getCurrentLayer();
 
@@ -706,19 +737,19 @@ const layer = imgKitRenderer.getCurrentLayer();
 const colors = await ImageProcessor.extractColors(
   layer.buffer,
   layer.info,
-  5  // Extract 5 dominant colors
+  5 // Extract 5 dominant colors
 );
-console.log('Dominant colors:', colors);
+console.log("Dominant colors:", colors);
 // Output: ['#2c3e50', '#ecf0f1', '#e74c3c', '#3498db', '#f39c12']
 
 // Extract color at specific pixel
 const pixelColor = await ImageProcessor.extractColorAt(
   layer.buffer,
   layer.info,
-  150,  // x coordinate
-  200   // y coordinate
+  150, // x coordinate
+  200 // y coordinate
 );
-console.log('Pixel color:', pixelColor);
+console.log("Pixel color:", pixelColor);
 // Output: '#3498db'
 ```
 
@@ -729,6 +760,7 @@ console.log('Pixel color:', pixelColor);
 ### 1. Unified Mode System
 
 **Problem (Before):**
+
 ```javascript
 // Multiple flags - prone to conflicting states
 this.drawFlag = true;
@@ -740,6 +772,7 @@ if (drawFlag && !magnifyFlag && !cropFlag) { ... }
 ```
 
 **Solution (After):**
+
 ```javascript
 // Single mode - mutually exclusive states
 this.modeManager.setMode(ImageMode.DRAWING);
@@ -749,6 +782,7 @@ if (this.modeManager.isDrawing()) { ... }
 ```
 
 **Benefits:**
+
 - ✅ **State Consistency:** Can't be in DRAWING and MAGNIFY simultaneously
 - ✅ **Type Safety:** Enum prevents typos (IDE autocomplete)
 - ✅ **Maintainability:** Add new mode = add one enum value
@@ -758,28 +792,33 @@ if (this.modeManager.isDrawing()) { ... }
 ### 2. Separation of Concerns
 
 **Processing Layer (image-processor.js)**
+
 - Pure functions only
 - No UI dependencies
 - No state management
 - Testable in isolation
 
 **Mode Layer (image-mode.js)**
+
 - Mode enum definition
 - Mode validation
 - Mode transition logic
 - Cursor management
 
 **Component Layer (image-layer.js)**
+
 - Manages component state
 - Bridges UI events to processing
 - Owns ModeManager instance
 
 **Event Layer (image-layer-events.js)**
+
 - Mode-specific event handlers
 - Separated by functionality (cropping, drawing, magnifying)
 - No business logic
 
 **Presentation Layer (renderer.js)**
+
 - Manages UI container
 - Global mode coordination
 - No business logic
@@ -787,6 +826,7 @@ if (this.modeManager.isDrawing()) { ... }
 ### 3. Single Responsibility
 
 Each module has one clear purpose:
+
 - **ImageProcessor:** Image manipulation (pure functions)
 - **ImageMode:** Mode definition and validation
 - **ModeManager:** Mode state management
@@ -797,19 +837,21 @@ Each module has one clear purpose:
 ### 4. No Circular Dependencies
 
 **Dependency Flow:**
+
 ```
 renderer.js ──────┐
                   ↓
 image-layer.js ───┼──→ image-processor.js
                   ↓
 image-mode.js ────┘
-                  
+
 (No circular references)
 ```
 
 ### 5. Event-Driven Architecture
 
 **Mode Changes:**
+
 ```javascript
 // Mode change can trigger callbacks
 modeManager.onModeChange = (newMode, oldMode) => {
@@ -819,12 +861,13 @@ modeManager.onModeChange = (newMode, oldMode) => {
 ```
 
 **IPC Communication:**
+
 ```javascript
 // Renderer → Main Process → BrowserView
-ipcRenderer.send('colorpickerValueSEND', color);
+ipcRenderer.send("colorpickerValueSEND", color);
 // Main process broadcasts to all BrowserViews
-views.forEach(view => {
-  view.webContents.send('colorpickerValueRECV', color);
+views.forEach((view) => {
+  view.webContents.send("colorpickerValueRECV", color);
 });
 ```
 
@@ -837,8 +880,8 @@ try {
   const result = await ImageProcessor.openImage(filepath);
   this.updatePreview(result.buffer, result.info);
 } catch (error) {
-  this.renderer.showMessage('error');
-  console.error('Error opening image:', error);
+  this.renderer.showMessage("error");
+  console.error("Error opening image:", error);
 }
 ```
 
@@ -861,6 +904,7 @@ addToHistory(buffer, info) {
 ### Supported Image Formats
 
 **Standard (via Sharp):**
+
 - PNG
 - JPEG
 - WebP
@@ -868,6 +912,7 @@ addToHistory(buffer, info) {
 - TIFF
 
 **Special (via helper libraries):**
+
 - BMP (sharp-bmp)
 - ICO (sharp-ico)
 
@@ -900,17 +945,17 @@ Auto cleanup on app exit
 
 ### Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| Arrow Left/Right | Navigate between images |
+| Shortcut                | Action                   |
+| ----------------------- | ------------------------ |
+| Arrow Left/Right        | Navigate between images  |
 | Ctrl + Arrow Left/Right | Jump to first/last image |
-| Ctrl + C | Copy current image |
-| Ctrl + V | Paste image |
-| Ctrl + D | Delete current image |
-| Delete | Delete current image |
-| Ctrl + Z | Undo |
-| Ctrl + Y | Redo |
-| Alt + A | Magnify |
+| Ctrl + C                | Copy current image       |
+| Ctrl + V                | Paste image              |
+| Ctrl + D                | Delete current image     |
+| Delete                  | Delete current image     |
+| Ctrl + Z                | Undo                     |
+| Ctrl + Y                | Redo                     |
+| Alt + A                 | Magnify                  |
 
 ---
 
@@ -925,6 +970,7 @@ Auto cleanup on app exit
 ```
 
 **Sharp** is the core image processing library providing:
+
 - High-performance image manipulation
 - Multiple format support
 - Streaming operations
@@ -935,15 +981,18 @@ Auto cleanup on app exit
 ## Performance Considerations
 
 **Color Extraction:**
+
 - Images resized to 24px width before processing
 - Reduces computation time from O(n²) to O(24 × height)
 
 **History Management:**
+
 - Limited to 10 entries per layer
 - Prevents excessive memory usage
 - Old entries automatically removed
 
 **Lazy Loading:**
+
 - Renderer components loaded only when needed
 - Reduces initial bundle size
 - Faster startup time
@@ -953,6 +1002,7 @@ Auto cleanup on app exit
 ## Error Scenarios
 
 **Common Errors:**
+
 - Invalid file path
 - Unsupported format
 - Corrupted image data
@@ -961,12 +1011,13 @@ Auto cleanup on app exit
 - Insufficient memory for large images
 
 **Error Handling Pattern:**
+
 ```javascript
 try {
   // Operation
 } catch (error) {
-  this.renderer.showMessage('error');
-  console.error('Operation failed:', error);
+  this.renderer.showMessage("error");
+  console.error("Operation failed:", error);
   // Continue execution, don't crash
 }
 ```
@@ -976,15 +1027,16 @@ try {
 ## Testing Recommendations
 
 **Unit Tests (ImageProcessor):**
+
 ```javascript
-describe('ImageProcessor', () => {
-  it('should open PNG image', async () => {
-    const result = await ImageProcessor.openImage('test.png');
+describe("ImageProcessor", () => {
+  it("should open PNG image", async () => {
+    const result = await ImageProcessor.openImage("test.png");
     expect(result.buffer).toBeDefined();
-    expect(result.info.format).toBe('png');
+    expect(result.info.format).toBe("png");
   });
-  
-  it('should extract colors', async () => {
+
+  it("should extract colors", async () => {
     const colors = await ImageProcessor.extractColors(buffer, info, 3);
     expect(colors).toHaveLength(3);
     expect(colors[0]).toMatch(/^#[0-9a-f]{6}$/);
@@ -993,13 +1045,14 @@ describe('ImageProcessor', () => {
 ```
 
 **Integration Tests (ImageLayer):**
+
 ```javascript
-describe('ImageLayer', () => {
-  it('should maintain history', async () => {
+describe("ImageLayer", () => {
+  it("should maintain history", async () => {
     const layer = new ImageLayer(renderer);
-    await layer.openImage('test.png');
+    await layer.openImage("test.png");
     await layer.processImage({ blur: 2 });
-    
+
     layer.undo();
     expect(layer.history.index).toBe(0);
   });
@@ -1011,12 +1064,14 @@ describe('ImageLayer', () => {
 ## Contributing Guidelines
 
 **Code Style:**
+
 - Use JSDoc comments for all public methods
 - Include parameter types and return values
 - Add error handling to all async operations
 - Keep functions under 50 lines when possible
 
 **Architecture Rules:**
+
 - No UI code in ImageProcessor
 - No business logic in ImageLayerEvents
 - Use ImageLayer as bridge between UI and processing
@@ -1025,11 +1080,13 @@ describe('ImageLayer', () => {
 **Adding New Features:**
 
 1. **New Processing Operation:**
+
    - Add to ImageProcessor as static method
    - Add wrapper in ImageLayer
    - Update history management if needed
 
 2. **New UI Feature:**
+
    - Add event handler in ImageLayerEvents
    - Update ImageLayer state as needed
    - Coordinate through ImgKitRenderer if multi-layer
@@ -1050,7 +1107,9 @@ Part of the Pegasus image editor application.
 ## Version History
 
 ### v2.0.0 (Current)
+
 **Architecture:**
+
 - Removed circular dependencies
 - Separated ImageProcessor from main logic
 - Simplified module exports
@@ -1061,6 +1120,7 @@ Part of the Pegasus image editor application.
 - Introduced undo/redo history system
 
 **Mode System:**
+
 - Unified `ImageMode` enum system (NORMAL, DRAWING, CROPPING, MAGNIFY, COLORPICKER)
 - `ModeManager` class for state management with validation
 - Mode-specific event handlers: `setupCropping()`, `setupDrawing()`, `setupMagnifying()`
@@ -1069,11 +1129,13 @@ Part of the Pegasus image editor application.
 - Global mode coordination for magnify (Alt+A affects all layers)
 
 **Features:**
+
 - **Color Picker Mode:** Click on image to extract pixel color and send to paint panel
 - IPC communication for color picker: `colorpickerValueSEND` → Main → `colorpickerValueRECV`
 - Enhanced `ImageProcessor.extractColorAt(buffer, info, x, y)` for single-pixel extraction
 
 **API:**
+
 ```javascript
 // Mode management
 const { ImageMode, ModeManager } = require('imgkit');
@@ -1084,6 +1146,7 @@ if (imageLayer.modeManager.isMagnifying()) { ... }
 ---
 
 ### v1.0.0 - Initial Release
+
 - Basic Sharp image processing integration
 - Single image panel support (just 1 index.js file)
 - Direct DOM manipulation

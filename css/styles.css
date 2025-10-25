@@ -90,7 +90,7 @@ select#extensionComboBox {
   transform: translateY(1px);
 }
 
-#nameSpan {
+#nameInput {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -151,17 +151,4 @@ select#extensionComboBox {
 #delete_msg,
 #error_msg {
   background-color: #f29999;
-}
-
-#scroll-container {
-  position: relative;
-  width: auto !important;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  padding: 48px 48px 48px 48px;
-  scroll-behavior: smooth;
 }

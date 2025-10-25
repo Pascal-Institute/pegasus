@@ -21,6 +21,7 @@
     "postinstall": "electron-builder install-app-deps",
     "start": "electron .",
     "build": "electron-builder",
+    "build:win-store": "electron-builder --win appx",
     "rebuild": "electron-rebuild -f -w sharp"
   },
   "build": {
@@ -34,8 +35,22 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "appx",
+          "arch": [
+            "x64"
+          ]
         }
       ]
+    },
+    "appx": {
+      "applicationId": "PascalInstitute.Pegasus",
+      "backgroundColor": "#ffffff",
+      "displayName": "Pegasus - Image Processing Tool",
+      "identityName": "PascalInstitute.Pegasus",
+      "publisher": "CN=Pascal Institute",
+      "publisherDisplayName": "Pascal Institute"
     },
     "mac": {
       "target": []

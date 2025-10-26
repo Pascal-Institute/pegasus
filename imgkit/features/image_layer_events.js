@@ -354,6 +354,10 @@ class ImageLayerEvents {
         case "redo":
           this.layer.redo();
           break;
+        case "hide":
+          this.layer.hide();
+          break;
+
       }
     });
 

@@ -290,6 +290,20 @@ app.whenReady().then(() => {
       })
     );
 
+    // Separator
+    menu.append(new MenuItem({ type: "separator" }));
+
+    // Hide
+    menu.append(
+      new MenuItem({
+        label: "Hide",
+        accelerator: "Alt + H",
+        click: () => {
+          event.sender.send("imgkit-context-menu-action", "hide");
+        },
+      })
+    );
+
     // Show menu at cursor position
     menu.popup({ window: BrowserWindow.fromWebContents(event.sender) });
   });

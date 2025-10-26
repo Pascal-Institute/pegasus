@@ -232,16 +232,6 @@ ipcRenderer.on("drawImgCMD", (event, res) => {
   }
 });
 
-var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
-
-sioCheckBox.addEventListener("click", (event) => {
-  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
-  if (!currentLayer) return;
-
-  const isChecked = sioCheckBox.checked;
-  currentLayer.toggleShowImageOnly(isChecked);
-});
-
 ipcRenderer.on("openImgCMD", async (event, res) => {
   // Handle both single file path (string) and multiple file paths (array)
   const filePaths = Array.isArray(res) ? res : [res];
@@ -318,6 +308,8 @@ document.addEventListener("keydown", function (event) {
     // Alt+M: Toggle magnifying glass mode (handled globally in renderer.js now)
     // This local handler is kept for backwards compatibility but does nothing
     // since setupGlobalMagnifyShortcut in renderer.js handles Alt+M globally
+  } else if (event.altKey && (event.key === "h" || event.key === "H")) {
+      currentLayer.hide();
   } else if (event.which === 122) {
     if (!fullScreenFlag) {
       ipcRenderer.send("FullScreenREQ");

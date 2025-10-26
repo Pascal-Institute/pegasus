@@ -25,19 +25,9 @@ npm install --save electron electron-reload electron-rebuild electron-builder sh
 
 ### For Application use
 
-1. Install node.js : https://nodejs.org/
+1. Install Pegasus Setup.exe
 
-2. Install electron
-
-```bash
-npm install -g electron
-```
-
-### npm update (Recommended)
-
-```bash
-npm update
-```
+2. Execute pegasus
 
 ## 2. Coding Convention
 

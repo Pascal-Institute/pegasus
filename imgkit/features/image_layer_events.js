@@ -68,6 +68,9 @@ class ImageLayerEvents {
       e.stopPropagation(); // Don't trigger panel click
     });
 
+    this.layer.nameInput.addEventListener("change", (e) => {
+      ipcRenderer.send("showNotificationREQ", "imgkit-name-changed");
+    });
     // Name input - update filename on change
     this.layer.nameInput.addEventListener("change", (e) => {
       const newFilename = e.target.value.trim();

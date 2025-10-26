@@ -4,7 +4,8 @@
 #watermarkBtn:hover,
 #colorpickerBtn:hover,
 #colorpickerBox:hover,
-#padBtn:hover {
+#padBtn:hover,
+#watermarkUploadBtn:hover {
   cursor: pointer;
 }
 

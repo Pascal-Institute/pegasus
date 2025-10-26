@@ -5,6 +5,8 @@
  * This makes the code more maintainable and prevents conflicting states.
  */
 
+const path = require("path");
+
 /**
  * Available interaction modes for image layers
  * @enum {string}
@@ -133,7 +135,10 @@ class ModeManager {
       case ImageMode.DRAWING:
         return "crosshair"; // or custom drawing cursor
       case ImageMode.COLORPICKER:
-        return "crosshair";
+        const cursorPath = path
+          .join(__dirname, "../assets/spoid.png")
+          .replace(/\\/g, "/");
+        return `url('file://${cursorPath}') 0 32, crosshair`;
       default:
         return "default";
     }

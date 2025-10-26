@@ -133,9 +133,12 @@ class ModeManager {
       case ImageMode.MAGNIFY:
         return "zoom-in";
       case ImageMode.DRAWING:
-        return "crosshair"; // or custom drawing cursor
+        var cursorPath = path
+          .join(__dirname, "../assets/pencil.png")
+          .replace(/\\/g, "/");
+        return `url('file://${cursorPath}') 0 32, crosshair`;
       case ImageMode.COLORPICKER:
-        const cursorPath = path
+        var cursorPath = path
           .join(__dirname, "../assets/spoid.png")
           .replace(/\\/g, "/");
         return `url('file://${cursorPath}') 0 32, crosshair`;

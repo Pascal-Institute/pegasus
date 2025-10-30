@@ -142,16 +142,7 @@ ipcRenderer.on("negativeImgCMD", async (event) => {
 ipcRenderer.on("grayScaleImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .grayscale(true)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Grayscale failed:", error);
-  }
+  currentLayer.processImage({ grayscale: true });
 });
 
 ipcRenderer.on("tintImgCMD", async (event, res) => {
@@ -309,7 +300,7 @@ document.addEventListener("keydown", function (event) {
     // This local handler is kept for backwards compatibility but does nothing
     // since setupGlobalMagnifyShortcut in renderer.js handles Alt+M globally
   } else if (event.altKey && (event.key === "h" || event.key === "H")) {
-      currentLayer.hide();
+    currentLayer.hide();
   } else if (event.which === 122) {
     if (!fullScreenFlag) {
       ipcRenderer.send("FullScreenREQ");

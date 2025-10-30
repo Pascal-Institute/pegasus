@@ -82,6 +82,10 @@ class ImageProcessor {
         pipeline = pipeline.negate(options.negative);
       }
 
+      if (options.grayscale) {
+        pipeline = pipeline.grayscale();
+      }
+
       // Apply format conversion if specified
       if (options.format) {
         pipeline = pipeline.toFormat(options.format);

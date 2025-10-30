@@ -121,16 +121,7 @@ ipcRenderer.on("flopImgCMD", async (event) => {
 ipcRenderer.on("bitwiseImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .threshold()
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Bitwise failed:", error);
-  }
+  currentLayer.processImage({ threshold: 128 });
 });
 
 ipcRenderer.on("negativeImgCMD", async (event) => {

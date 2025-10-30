@@ -78,6 +78,10 @@ class ImageProcessor {
         pipeline = pipeline.rotate(options.rotate);
       }
 
+      if (options.threshold) {
+        pipeline = pipeline.threshold(options.threshold);
+      }
+
       if (options.negative) {
         pipeline = pipeline.negate(options.negative);
       }

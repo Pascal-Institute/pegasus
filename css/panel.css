@@ -25,3 +25,23 @@ body {
 .charDiv {
   font-size: 10px;
 }
+
+#wrapperBox {
+  margin-left: 20px;
+  padding: 2px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 217px;
+  border: 1px solid black;
+  position: relative;
+}
+
+#wrapperBox:hover {
+  background-color: gainsboro;
+}
+
+#wrapperBox:active {
+  background-color: ghostwhite;
+}

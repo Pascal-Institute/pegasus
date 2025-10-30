@@ -173,8 +173,8 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
-  ipcMain.on("bitwiseImgREQ", (event) => {
-    mainWindow.webContents.send("bitwiseImgCMD");
+  ipcMain.on("bitwiseValueSEND", (event, res) => {
+    mainWindow.webContents.send("bitwiseImgCMD", res);
     mainWindow.webContents.focus();
   });
 

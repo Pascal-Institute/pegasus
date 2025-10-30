@@ -118,10 +118,10 @@ ipcRenderer.on("flopImgCMD", async (event) => {
   currentLayer.processImage({ flop: true });
 });
 
-ipcRenderer.on("bitwiseImgCMD", async (event) => {
+ipcRenderer.on("bitwiseImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-  currentLayer.processImage({ threshold: 128 });
+  currentLayer.processImage({ threshold: res });
 });
 
 ipcRenderer.on("negativeImgCMD", async (event) => {

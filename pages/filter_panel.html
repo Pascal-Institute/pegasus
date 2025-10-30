@@ -31,7 +31,7 @@
         max="3.0"
         placeholder="1.0"
         step="0.5"
-        style="width: 150px"
+        style="width: 140px"
       />
       <button id="sharpenBtn" title="sharpen">
         <img class="icon" src="../assets/sharpen.ico" />
@@ -46,16 +46,27 @@
         max="10"
         placeholder="5"
         step="1"
-        style="width: 150px"
+        style="width: 140px"
       />
       <button id="medianBtn" title="median">
         <img class="icon" src="../assets/median.ico" />
       </button>
     </div>
 
-    <button id="bitwiseBtn" title="bitwise">
-      <img class="icon" src="../assets/bitwise.ico" />
-    </button>
+    <div id="bitwiseDiv">
+      <input
+        id="bitwiseValue"
+        type="range"
+        min="0"
+        max="255"
+        placeholder="125"
+        step="1"
+        style="width: 140px"
+      />
+      <button id="bitwiseBtn" title="bitwise">
+        <img class="icon" src="../assets/bitwise.ico" />
+      </button>
+    </div>
 
     <button id="negativeBtn" title="negative">
       <img class="icon" src="../assets/negative.ico" />

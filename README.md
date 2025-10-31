@@ -71,9 +71,18 @@ png svg jpg jpeg webp gif bmp ico tiff tif
 
 **Note:** Animated GIF files are now supported! When you load an animated GIF, playback controls appear automatically. See [GIF Animation Documentation](docs/GIF_ANIMATION.md) for details.
 
-#### 4-2. extension converting
+### 4-2. Multi-Select Image Panels
 
-### 4-3. Image Processing
+**Multiple image panels can be selected simultaneously:**
+- **Single Select:** Click on an image panel to select it
+- **Multi-Select:** Hold `Ctrl` key + click to select/deselect multiple panels
+- **Visual Feedback:** Selected panels display a green border and shadow
+
+This feature allows for batch operations on multiple images at once.
+
+#### 4-3. extension converting
+
+### 4-4. Image Processing
 
 #### resize
 

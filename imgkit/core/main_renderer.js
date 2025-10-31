@@ -327,10 +327,6 @@ class ImgKitRenderer {
         // Multi-select mode: toggle selection
         if (this.selectedLayers.has(index)) {
           this.selectedLayers.delete(index);
-          // Ensure at least one panel remains selected if deselecting current
-          if (this.selectedLayers.size === 0) {
-            this.selectedLayers.add(index);
-          }
         } else {
           this.selectedLayers.add(index);
         }

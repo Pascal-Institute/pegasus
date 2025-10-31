@@ -284,6 +284,18 @@ class ImageLayer {
   }
 
   /**
+   * Set selection state (for multi-select)
+   * @param {boolean} selected - Whether panel is selected
+   */
+  setSelected(selected) {
+    if (selected) {
+      this.panel.classList.add('selected');
+    } else {
+      this.panel.classList.remove('selected');
+    }
+  }
+
+  /**
    * hide or show layer UI elements
    */
   hide() {

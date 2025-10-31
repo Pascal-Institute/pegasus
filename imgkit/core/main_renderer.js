@@ -358,10 +358,12 @@ class ImgKitRenderer {
 
   /**
    * Get all selected layers
-   * @returns {ImageLayer[]} Array of selected layers
+   * @returns {ImageLayer[]} Array of selected layers (filters out invalid indices)
    */
   getSelectedLayers() {
-    return Array.from(this.selectedLayers).map(idx => this.imageLayerQueue[idx]);
+    return Array.from(this.selectedLayers)
+      .filter(idx => idx >= 0 && idx < this.imageLayerQueue.length)
+      .map(idx => this.imageLayerQueue[idx]);
   }
 
   // --------------------------------------------------------------------------

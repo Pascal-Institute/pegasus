@@ -114,7 +114,7 @@
 
 .imgPanel.selected {
   border: 2px solid #4caf50 !important;
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.5) !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.7) !important;
   outline: none;
 }
 

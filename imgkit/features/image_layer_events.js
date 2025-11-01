@@ -21,10 +21,10 @@ class ImageLayerEvents {
    * Setup all event listeners
    */
   setupEvents() {
-    // Panel focus on click
-    this.layer.panel.addEventListener("click", () => {
+    // Panel focus on click (with Ctrl+click multi-select support)
+    this.layer.panel.addEventListener("click", (e) => {
       const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
-      this.layer.renderer.setCurrentLayer(index);
+      this.layer.renderer.setCurrentLayer(index, e.ctrlKey);
     });
 
     this.layer.canvas.addEventListener("click", async (e) => {

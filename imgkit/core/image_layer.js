@@ -274,12 +274,14 @@ class ImageLayer {
   // --------------------------------------------------------------------------
 
   /**
-   * Set focus state
-   * @param {boolean} focused - Whether panel is focused
+   * Set selection state (for multi-select)
+   * @param {boolean} selected - Whether panel is selected
    */
-  setFocus(focused) {
-    if (focused) {
-      this.panel.focus();
+  setSelected(selected) {
+    if (selected) {
+      this.panel.classList.add("selected");
+    } else {
+      this.panel.classList.remove("selected");
     }
   }
 

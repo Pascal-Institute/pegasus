@@ -52,16 +52,7 @@ ipcRenderer.on("blurImgCMD", async (event, res) => {
 ipcRenderer.on("sharpenImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .sharpen(res, 1.0, 2.0)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Sharpen failed:", error);
-  }
+  currentLayer.processImage({ sharpen: (res, 1.0, 2.0) });
 });
 
 ipcRenderer.on("normalizeImgCMD", async (event) => {

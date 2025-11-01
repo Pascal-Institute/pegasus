@@ -106,15 +106,10 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-.imgPanel:focus {
+.imgPanel:focus,
+.imgPanel.selected {
   border: 2px solid #555 !important;
   box-shadow: 0 4px 16px rgba(68, 68, 68, 0.4) !important;
-  outline: none;
-}
-
-.imgPanel.selected {
-  border: 2px solid #4caf50 !important;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.7) !important;
   outline: none;
 }
 

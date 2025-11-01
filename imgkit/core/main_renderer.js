@@ -302,7 +302,6 @@ class ImgKitRenderer {
     const layer = this.createImageLayer(true);
     this.currentIndex = this.imageLayerQueue.length - 1;
     layer.openImage("./assets/addImage.png");
-    layer.panel.focus();
     return layer;
   }
 
@@ -342,7 +341,6 @@ class ImgKitRenderer {
       // Update visual focus/selection for all layers
       this.imageLayerQueue.forEach((layer, idx) => {
         const isSelected = this.selectedLayers.has(idx);
-        layer.setFocus(idx === index);
         layer.setSelected(isSelected);
       });
     }
@@ -362,8 +360,8 @@ class ImgKitRenderer {
    */
   getSelectedLayers() {
     return Array.from(this.selectedLayers)
-      .filter(idx => idx >= 0 && idx < this.imageLayerQueue.length)
-      .map(idx => this.imageLayerQueue[idx]);
+      .filter((idx) => idx >= 0 && idx < this.imageLayerQueue.length)
+      .map((idx) => this.imageLayerQueue[idx]);
   }
 
   // --------------------------------------------------------------------------

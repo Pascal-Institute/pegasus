@@ -105,7 +105,7 @@ app.whenReady().then(() => {
 
   ipcMain.on("resizeValueSEND", (event, res) => {
     mainWindow.webContents.send("resizeImgCMD", res);
-    mainWindow.webContents.focus();
+    mainWindow.webContents.focus(); //Do not remove this line because of focus helps instant acttion.
   });
 
   ipcMain.on("blurValueSEND", (event, res) => {

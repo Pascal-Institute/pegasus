@@ -244,7 +244,10 @@ ipcRenderer.on("saveAsImgCMD", async (event, res) => {
 document.addEventListener("keydown", function (event) {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
 
-  if (event.ctrlKey && event.key === "z") {
+  if (event.ctrlKey && event.key === "a") {
+    event.preventDefault(); // Prevent default browser select all action
+    imgKitRenderer.selectAll();
+  } else if (event.ctrlKey && event.key === "z") {
     if (currentLayer && currentLayer.undo) {
       currentLayer.undo();
     }

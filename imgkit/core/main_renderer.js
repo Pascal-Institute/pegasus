@@ -354,6 +354,17 @@ class ImgKitRenderer {
     return Array.from(this.selectedLayers);
   }
 
+  selectAll() {
+    this.selectedLayers.clear();
+    for (let i = 0; i < this.imageLayerQueue.length; i++) {
+      this.selectedLayers.add(i);
+    }
+    // Update visual focus/selection for all layers
+    this.imageLayerQueue.forEach((layer, idx) => {
+      layer.setSelected(true);
+    });
+  }
+
   /**
    * Get all selected layers
    * @returns {ImageLayer[]} Array of selected layers (filters out invalid indices)

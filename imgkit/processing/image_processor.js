@@ -94,6 +94,19 @@ class ImageProcessor {
         pipeline = pipeline.tint(options.tint);
       }
 
+      if (options.composite) {
+        const watermarkPath = "./assets/icon.png";
+
+        const watermark = await sharp(watermarkPath).resize(32, 32).toBuffer();
+
+        pipeline = pipeline.composite([
+          {
+            input: watermark,
+            gravity: "southeast",
+          },
+        ]);
+      }
+
       // Apply format conversion if specified
       if (options.format) {
         pipeline = pipeline.toFormat(options.format);

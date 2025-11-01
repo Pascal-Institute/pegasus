@@ -145,24 +145,7 @@ ipcRenderer.on("tintImgCMD", async (event, res) => {
 ipcRenderer.on("watermarkImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const watermark = await sharp("./assets/icon.png")
-      .resize(32, 32)
-      .toBuffer();
-    const result = await sharp(currentLayer.buffer)
-      .composite([
-        {
-          input: watermark,
-          gravity: "southeast",
-        },
-      ])
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Watermark failed:", error);
-  }
+  currentLayer.processImage({ composite: true });
 });
 
 ipcRenderer.on("colorpickerImgCMD", async (event, res) => {

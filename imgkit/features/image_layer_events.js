@@ -248,7 +248,9 @@ class ImageLayerEvents {
     }
 
     // Add one more empty layer for next image
-    this.layer.renderer.createDefaultImage();
+    if (this.layer.renderer.currentIndex === this.layer.renderer.imageLayerQueue.length - 1) {
+      this.layer.renderer.createDefaultImage();
+    }
   }
 
   /**

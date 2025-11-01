@@ -1,6 +1,5 @@
 const { ipcRenderer } = require("electron");
 const { imgKitRenderer, createDefaultImage, ImageMode } = require("imgkit");
-const sharp = require("sharp");
 
 // Get imageLayerQueue from renderer
 const imageLayerQueue = imgKitRenderer.imageLayerQueue;
@@ -52,7 +51,8 @@ ipcRenderer.on("blurImgCMD", async (event, res) => {
 ipcRenderer.on("sharpenImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-  currentLayer.processImage({ sharpen: (res, 1.0, 2.0) });
+  // Pass only the expected value for sharpen if imgkit does not support Sharp's tuple signature
+  currentLayer.processImage({ sharpen: res });
 });
 
 ipcRenderer.on("normalizeImgCMD", async (event) => {

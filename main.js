@@ -105,82 +105,102 @@ app.whenReady().then(() => {
 
   ipcMain.on("resizeValueSEND", (event, res) => {
     mainWindow.webContents.send("resizeImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("blurValueSEND", (event, res) => {
     mainWindow.webContents.send("blurImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("sharpenValueSEND", (event, res) => {
     mainWindow.webContents.send("sharpenImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("normalizeImgREQ", (event) => {
     mainWindow.webContents.send("normalizeImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("medianValueSEND", (event, res) => {
     mainWindow.webContents.send("medianImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("dilateValueSEND", (event, res) => {
     mainWindow.webContents.send("dilateImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("erodeValueSEND", (event, res) => {
     mainWindow.webContents.send("erodeImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("rotateValueSEND", (event, res) => {
     mainWindow.webContents.send("rotateImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("tintValueSEND", (event, res) => {
     mainWindow.webContents.send("tintImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("colorpickerImgREQ", (event, res) => {
     mainWindow.webContents.send("colorpickerImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("rotateLeftImgREQ", (event) => {
     mainWindow.webContents.send("rotateLeftImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("rotateRightImgREQ", (event) => {
     mainWindow.webContents.send("rotateRightImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("flipImgREQ", (event) => {
     mainWindow.webContents.send("flipImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("flopImgREQ", (event) => {
     mainWindow.webContents.send("flopImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("bitwiseValueSEND", (event, res) => {
     mainWindow.webContents.send("bitwiseImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("negativeImgREQ", (event) => {
     mainWindow.webContents.send("negativeImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("grayScaleImgREQ", (event) => {
     mainWindow.webContents.send("grayScaleImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("watermarkImgREQ", (event) => {
     mainWindow.webContents.send("watermarkImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("cropImgREQ", (event, res) => {
     mainWindow.webContents.send("cropImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("drawImgREQ", (event, res) => {
     mainWindow.webContents.send("drawImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("colorpickerValueSEND", (event, color, color_name) => {
@@ -193,6 +213,7 @@ app.whenReady().then(() => {
 
   ipcMain.on("padImgREQ", (event) => {
     mainWindow.webContents.send("padImgCMD");
+    mainWindow.webContents.focus();
   });
 
   // Notification Handler - Forward to main window

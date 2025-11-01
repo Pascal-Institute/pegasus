@@ -90,6 +90,10 @@ class ImageProcessor {
         pipeline = pipeline.grayscale();
       }
 
+      if (options.tint) {
+        pipeline = pipeline.tint(options.tint);
+      }
+
       // Apply format conversion if specified
       if (options.format) {
         pipeline = pipeline.toFormat(options.format);

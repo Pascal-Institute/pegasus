@@ -139,15 +139,7 @@ ipcRenderer.on("grayScaleImgCMD", async (event) => {
 ipcRenderer.on("tintImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .tint(res)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Tint failed:", error);
-  }
+  currentLayer.processImage({ tint: res });
 });
 
 ipcRenderer.on("watermarkImgCMD", async (event) => {

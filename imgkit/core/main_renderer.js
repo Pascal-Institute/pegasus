@@ -29,6 +29,7 @@ class ImgKitRenderer {
     // State
     this.imageLayerQueue = []; // Array of all ImageLayer objects
     this.currentIndex = 0; // Which layer is currently selected
+    this.selectedLayers = new Set(); // Set of selected layer indices for multi-select
     this.copiedLayer = null; // Copied image data for paste operation
     this.messages = {}; // Notification message elements
     this.globalMode = ImageMode.NORMAL; // Global interaction mode (e.g., magnify with Alt + A)
@@ -301,7 +302,6 @@ class ImgKitRenderer {
     const layer = this.createImageLayer(true);
     this.currentIndex = this.imageLayerQueue.length - 1;
     layer.openImage("./assets/addImage.png");
-    layer.panel.focus();
     return layer;
   }
 
@@ -318,15 +318,61 @@ class ImgKitRenderer {
    * Updates focus states to highlight the selected layer
    *
    * @param {number} index - Layer index to select
+   * @param {boolean} ctrlKey - Whether Ctrl key is pressed for multi-select
    */
-  setCurrentLayer(index) {
+  setCurrentLayer(index, ctrlKey = false) {
     if (index >= 0 && index < this.imageLayerQueue.length) {
-      this.currentIndex = index;
-      // Update visual focus for all layers
+      if (ctrlKey) {
+        // Multi-select mode: toggle selection
+        if (this.selectedLayers.has(index)) {
+          this.selectedLayers.delete(index);
+        } else {
+          this.selectedLayers.add(index);
+        }
+        // Update current index to the last clicked
+        this.currentIndex = index;
+      } else {
+        // Single select mode: clear other selections
+        this.selectedLayers.clear();
+        this.selectedLayers.add(index);
+        this.currentIndex = index;
+      }
+
+      // Update visual focus/selection for all layers
       this.imageLayerQueue.forEach((layer, idx) => {
-        layer.setFocus(idx === index);
+        const isSelected = this.selectedLayers.has(idx);
+        layer.setSelected(isSelected);
       });
     }
+  }
+
+  /**
+   * Get all selected layer indices
+   * @returns {number[]} Array of selected indices
+   */
+  getSelectedIndices() {
+    return Array.from(this.selectedLayers);
+  }
+
+  selectAll() {
+    this.selectedLayers.clear();
+    for (let i = 0; i < this.imageLayerQueue.length; i++) {
+      this.selectedLayers.add(i);
+    }
+    // Update visual focus/selection for all layers
+    this.imageLayerQueue.forEach((layer, idx) => {
+      layer.setSelected(true);
+    });
+  }
+
+  /**
+   * Get all selected layers
+   * @returns {ImageLayer[]} Array of selected layers (filters out invalid indices)
+   */
+  getSelectedLayers() {
+    return Array.from(this.selectedLayers)
+      .filter((idx) => idx >= 0 && idx < this.imageLayerQueue.length)
+      .map((idx) => this.imageLayerQueue[idx]);
   }
 
   // --------------------------------------------------------------------------

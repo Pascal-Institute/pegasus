@@ -78,8 +78,33 @@ class ImageProcessor {
         pipeline = pipeline.rotate(options.rotate);
       }
 
+      if (options.threshold) {
+        pipeline = pipeline.threshold(options.threshold);
+      }
+
       if (options.negative) {
         pipeline = pipeline.negate(options.negative);
+      }
+
+      if (options.grayscale) {
+        pipeline = pipeline.grayscale();
+      }
+
+      if (options.tint) {
+        pipeline = pipeline.tint(options.tint);
+      }
+
+      if (options.composite) {
+        const watermarkPath = "./assets/icon.png";
+
+        const watermark = await sharp(watermarkPath).resize(32, 32).toBuffer();
+
+        pipeline = pipeline.composite([
+          {
+            input: watermark,
+            gravity: "southeast",
+          },
+        ]);
       }
 
       // Apply format conversion if specified

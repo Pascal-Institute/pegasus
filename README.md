@@ -4,7 +4,9 @@
 
 # pegasus
 
-#### The Image Processing Tool based on Electron framework & sharp npm package
+#### The Image Processing & Analysis Tool based on Electron framework & sharp npm package
+
+<img width="1259" height="1007" alt="image" src="https://github.com/user-attachments/assets/c6dbe835-26d8-40ab-8fa4-a6a330e23baf" />
 
 ## 0. Application mission : Give wings to pixels
 
@@ -25,19 +27,9 @@ npm install --save electron electron-reload electron-rebuild electron-builder sh
 
 ### For Application use
 
-1. Install node.js : https://nodejs.org/
+1. Install Pegasus Setup.exe
 
-2. Install electron
-
-```bash
-npm install -g electron
-```
-
-### npm update (Recommended)
-
-```bash
-npm update
-```
+2. Execute pegasus
 
 ## 2. Coding Convention
 
@@ -79,9 +71,19 @@ png svg jpg jpeg webp gif bmp ico tiff tif
 
 **Note:** Animated GIF files are now supported! When you load an animated GIF, playback controls appear automatically. See [GIF Animation Documentation](docs/GIF_ANIMATION.md) for details.
 
-#### 4-2. extension converting
+### 4-2. Multi-Select Image Panels
 
-### 4-3. Image Processing
+**Multiple image panels can be selected simultaneously:**
+- **Single Select:** Click on an image panel to select it (clears other selections)
+- **Multi-Select:** Hold `Ctrl` key + click to toggle selection of multiple panels
+- **Deselect:** `Ctrl` + click on a selected panel to deselect it (all panels can be deselected)
+- **Visual Feedback:** Selected panels display a green border and shadow
+
+This feature allows for batch operations on multiple images at once.
+
+#### 4-3. extension converting
+
+### 4-4. Image Processing
 
 #### resize
 

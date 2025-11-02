@@ -21,10 +21,10 @@ class ImageLayerEvents {
    * Setup all event listeners
    */
   setupEvents() {
-    // Panel focus on click
-    this.layer.panel.addEventListener("click", () => {
+    // Panel focus on click (with Ctrl+click multi-select support)
+    this.layer.panel.addEventListener("click", (e) => {
       const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
-      this.layer.renderer.setCurrentLayer(index);
+      this.layer.renderer.setCurrentLayer(index, e.ctrlKey);
     });
 
     this.layer.canvas.addEventListener("click", async (e) => {
@@ -68,6 +68,9 @@ class ImageLayerEvents {
       e.stopPropagation(); // Don't trigger panel click
     });
 
+    this.layer.nameInput.addEventListener("change", (e) => {
+      ipcRenderer.send("showNotificationREQ", "imgkit-name-changed");
+    });
     // Name input - update filename on change
     this.layer.nameInput.addEventListener("change", (e) => {
       const newFilename = e.target.value.trim();
@@ -245,7 +248,9 @@ class ImageLayerEvents {
     }
 
     // Add one more empty layer for next image
-    this.layer.renderer.createDefaultImage();
+    if (this.layer.renderer.currentIndex === this.layer.renderer.imageLayerQueue.length - 1) {
+      this.layer.renderer.createDefaultImage();
+    }
   }
 
   /**
@@ -354,6 +359,10 @@ class ImageLayerEvents {
         case "redo":
           this.layer.redo();
           break;
+        case "hide":
+          this.layer.hide();
+          break;
+
       }
     });
 

@@ -3,6 +3,7 @@ const { ipcRenderer } = require("electron");
 var blurValue = 1.0;
 var sharpenValue = 1.0;
 var medianValue = 5;
+var bitwiseValue = 128;
 
 document.getElementById("blurValue").addEventListener("input", (event) => {
   blurValue = event.target.value;
@@ -28,8 +29,12 @@ document.getElementById("medianBtn").addEventListener("click", () => {
   ipcRenderer.send("medianValueSEND", Number(medianValue));
 });
 
+document.getElementById("bitwiseValue").addEventListener("input", (event) => {
+  bitwiseValue = event.target.value;
+});
+
 document.getElementById("bitwiseBtn").addEventListener("click", () => {
-  ipcRenderer.send("bitwiseImgREQ");
+  ipcRenderer.send("bitwiseValueSEND", Number(bitwiseValue));
 });
 
 document.getElementById("negativeBtn").addEventListener("click", () => {

@@ -40,7 +40,7 @@ class ImageLayer {
     this.extension = ""; // File extension (png, jpg, etc.)
     this.filepath = ""; // Full path on disk (if saved)
     this.svgData = null; // SVG string data (for SVG format only)
-
+    this.visibility = "visible"; // Layer visibility state
     // --------------------------------------------------------------------------
     // GIF ANIMATION MODULE
     // --------------------------------------------------------------------------
@@ -51,11 +51,6 @@ class ImageLayer {
     // --------------------------------------------------------------------------
     // History manager handles all undo/redo functionality
     this.history = new LayerHistory(10); // Max 10 undo steps
-
-    // --------------------------------------------------------------------------
-    // UI STATE
-    // --------------------------------------------------------------------------
-    this.showImageOnly = false; // Hide all UI elements except canvas?
 
     // --------------------------------------------------------------------------
     // INTERACTION MODE MANAGEMENT
@@ -279,22 +274,22 @@ class ImageLayer {
   // --------------------------------------------------------------------------
 
   /**
-   * Set focus state
-   * @param {boolean} focused - Whether panel is focused
+   * Set selection state (for multi-select)
+   * @param {boolean} selected - Whether panel is selected
    */
-  setFocus(focused) {
-    if (focused) {
-      this.panel.focus();
+  setSelected(selected) {
+    if (selected) {
+      this.panel.classList.add("selected");
+    } else {
+      this.panel.classList.remove("selected");
     }
   }
 
   /**
-   * Toggle show image only mode
-   * @param {boolean} show - Whether to show image only
+   * hide or show layer UI elements
    */
-  toggleShowImageOnly(show) {
-    this.showImageOnly = show;
-    const visibility = show ? "hidden" : "visible";
+  hide() {
+    const visibility = this.visibility === "visible" ? "hidden" : "visible";
     [
       this.deleteBtn,
       this.nameInput,
@@ -302,6 +297,7 @@ class ImageLayer {
       this.infoText,
       this.extensionCombo,
     ].forEach((el) => (el.style.visibility = visibility));
+    this.visibility = visibility;
   }
 
   /**

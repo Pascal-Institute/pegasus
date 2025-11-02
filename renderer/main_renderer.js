@@ -1,6 +1,5 @@
 const { ipcRenderer } = require("electron");
 const { imgKitRenderer, createDefaultImage, ImageMode } = require("imgkit");
-const sharp = require("sharp");
 
 // Get imageLayerQueue from renderer
 const imageLayerQueue = imgKitRenderer.imageLayerQueue;
@@ -52,16 +51,8 @@ ipcRenderer.on("blurImgCMD", async (event, res) => {
 ipcRenderer.on("sharpenImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .sharpen(res, 1.0, 2.0)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Sharpen failed:", error);
-  }
+  // Pass only the expected value for sharpen if imgkit does not support Sharp's tuple signature
+  currentLayer.processImage({ sharpen: res });
 });
 
 ipcRenderer.on("normalizeImgCMD", async (event) => {
@@ -118,19 +109,10 @@ ipcRenderer.on("flopImgCMD", async (event) => {
   currentLayer.processImage({ flop: true });
 });
 
-ipcRenderer.on("bitwiseImgCMD", async (event) => {
+ipcRenderer.on("bitwiseImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .threshold()
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Bitwise failed:", error);
-  }
+  currentLayer.processImage({ threshold: res });
 });
 
 ipcRenderer.on("negativeImgCMD", async (event) => {
@@ -142,53 +124,19 @@ ipcRenderer.on("negativeImgCMD", async (event) => {
 ipcRenderer.on("grayScaleImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .grayscale(true)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Grayscale failed:", error);
-  }
+  currentLayer.processImage({ grayscale: true });
 });
 
 ipcRenderer.on("tintImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-  try {
-    const result = await sharp(currentLayer.buffer)
-      .tint(res)
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Tint failed:", error);
-  }
+  currentLayer.processImage({ tint: res });
 });
 
 ipcRenderer.on("watermarkImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;
-
-  try {
-    const watermark = await sharp("./assets/icon.png")
-      .resize(32, 32)
-      .toBuffer();
-    const result = await sharp(currentLayer.buffer)
-      .composite([
-        {
-          input: watermark,
-          gravity: "southeast",
-        },
-      ])
-      .toBuffer({ resolveWithObject: true });
-
-    currentLayer.updatePreview(result.data, result.info);
-  } catch (error) {
-    console.error("Watermark failed:", error);
-  }
+  currentLayer.processImage({ composite: true });
 });
 
 ipcRenderer.on("colorpickerImgCMD", async (event, res) => {
@@ -230,16 +178,6 @@ ipcRenderer.on("drawImgCMD", (event, res) => {
     currentLayer.modeManager.reset();
     currentLayer.canvas.setAttribute("draggable", true);
   }
-});
-
-var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
-
-sioCheckBox.addEventListener("click", (event) => {
-  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
-  if (!currentLayer) return;
-
-  const isChecked = sioCheckBox.checked;
-  currentLayer.toggleShowImageOnly(isChecked);
 });
 
 ipcRenderer.on("openImgCMD", async (event, res) => {
@@ -306,7 +244,10 @@ ipcRenderer.on("saveAsImgCMD", async (event, res) => {
 document.addEventListener("keydown", function (event) {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
 
-  if (event.ctrlKey && event.key === "z") {
+  if (event.ctrlKey && event.key === "a") {
+    event.preventDefault(); // Prevent default browser select all action
+    imgKitRenderer.selectAll();
+  } else if (event.ctrlKey && event.key === "z") {
     if (currentLayer && currentLayer.undo) {
       currentLayer.undo();
     }
@@ -318,6 +259,8 @@ document.addEventListener("keydown", function (event) {
     // Alt+M: Toggle magnifying glass mode (handled globally in renderer.js now)
     // This local handler is kept for backwards compatibility but does nothing
     // since setupGlobalMagnifyShortcut in renderer.js handles Alt+M globally
+  } else if (event.altKey && (event.key === "h" || event.key === "H")) {
+    currentLayer.hide();
   } else if (event.which === 122) {
     if (!fullScreenFlag) {
       ipcRenderer.send("FullScreenREQ");

@@ -59,9 +59,20 @@
       </button>
     </div>
 
-    <button id="watermarkBtn" title="watermark">
-      <img class="icon" src="../assets/watermark.ico" />
-    </button>
+    <div id="wrapperBox">
+      <button id="watermarkBtn" title="watermark">
+        <img class="icon" src="../assets/watermark.ico" />
+      </button>
+      <input
+        type="file"
+        id="watermarkFileInput"
+        accept="image/*"
+        style="display: none"
+      />
+      <button id="watermarkUploadBtn" title="Upload Watermark">
+        <span>Upload...</span>
+      </button>
+    </div>
 
     <div id="wrapperBox">
       <button id="colorpickerBtn" title="color_picker">

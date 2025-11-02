@@ -1,6 +1,6 @@
 {
   "name": "pegasus",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "",
   "main": "main.js",
   "dependencies": {
@@ -21,6 +21,7 @@
     "postinstall": "electron-builder install-app-deps",
     "start": "electron .",
     "build": "electron-builder",
+    "build:win-store": "electron-builder --win appx",
     "rebuild": "electron-rebuild -f -w sharp"
   },
   "build": {

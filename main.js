@@ -105,7 +105,7 @@ app.whenReady().then(() => {
 
   ipcMain.on("resizeValueSEND", (event, res) => {
     mainWindow.webContents.send("resizeImgCMD", res);
-    mainWindow.webContents.focus();
+    mainWindow.webContents.focus(); //Do not remove this line because of focus helps instant acttion.
   });
 
   ipcMain.on("blurValueSEND", (event, res) => {
@@ -173,8 +173,8 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
-  ipcMain.on("bitwiseImgREQ", (event) => {
-    mainWindow.webContents.send("bitwiseImgCMD");
+  ipcMain.on("bitwiseValueSEND", (event, res) => {
+    mainWindow.webContents.send("bitwiseImgCMD", res);
     mainWindow.webContents.focus();
   });
 
@@ -286,6 +286,20 @@ app.whenReady().then(() => {
         enabled: hasRedo,
         click: () => {
           event.sender.send("imgkit-context-menu-action", "redo");
+        },
+      })
+    );
+
+    // Separator
+    menu.append(new MenuItem({ type: "separator" }));
+
+    // Hide
+    menu.append(
+      new MenuItem({
+        label: "Hide",
+        accelerator: "Alt + H",
+        click: () => {
+          event.sender.send("imgkit-context-menu-action", "hide");
         },
       })
     );

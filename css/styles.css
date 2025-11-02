@@ -5,7 +5,6 @@ body {
   width: 100vw;
   height: 99vh;
   display: flex;
-
   justify-content: center;
   align-items: center;
   border-top: 1px black solid;
@@ -128,12 +127,6 @@ select#extensionComboBox {
 
 #dummyCanvas {
   background-color: transparent;
-}
-
-#showImageOnlyLabel {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
 }
 
 .alert-box {

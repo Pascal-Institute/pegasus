@@ -77,7 +77,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
   position: relative;
-  min-width: 200px;
+  min-width: 192px;
+  min-height: 192px;
   flex-shrink: 0;
   outline: none;
 }

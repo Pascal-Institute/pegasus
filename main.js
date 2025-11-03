@@ -188,6 +188,11 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on("watermarkUploadREQ", (event, filePath) => {
+    mainWindow.webContents.send("watermarkUploadCMD", filePath);
+    mainWindow.webContents.focus();
+  });
+
   ipcMain.on("watermarkImgREQ", (event) => {
     mainWindow.webContents.send("watermarkImgCMD");
     mainWindow.webContents.focus();

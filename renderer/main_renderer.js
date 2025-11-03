@@ -133,6 +133,12 @@ ipcRenderer.on("tintImgCMD", async (event, res) => {
   currentLayer.processImage({ tint: res });
 });
 
+ipcRenderer.on("watermarkUploadCMD", async (event, filePath) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+  currentLayer.applyWatermark({ filePath: filePath });
+});
+
 ipcRenderer.on("watermarkImgCMD", async (event) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;

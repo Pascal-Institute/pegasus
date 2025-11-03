@@ -478,6 +478,10 @@ class ImageLayer {
     }
   }
 
+  async applyWatermark({ filePath }) {
+    const result = await ImageProcessor.applyWatermark(filePath);
+  }
+
   /**
    * Process image with various operations
    * Bridges UI to backend operations

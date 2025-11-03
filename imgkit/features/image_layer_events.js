@@ -24,7 +24,9 @@ class ImageLayerEvents {
     // Panel focus on click (with Ctrl+click multi-select support)
     this.layer.panel.addEventListener("click", (e) => {
       const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
-      this.layer.renderer.setCurrentLayer(index, e.ctrlKey);
+      // Support both Ctrl (Windows/Linux) and Cmd (Mac) for multi-select toggle
+      const isMultiSelectKey = e.ctrlKey || e.metaKey;
+      this.layer.renderer.setCurrentLayer(index, isMultiSelectKey);
     });
 
     this.layer.canvas.addEventListener("click", async (e) => {
@@ -390,18 +392,18 @@ class ImageLayerEvents {
       const current = this.layer.renderer.getCurrentLayer();
       if (current !== this.layer) return;
 
-      // Delete: Ctrl+D or Delete key
-      if ((e.ctrlKey && e.key === "d") || e.key === "Delete") {
+      // Delete: Ctrl+D (Cmd+D on Mac) or Delete key
+      if (((e.ctrlKey || e.metaKey) && e.key === "d") || e.key === "Delete") {
         e.preventDefault();
         this.layer.renderer.deleteImage();
       }
-      // Copy: Ctrl+C
-      else if (e.ctrlKey && e.key === "c") {
+      // Copy: Ctrl+C (Cmd+C on Mac)
+      else if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault();
         this.layer.renderer.copyImage();
       }
-      // Paste: Ctrl+V
-      else if (e.ctrlKey && e.key === "v") {
+      // Paste: Ctrl+V (Cmd+V on Mac)
+      else if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault();
         this.layer.renderer.pasteImage();
       }
@@ -410,9 +412,9 @@ class ImageLayerEvents {
         const currentIdx = this.layer.renderer.currentIndex;
         let newIdx = currentIdx;
 
-        if (e.ctrlKey && e.key === "ArrowLeft") {
+        if ((e.ctrlKey || e.metaKey) && e.key === "ArrowLeft") {
           newIdx = 0;
-        } else if (e.ctrlKey && e.key === "ArrowRight") {
+        } else if ((e.ctrlKey || e.metaKey) && e.key === "ArrowRight") {
           newIdx = this.layer.renderer.imageLayerQueue.length - 1;
         } else if (e.key === "ArrowLeft" && currentIdx > 0) {
           newIdx = currentIdx - 1;

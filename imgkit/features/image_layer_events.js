@@ -3,6 +3,15 @@ const { ImageMode } = require("./image_mode");
 const { ImageProcessor } = require("../processing/image_processor");
 
 /**
+ * Check if multi-select modifier key is pressed (Ctrl on Windows/Linux, Cmd on Mac)
+ * @param {KeyboardEvent|MouseEvent} event - The event object
+ * @returns {boolean} True if Ctrl or Meta key is pressed
+ */
+function isMultiSelectKey(event) {
+  return event.ctrlKey || event.metaKey;
+}
+
+/**
  * ImageLayerEvents - Handles all event listeners for ImageLayer
  * Extracted from ImageLayer class to improve code organization
  */
@@ -25,8 +34,7 @@ class ImageLayerEvents {
     this.layer.panel.addEventListener("click", (e) => {
       const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
       // Support both Ctrl (Windows/Linux) and Cmd (Mac) for multi-select toggle
-      const isMultiSelectKey = e.ctrlKey || e.metaKey;
-      this.layer.renderer.setCurrentLayer(index, isMultiSelectKey);
+      this.layer.renderer.setCurrentLayer(index, isMultiSelectKey(e));
     });
 
     this.layer.canvas.addEventListener("click", async (e) => {
@@ -393,17 +401,17 @@ class ImageLayerEvents {
       if (current !== this.layer) return;
 
       // Delete: Ctrl+D (Cmd+D on Mac) or Delete key
-      if (((e.ctrlKey || e.metaKey) && e.key === "d") || e.key === "Delete") {
+      if ((isMultiSelectKey(e) && e.key === "d") || e.key === "Delete") {
         e.preventDefault();
         this.layer.renderer.deleteImage();
       }
       // Copy: Ctrl+C (Cmd+C on Mac)
-      else if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+      else if (isMultiSelectKey(e) && e.key === "c") {
         e.preventDefault();
         this.layer.renderer.copyImage();
       }
       // Paste: Ctrl+V (Cmd+V on Mac)
-      else if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+      else if (isMultiSelectKey(e) && e.key === "v") {
         e.preventDefault();
         this.layer.renderer.pasteImage();
       }
@@ -412,9 +420,9 @@ class ImageLayerEvents {
         const currentIdx = this.layer.renderer.currentIndex;
         let newIdx = currentIdx;
 
-        if ((e.ctrlKey || e.metaKey) && e.key === "ArrowLeft") {
+        if (isMultiSelectKey(e) && e.key === "ArrowLeft") {
           newIdx = 0;
-        } else if ((e.ctrlKey || e.metaKey) && e.key === "ArrowRight") {
+        } else if (isMultiSelectKey(e) && e.key === "ArrowRight") {
           newIdx = this.layer.renderer.imageLayerQueue.length - 1;
         } else if (e.key === "ArrowLeft" && currentIdx > 0) {
           newIdx = currentIdx - 1;
@@ -598,4 +606,4 @@ class ImageLayerEvents {
   }
 }
 
-module.exports = { ImageLayerEvents };
+module.exports = { ImageLayerEvents, isMultiSelectKey };

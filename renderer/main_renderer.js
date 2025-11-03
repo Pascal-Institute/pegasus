@@ -1,6 +1,9 @@
 const { ipcRenderer } = require("electron");
 const { imgKitRenderer, createDefaultImage, ImageMode } = require("imgkit");
 
+// Import the multi-select key helper
+const { isMultiSelectKey } = require("../imgkit/features/image_layer_events");
+
 // Get imageLayerQueue from renderer
 const imageLayerQueue = imgKitRenderer.imageLayerQueue;
 var fullScreenFlag = false;
@@ -244,14 +247,14 @@ ipcRenderer.on("saveAsImgCMD", async (event, res) => {
 document.addEventListener("keydown", function (event) {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
 
-  if ((event.ctrlKey || event.metaKey) && event.key === "a") {
+  if (isMultiSelectKey(event) && event.key === "a") {
     event.preventDefault(); // Prevent default browser select all action
     imgKitRenderer.selectAll();
-  } else if ((event.ctrlKey || event.metaKey) && event.key === "z") {
+  } else if (isMultiSelectKey(event) && event.key === "z") {
     if (currentLayer && currentLayer.undo) {
       currentLayer.undo();
     }
-  } else if ((event.ctrlKey || event.metaKey) && event.key === "y") {
+  } else if (isMultiSelectKey(event) && event.key === "y") {
     if (currentLayer && currentLayer.redo) {
       currentLayer.redo();
     }
@@ -284,7 +287,7 @@ ipcRenderer.on("showNotificationCMD", (event, notificationId) => {
 });
 
 document.addEventListener("wheel", function (event) {
-  if (event.ctrlKey || event.metaKey) {
+  if (isMultiSelectKey(event)) {
     const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
     if (currentLayer && currentLayer.modeManager.isDrawing()) {
       if (event.deltaY > 0 || event.detail < 0) {

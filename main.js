@@ -399,6 +399,7 @@ app.whenReady().then(() => {
                         "ico",
                         "tiff",
                         "tif",
+                        "avif",
                       ],
                     },
                   ],

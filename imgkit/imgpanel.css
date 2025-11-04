@@ -157,6 +157,11 @@
   position: absolute;
   left: 18px;
   top: 8px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #ccc;
+  outline: none;
 }
 
 .color-box-container {

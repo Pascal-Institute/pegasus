@@ -1,6 +1,7 @@
 const { ipcRenderer, webUtils } = require("electron");
 const { ImageMode } = require("./image_mode");
 const { ImageProcessor } = require("../processing/image_processor");
+const { send } = require("process");
 
 /**
  * ImageLayerEvents - Handles all event listeners for ImageLayer
@@ -103,6 +104,17 @@ class ImageLayerEvents {
     // Extension change
     this.layer.extensionCombo.addEventListener("change", (e) => {
       if (this.layer.convertFormat) {
+        if (e.target.value === "ico") {
+          if (
+            this.layer.info.width > 256 ||
+            this.layer.info.height > 256 ||
+            this.layer.info.width !== this.layer.info.height
+          )
+            ipcRenderer.send("showNotificationREQ", "imgkit-ico-error");
+          this.layer.extensionCombo.value = this.layer.extension;
+          return;
+        }
+
         this.layer.convertFormat(e.target.value);
       }
     });
@@ -248,7 +260,10 @@ class ImageLayerEvents {
     }
 
     // Add one more empty layer for next image
-    if (this.layer.renderer.currentIndex === this.layer.renderer.imageLayerQueue.length - 1) {
+    if (
+      this.layer.renderer.currentIndex ===
+      this.layer.renderer.imageLayerQueue.length - 1
+    ) {
       this.layer.renderer.createDefaultImage();
     }
   }
@@ -362,7 +377,6 @@ class ImageLayerEvents {
         case "hide":
           this.layer.hide();
           break;
-
       }
     });
 

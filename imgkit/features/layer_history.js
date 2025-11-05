@@ -15,6 +15,7 @@ class LayerHistory {
     this.buffers = []; // Array of image buffers
     this.infos = []; // Array of image metadata objects
     this.extensions = []; // Array of file extensions
+    this.colors = []; // Array of color arrays
     this.index = -1; // Current position in history (-1 = empty)
     this.maxSize = maxSize; // Maximum number of history states
   }
@@ -24,8 +25,9 @@ class LayerHistory {
    * @param {Buffer} buffer - Image buffer
    * @param {Object} info - Image metadata (width, height, format, etc.)
    * @param {string} extension - File extension (png, jpg, etc.)
+   * @param {Array<string>} [colors] - Optional array of color strings
    */
-  add(buffer, info, extension) {
+  add(buffer, info, extension, colors = []) {
     this.index++;
 
     // Remove future history if we're not at the end
@@ -34,6 +36,7 @@ class LayerHistory {
       this.buffers = this.buffers.slice(0, this.index);
       this.infos = this.infos.slice(0, this.index);
       this.extensions = this.extensions.slice(0, this.index);
+      this.colors = this.colors.slice(0, this.index);
     }
 
     // Limit history size (FIFO - remove oldest)
@@ -41,6 +44,7 @@ class LayerHistory {
       this.buffers.shift();
       this.infos.shift();
       this.extensions.shift();
+      this.colors.shift();
       this.index = this.maxSize - 1;
     }
 
@@ -48,6 +52,7 @@ class LayerHistory {
     this.buffers.push(buffer);
     this.infos.push(info);
     this.extensions.push(extension);
+    this.colors.push(colors);
   }
 
   /**
@@ -78,7 +83,7 @@ class LayerHistory {
 
   /**
    * Get current state from history
-   * @returns {Object|null} Current state {buffer, info, extension} or null if empty
+   * @returns {Object|null} Current state {buffer, info, extension, colors} or null if empty
    */
   getCurrentState() {
     if (this.index < 0 || this.index >= this.buffers.length) {
@@ -89,6 +94,7 @@ class LayerHistory {
       buffer: this.buffers[this.index],
       info: this.infos[this.index],
       extension: this.extensions[this.index],
+      colors: this.colors[this.index],
     };
   }
 
@@ -123,6 +129,7 @@ class LayerHistory {
     this.buffers = [];
     this.infos = [];
     this.extensions = [];
+    this.colors = [];
     this.index = -1;
   }
 

@@ -42,6 +42,13 @@ ipcRenderer.on("resizeImgCMD", async (event, res) => {
   currentLayer.processImage({ resize: newWidth });
 });
 
+ipcRenderer.on("resizePixelImgCMD", async (event, res) => {
+  const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  if (!currentLayer || !currentLayer.buffer) return;
+  const newWidth = res;
+  currentLayer.processImage({ resize: newWidth });
+});
+
 ipcRenderer.on("blurImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
   if (!currentLayer || !currentLayer.buffer) return;

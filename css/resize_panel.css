@@ -1,3 +1,4 @@
-#resizeExecuteBtn:hover {
+#resizeExecuteBtn:hover,
+#resizePixelExecuteBtn:hover {
   cursor: pointer;
 }

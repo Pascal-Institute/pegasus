@@ -189,6 +189,14 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.coord-text {
+  font-size: 13px;
+  color: #666;
+  position: absolute;
+  right: 12px;
+  bottom: 36px;
+}
+
 .info-text {
   font-size: 13px;
   color: #666;

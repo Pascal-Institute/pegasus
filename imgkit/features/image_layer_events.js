@@ -132,6 +132,7 @@ class ImageLayerEvents {
     this.setupCropping();
     this.setupDrawing();
     this.setupMagnifying();
+    this.setupCoordinateDisplay();
 
     this.setupPanelDragging();
   }
@@ -606,6 +607,26 @@ class ImageLayerEvents {
           this.layer.overlayCanvas.height
         );
       }
+    });
+  }
+
+  /**
+   * Setup coordinate display functionality
+   */
+  setupCoordinateDisplay() {
+    // Track mouse position on canvas and display coordinates
+    this.layer.canvas.addEventListener("mousemove", (e) => {
+      const rect = this.layer.canvas.getBoundingClientRect();
+      const x = Math.floor(e.clientX - rect.left);
+      const y = Math.floor(e.clientY - rect.top);
+
+      // Update coordinate text
+      this.layer.coordText.textContent = `( ${x} , ${y} )`;
+    });
+
+    // Reset coordinate display when mouse leaves canvas
+    this.layer.canvas.addEventListener("mouseleave", () => {
+      this.layer.coordText.textContent = "( - , - )";
     });
   }
 }

@@ -118,6 +118,7 @@ class ImageLayer {
     // Get UI control elements
     this.deleteBtn = this.panel.querySelector(".delete-btn");
     this.nameInput = this.panel.querySelector(".name-input");
+    this.coordText = this.panel.querySelector(".coord-text");
     this.infoText = this.panel.querySelector(".info-text");
     this.extensionCombo = this.panel.querySelector(".extension-combo");
 

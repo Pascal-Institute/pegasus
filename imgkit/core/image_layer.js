@@ -320,6 +320,7 @@ class ImageLayer {
       this.nameInput,
       this.colorBox.container,
       this.infoText,
+      this.coordText,
       this.extensionCombo,
     ].forEach((el) => (el.style.visibility = visibility));
     this.visibility = visibility;

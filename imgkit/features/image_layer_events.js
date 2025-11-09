@@ -1,7 +1,6 @@
 const { ipcRenderer, webUtils } = require("electron");
 const { ImageMode } = require("./image_mode");
 const { ImageProcessor } = require("../processing/image_processor");
-const { send } = require("process");
 
 /**
  * ImageLayerEvents - Handles all event listeners for ImageLayer

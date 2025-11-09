@@ -77,7 +77,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
   position: relative;
-  min-width: 200px;
+  min-width: 192px;
+  min-height: 192px;
   flex-shrink: 0;
   outline: none;
 }
@@ -114,8 +115,6 @@
 }
 
 .img-canvas {
-  max-width: 600px;
-  max-height: 600px;
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
@@ -158,6 +157,11 @@
   position: absolute;
   left: 18px;
   top: 8px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #ccc;
+  outline: none;
 }
 
 .color-box-container {
@@ -185,12 +189,10 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.coord-text,
 .info-text {
   font-size: 13px;
   color: #666;
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
 }
 
 .extension-combo {
@@ -251,4 +253,14 @@
 
 .context-menu-item:hover {
   background: #f5f5f5;
+}
+
+.coord-container {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 4px;
 }

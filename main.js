@@ -108,6 +108,11 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus(); //Do not remove this line because of focus helps instant acttion.
   });
 
+  ipcMain.on("resizePixelValueSEND", (event, res) => {
+    mainWindow.webContents.send("resizePixelImgCMD", res);
+    mainWindow.webContents.focus(); //Do not remove this line because of focus helps instant acttion.
+  });
+
   ipcMain.on("blurValueSEND", (event, res) => {
     mainWindow.webContents.send("blurImgCMD", res);
     mainWindow.webContents.focus();
@@ -185,6 +190,11 @@ app.whenReady().then(() => {
 
   ipcMain.on("grayScaleImgREQ", (event) => {
     mainWindow.webContents.send("grayScaleImgCMD");
+    mainWindow.webContents.focus();
+  });
+
+  ipcMain.on("watermarkUploadREQ", (event, filePath) => {
+    mainWindow.webContents.send("watermarkUploadCMD", filePath);
     mainWindow.webContents.focus();
   });
 
@@ -394,6 +404,7 @@ app.whenReady().then(() => {
                         "ico",
                         "tiff",
                         "tif",
+                        "avif",
                       ],
                     },
                   ],

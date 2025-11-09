@@ -7,6 +7,8 @@ const namer = require("color-namer");
 const { FormatConverter } = require("./format_converter");
 
 class ImageProcessor {
+  static filePath = "";
+
   // Delegate to FormatConverter
   static async convertFormat(buffer, fromExt, toExt) {
     return FormatConverter.convert(buffer, fromExt, toExt);
@@ -18,6 +20,10 @@ class ImageProcessor {
 
   static cleanupAllTempFiles() {
     FormatConverter.cleanupTempFiles();
+  }
+
+  static async applyWatermark(filePath) {
+    this.filePath = filePath;
   }
 
   // Image Processing Operations (kept in ImageProcessor)
@@ -95,7 +101,8 @@ class ImageProcessor {
       }
 
       if (options.composite) {
-        const watermarkPath = "./assets/icon.png";
+        const watermarkPath =
+          this.filePath !== "" ? this.filePath : "./assets/icon.png";
 
         const watermark = await sharp(watermarkPath).resize(32, 32).toBuffer();
 

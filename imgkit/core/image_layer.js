@@ -118,6 +118,7 @@ class ImageLayer {
     // Get UI control elements
     this.deleteBtn = this.panel.querySelector(".delete-btn");
     this.nameInput = this.panel.querySelector(".name-input");
+    this.coordText = this.panel.querySelector(".coord-text");
     this.infoText = this.panel.querySelector(".info-text");
     this.extensionCombo = this.panel.querySelector(".extension-combo");
 
@@ -172,7 +173,6 @@ class ImageLayer {
     };
 
     this.infoText.textContent = `${info.width} x ${info.height}`;
-    this.history.add(buffer, info, this.extension);
     // Extract colors and update color boxes
     let extractedColors = colors;
     if (!extractedColors) {
@@ -183,6 +183,8 @@ class ImageLayer {
         extractedColors = [];
       }
     }
+
+    this.history.add(buffer, info, this.extension, extractedColors);
 
     // Update color box UI
     if (Array.isArray(extractedColors) && extractedColors.length > 0) {
@@ -250,7 +252,7 @@ class ImageLayer {
 
   /**
    * Restore state from history
-   * @param {Object} state - State object with buffer, info, extension
+   * @param {Object} state - State object with buffer, info, extension, colors
    */
   restoreFromHistory(state) {
     this.buffer = state.buffer;
@@ -267,6 +269,29 @@ class ImageLayer {
 
     this.infoText.textContent = `${state.info.width} x ${state.info.height}`;
     this.extensionCombo.value = state.extension;
+
+    // Restore color boxes
+    const colors = state.colors || [];
+    if (Array.isArray(colors) && colors.length > 0) {
+      colors.forEach((color, idx) => {
+        if (this.colorBox.colors[idx]) {
+          this.colorBox.colors[idx].style.backgroundColor = color;
+          this.colorBox.colors[idx].title = color;
+        }
+      });
+
+      // Clear unused color boxes
+      for (let i = colors.length; i < this.colorBox.colors.length; i++) {
+        this.colorBox.colors[i].style.backgroundColor = "transparent";
+        this.colorBox.colors[i].title = "empty";
+      }
+    } else {
+      // No colors - clear all boxes
+      this.colorBox.colors.forEach((colorDiv) => {
+        colorDiv.style.backgroundColor = "transparent";
+        colorDiv.title = "empty";
+      });
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -295,6 +320,7 @@ class ImageLayer {
       this.nameInput,
       this.colorBox.container,
       this.infoText,
+      this.coordText,
       this.extensionCombo,
     ].forEach((el) => (el.style.visibility = visibility));
     this.visibility = visibility;
@@ -476,6 +502,10 @@ class ImageLayer {
       ipcRenderer.send("showNotificationREQ", "imgkit-error");
       console.error("Error saving image:", error);
     }
+  }
+
+  async applyWatermark({ filePath }) {
+    await ImageProcessor.applyWatermark(filePath);
   }
 
   /**

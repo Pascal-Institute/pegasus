@@ -103,6 +103,17 @@ class ImageLayerEvents {
     // Extension change
     this.layer.extensionCombo.addEventListener("change", (e) => {
       if (this.layer.convertFormat) {
+        if (e.target.value === "ico") {
+          if (
+            this.layer.info.width > 256 ||
+            this.layer.info.height > 256 ||
+            this.layer.info.width !== this.layer.info.height
+          )
+            ipcRenderer.send("showNotificationREQ", "imgkit-ico-error");
+          this.layer.extensionCombo.value = this.layer.extension;
+          return;
+        }
+
         this.layer.convertFormat(e.target.value);
       }
     });
@@ -120,6 +131,7 @@ class ImageLayerEvents {
     this.setupCropping();
     this.setupDrawing();
     this.setupMagnifying();
+    this.setupCoordinateDisplay();
 
     this.setupPanelDragging();
   }
@@ -248,7 +260,10 @@ class ImageLayerEvents {
     }
 
     // Add one more empty layer for next image
-    if (this.layer.renderer.currentIndex === this.layer.renderer.imageLayerQueue.length - 1) {
+    if (
+      this.layer.renderer.currentIndex ===
+      this.layer.renderer.imageLayerQueue.length - 1
+    ) {
       this.layer.renderer.createDefaultImage();
     }
   }
@@ -362,7 +377,6 @@ class ImageLayerEvents {
         case "hide":
           this.layer.hide();
           break;
-
       }
     });
 
@@ -592,6 +606,26 @@ class ImageLayerEvents {
           this.layer.overlayCanvas.height
         );
       }
+    });
+  }
+
+  /**
+   * Setup coordinate display functionality
+   */
+  setupCoordinateDisplay() {
+    // Track mouse position on canvas and display coordinates
+    this.layer.canvas.addEventListener("mousemove", (e) => {
+      const rect = this.layer.canvas.getBoundingClientRect();
+      const x = Math.floor(e.clientX - rect.left);
+      const y = Math.floor(e.clientY - rect.top);
+
+      // Update coordinate text
+      this.layer.coordText.textContent = `( ${x} , ${y} )`;
+    });
+
+    // Reset coordinate display when mouse leaves canvas
+    this.layer.canvas.addEventListener("mouseleave", () => {
+      this.layer.coordText.textContent = "( - , - )";
     });
   }
 }

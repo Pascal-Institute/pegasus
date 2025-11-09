@@ -47,6 +47,23 @@ document.getElementById("watermarkBtn").addEventListener("click", () => {
   ipcRenderer.send("watermarkImgREQ");
 });
 
+// Watermark upload button - trigger file input
+document.getElementById("watermarkUploadBtn").addEventListener("click", () => {
+  document.getElementById("watermarkFileInput").click();
+});
+
+// Handle watermark file selection
+document
+  .getElementById("watermarkFileInput")
+  .addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      ipcRenderer.send("watermarkUploadREQ", file.path);
+      // Reset input so same file can be selected again
+      event.target.value = "";
+    }
+  });
+
 document.getElementById("colorpickerBtn").addEventListener("click", () => {
   colorpickerActive = !colorpickerActive;
   if (colorpickerActive) {

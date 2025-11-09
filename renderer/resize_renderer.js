@@ -14,7 +14,7 @@ document.getElementById("resizeExecuteBtn").addEventListener("click", () => {
 document
   .getElementById("resizePixelValue")
   .addEventListener("input", (event) => {
-    scale = event.target.value;
+    pixelSize = event.target.value;
   });
 
 document

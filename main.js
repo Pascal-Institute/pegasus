@@ -300,6 +300,18 @@ app.whenReady().then(() => {
       })
     );
 
+    // Watermark
+    menu.append(
+      new MenuItem({
+        label: "Watermark",
+        accelerator: "Ctrl+W",
+        enabled: true,
+        click: () => {
+          event.sender.send("imgkit-context-menu-action", "watermark");
+        },
+      })
+    );
+
     // Separator
     menu.append(new MenuItem({ type: "separator" }));
 

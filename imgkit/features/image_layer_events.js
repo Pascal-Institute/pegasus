@@ -374,6 +374,9 @@ class ImageLayerEvents {
         case "redo":
           this.layer.redo();
           break;
+        case "watermark":
+          this.layer.processImage({ composite: true });
+          break;
         case "hide":
           this.layer.hide();
           break;
@@ -418,6 +421,11 @@ class ImageLayerEvents {
       else if (e.ctrlKey && e.key === "v") {
         e.preventDefault();
         this.layer.renderer.pasteImage();
+      }
+      // Watermark: Ctrl+W
+      else if (e.ctrlKey && e.key === "w") {
+        e.preventDefault();
+        this.layer.processImage({ composite: true });
       }
       // Navigate: Arrow keys
       else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {

@@ -511,13 +511,67 @@ class ImageLayerEvents {
    * Setup drawing/painting functionality
    */
   setupDrawing() {
-    // Drawing mode will be implemented here
-    // Currently handled by main_renderer.js with drawImgCMD
-    // TODO: Add canvas drawing logic when in DRAWING mode
-    // this.layer.canvas.addEventListener("mousedown", (e) => {
-    //   if (!this.layer.modeManager.isDrawing()) return;
-    //   // Start drawing...
-    // });
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    this.layer.canvas.addEventListener("mousedown", (e) => {
+      // Only handle if in drawing mode
+      if (!this.layer.modeManager.isDrawing()) return;
+      
+      isDrawing = true;
+      const rect = this.layer.canvas.getBoundingClientRect();
+      lastX = e.clientX - rect.left;
+      lastY = e.clientY - rect.top;
+
+      // Start a new path
+      this.layer.ctx.beginPath();
+      this.layer.ctx.moveTo(lastX, lastY);
+      // Set line cap to round for smoother drawing
+      this.layer.ctx.lineCap = "round";
+      this.layer.ctx.lineJoin = "round";
+      // Ensure lineWidth is set (default to 1 if not already set)
+      if (!this.layer.ctx.lineWidth || this.layer.ctx.lineWidth < 1) {
+        this.layer.ctx.lineWidth = 1;
+      }
+    });
+
+    this.layer.canvas.addEventListener("mousemove", (e) => {
+      // Only draw if in drawing mode and mouse is pressed
+      if (!this.layer.modeManager.isDrawing() || !isDrawing) return;
+
+      const rect = this.layer.canvas.getBoundingClientRect();
+      const currentX = e.clientX - rect.left;
+      const currentY = e.clientY - rect.top;
+
+      // Draw line from last position to current position
+      this.layer.ctx.lineTo(currentX, currentY);
+      this.layer.ctx.stroke();
+
+      lastX = currentX;
+      lastY = currentY;
+    });
+
+    const finishDrawing = async () => {
+      if (!isDrawing) return;
+      isDrawing = false;
+
+      // Convert canvas to buffer and update the layer
+      try {
+        const dataUrl = this.layer.canvas.toDataURL(`image/${this.layer.extension}`);
+        const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, "base64");
+        
+        // Update the layer's image and buffer
+        this.layer.image.src = dataUrl;
+        await this.layer.updatePreview(buffer, this.layer.info);
+      } catch (error) {
+        console.error("Error saving drawing:", error);
+      }
+    };
+
+    this.layer.canvas.addEventListener("mouseup", finishDrawing);
+    this.layer.canvas.addEventListener("mouseleave", finishDrawing);
   }
 
   /**

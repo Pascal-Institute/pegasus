@@ -3,7 +3,7 @@ const { ipcRenderer } = require("electron");
 var rgb = { r: "123", g: "123", b: "123" };
 var drawFlagState = false;
 var colorpickerActive = false;
-
+var watermarkPreviewImg = document.getElementById("watermarkPreviewImg");
 // Receive color from color picker
 ipcRenderer.on("colorpickerValueRECV", (event, color, color_name) => {
   if (!color) return;
@@ -59,6 +59,7 @@ document
     const file = event.target.files[0];
     if (file) {
       ipcRenderer.send("watermarkUploadREQ", file.path);
+      watermarkPreviewImg.src = file.path;
       // Reset input so same file can be selected again
       event.target.value = "";
     }

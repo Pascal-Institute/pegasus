@@ -14,6 +14,7 @@
 const { ipcRenderer } = require("electron");
 const { ImageLayer } = require("./image_layer.js");
 const { ImageMode } = require("../features/image_mode.js");
+const LAYER_EVENT_CHANNEL = "imgkit-layer-event";
 
 // ============================================================================
 // MAIN CLASS: ImgKitRenderer
@@ -45,6 +46,7 @@ class ImgKitRenderer {
       this.setupScrollEvents();
       this.setupGlobalDragPrevention();
       this.setupGlobalMagnifyShortcut(); // Setup Alt + M globally
+      this.setupLayerEventBridge();
     }
   }
 
@@ -188,6 +190,139 @@ class ImgKitRenderer {
     });
   }
 
+  setupLayerEventBridge() {
+    ipcRenderer.on(LAYER_EVENT_CHANNEL, async (event, payload) => {
+      await this.handleLayerEvent(payload);
+    });
+  }
+
+  async handleLayerEvent(payload) {
+    if (!payload || !payload.type) return;
+
+    switch (payload.type) {
+      case "select":
+        this.selectLayerById(payload.layerId, payload.ctrlKey);
+        break;
+      case "delete":
+        this.selectLayerById(payload.layerId);
+        this.deleteImage();
+        break;
+      case "copy":
+        this.selectLayerById(payload.layerId);
+        await this.copyImage();
+        break;
+      case "paste":
+        this.selectLayerById(payload.layerId);
+        await this.pasteImage();
+        break;
+      case "swap":
+        this.swapLayersByIds(payload.fromLayerId, payload.toLayerId);
+        break;
+      case "drop":
+        await this.handleDropFiles(payload.layerId, payload.files || []);
+        break;
+      case "preview-updated":
+        this.updateScrollUI();
+        this.scrollToEnd();
+        break;
+      case "navigate":
+        this.navigateKeyboard(payload.direction, payload.ctrlKey);
+        break;
+    }
+  }
+
+  selectLayerById(layerId, ctrlKey = false) {
+    const index = this.getLayerIndexById(layerId);
+    if (index !== -1) {
+      this.setCurrentLayer(index, ctrlKey);
+    }
+  }
+
+  getLayerIndexById(layerId) {
+    return this.imageLayerQueue.findIndex((layer) => layer.id === layerId);
+  }
+
+  getLayerById(layerId) {
+    const index = this.getLayerIndexById(layerId);
+    return index === -1 ? null : this.imageLayerQueue[index];
+  }
+
+  swapLayersByIds(fromLayerId, toLayerId) {
+    const fromIndex = this.getLayerIndexById(fromLayerId);
+    const toIndex = this.getLayerIndexById(toLayerId);
+    if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+    this.swapLayers(fromIndex, toIndex);
+  }
+
+  async handleDropFiles(targetLayerId, files) {
+    if (!files || files.length === 0) return;
+
+    let dropHandled = false;
+
+    for (let i = 0; i < files.length; i++) {
+      const entry = files[i];
+      if (!entry) continue;
+
+      const targetLayer =
+        i === 0 ? this.getLayerById(targetLayerId) : this.createDefaultImage();
+      if (!targetLayer) continue;
+
+      let success = false;
+      if (entry.path) {
+        success = await targetLayer.openImage(entry.path);
+      } else if (entry.buffer) {
+        const buffer = Buffer.isBuffer(entry.buffer)
+          ? entry.buffer
+          : Buffer.from(entry.buffer);
+        success = await targetLayer.openImageBuffer(buffer, entry.name);
+      }
+
+      if (success) {
+        targetLayer.panel.draggable = true;
+        this.currentIndex = this.imageLayerQueue.indexOf(targetLayer);
+        dropHandled = true;
+      }
+    }
+
+    if (dropHandled && this.currentIndex === this.imageLayerQueue.length - 1) {
+      this.createDefaultImage();
+    }
+  }
+
+  scrollToEnd() {
+    if (this.scrollContainer) {
+      this.scrollContainer.scrollLeft = this.scrollContainer.scrollWidth;
+    }
+  }
+
+  navigateKeyboard(direction, ctrlKey) {
+    if (!direction) return;
+
+    let newIndex = this.currentIndex;
+
+    if (direction === "left") {
+      if (ctrlKey) {
+        newIndex = 0;
+      } else if (newIndex > 0) {
+        newIndex -= 1;
+      }
+    } else if (direction === "right") {
+      if (ctrlKey) {
+        newIndex = this.imageLayerQueue.length - 1;
+      } else if (newIndex < this.imageLayerQueue.length - 1) {
+        newIndex += 1;
+      }
+    }
+
+    if (newIndex !== this.currentIndex) {
+      this.setCurrentLayer(newIndex);
+      const layer = this.imageLayerQueue[newIndex];
+      if (layer && layer.panel) {
+        layer.panel.focus();
+      }
+    }
+  }
+
   /**
    * Update scroll UI state and panel ordering
    * - Disables scroll buttons at edges
@@ -249,7 +384,7 @@ class ImgKitRenderer {
    * @returns {ImageLayer} Created image layer
    */
   createImageLayer(isDefault = false) {
-    const layer = new ImageLayer(this, isDefault);
+    const layer = new ImageLayer(isDefault);
     this.imageLayerQueue.push(layer);
     this.scrollContainer.appendChild(layer.panel);
     this.updateScrollUI();

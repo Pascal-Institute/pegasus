@@ -1049,7 +1049,7 @@ describe("ImageProcessor", () => {
 ```javascript
 describe("ImageLayer", () => {
   it("should maintain history", async () => {
-    const layer = new ImageLayer(renderer);
+    const layer = new ImageLayer();
     await layer.openImage("test.png");
     await layer.processImage({ blur: 2 });
 

@@ -340,6 +340,10 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.on("imgkit-layer-event", (event, payload) => {
+    event.sender.send("imgkit-layer-event", payload);
+  });
+
   ipcMain.handle("paste-image-from-clipboard", () => {
     try {
       const image = clipboard.readImage();

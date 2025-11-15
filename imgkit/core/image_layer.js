@@ -19,16 +19,20 @@ const { ipcRenderer } = require("electron");
 const { ImageLayerEvents } = require("../features/image_layer_events");
 const { ImageProcessor } = require("../processing/image_processor");
 const { ImageLoader } = require("../processing/image_loader");
-const { ImageMode, ModeManager } = require("../features/image_mode");
+const { ModeManager } = require("../features/image_mode");
 const { LayerHistory } = require("../features/layer_history");
 const { GifAnimation } = require("../features/gif_animation");
+
+const LAYER_EVENT_CHANNEL = "imgkit-layer-event";
+let nextLayerId = 1;
 
 /**
  * ImageLayer class - Represents a single image panel with canvas and controls
  */
 class ImageLayer {
-  constructor(renderer, isDefault = false) {
-    this.renderer = renderer; // Reference to parent ImgKitRenderer
+  constructor(isDefault = false) {
+    this.id = `image-layer-${nextLayerId++}`;
+    this.isDefault = isDefault; // Is this a placeholder "+ Add Image" layer?
     this.isDefault = isDefault; // Is this a placeholder "+ Add Image" layer?
 
     // --------------------------------------------------------------------------
@@ -79,14 +83,18 @@ class ImageLayer {
    * This clones the template and gets references to all UI elements
    */
   createPanelFromTemplate() {
-    if (!this.renderer.panelTemplate) {
+    const template = document.getElementById("image-panel-template");
+    if (!template) {
       console.error("Image panel template not found!");
       return;
     }
 
     // Clone template content (defined in index.html)
-    const clone = this.renderer.panelTemplate.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     this.panel = clone.querySelector(".imgPanel");
+    if (this.panel) {
+      this.panel.dataset.layerId = this.id;
+    }
 
     // Get canvas and drawing context
     this.canvas = this.panel.querySelector(".img-canvas");
@@ -214,9 +222,10 @@ class ImageLayer {
 
     // Auto-scroll to show new image
     setTimeout(() => {
-      this.renderer.updateScrollUI();
-      this.renderer.scrollContainer.scrollLeft =
-        this.renderer.scrollContainer.scrollWidth;
+      ipcRenderer.send(LAYER_EVENT_CHANNEL, {
+        type: "preview-updated",
+        layerId: this.id,
+      });
     }, 0);
   }
 

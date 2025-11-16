@@ -33,8 +33,6 @@ class ImageLayer {
   constructor(isDefault = false) {
     this.id = `image-layer-${nextLayerId++}`;
     this.isDefault = isDefault; // Is this a placeholder "+ Add Image" layer?
-    this.isDefault = isDefault; // Is this a placeholder "+ Add Image" layer?
-
     // --------------------------------------------------------------------------
     // IMAGE DATA
     // --------------------------------------------------------------------------

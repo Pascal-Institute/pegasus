@@ -141,7 +141,7 @@ class ModeManager {
         var cursorPath = path
           .join(__dirname, "../assets/spoid.png")
           .replace(/\\/g, "/");
-        return `url('file://${cursorPath}') 0 32, crosshair`;
+        return `url('file://${cursorPath}') 0 24, crosshair`;
       default:
         return "default";
     }

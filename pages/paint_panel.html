@@ -60,9 +60,11 @@
     </div>
 
     <div id="wrapperBox">
-      <button id="watermarkBtn" title="watermark">
-        <img class="icon" src="../assets/watermark.ico" />
-      </button>
+      <img
+        id="watermarkPreviewImg"
+        src="../assets/icon.png"
+        alt="Watermark Preview"
+      />
       <input
         type="file"
         id="watermarkFileInput"
@@ -72,22 +74,28 @@
       <button id="watermarkUploadBtn" title="Upload Watermark">
         <span>Upload...</span>
       </button>
+      <button id="watermarkBtn" title="watermark">
+        <img class="icon" src="../assets/watermark.ico" />
+      </button>
     </div>
 
     <div id="wrapperBox">
-      <button id="colorpickerBtn" title="color_picker">
-        <img class="icon" src="../assets/color_picker.ico" />
-      </button>
       <div id="colorpickerBox"></div>
       <div id="colorpickerIndicator">
         <span id="colorpickerValue">#000000</span>
         <span id="colorpickerName">Black</span>
       </div>
+      <button id="colorpickerBtn" title="color_picker">
+        <img class="icon" src="../assets/color_picker.ico" />
+      </button>
     </div>
 
-    <button id="padBtn" title="pad">
-      <img class="icon" src="../assets/pad.ico" />
-    </button>
+    <div id="wrapperBox">
+      <input id="padValue" type="number" min="1" value="1" step="1" />
+      <button id="padBtn" title="pad">
+        <img class="icon" src="../assets/pad.ico" />
+      </button>
+    </div>
 
     <script src="../renderer/paint_renderer.js"></script>
   </body>

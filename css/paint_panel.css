@@ -55,3 +55,15 @@
   flex-direction: column;
   margin-left: 5px;
 }
+
+#watermarkPreviewImg {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+#padValue {
+  width: 80px;
+  margin-left: 5px;
+  outline: none;
+}

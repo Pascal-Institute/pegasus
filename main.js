@@ -221,8 +221,8 @@ app.whenReady().then(() => {
     });
   });
 
-  ipcMain.on("padImgREQ", (event) => {
-    mainWindow.webContents.send("padImgCMD");
+  ipcMain.on("padImgREQ", (event, res) => {
+    mainWindow.webContents.send("padImgCMD", res);
     mainWindow.webContents.focus();
   });
 
@@ -338,6 +338,10 @@ app.whenReady().then(() => {
     } catch (error) {
       console.error("Failed to copy image to clipboard:", error);
     }
+  });
+
+  ipcMain.on("imgkit-layer-event", (event, payload) => {
+    event.sender.send("imgkit-layer-event", payload);
   });
 
   ipcMain.handle("paste-image-from-clipboard", () => {

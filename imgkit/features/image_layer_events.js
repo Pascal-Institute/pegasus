@@ -1,6 +1,6 @@
-const { ipcRenderer, webUtils } = require("electron");
-const { ImageMode } = require("./image_mode");
+const { ipcRenderer } = require("electron");
 const { ImageProcessor } = require("../processing/image_processor");
+const LAYER_EVENT_CHANNEL = "imgkit-layer-event";
 
 /**
  * ImageLayerEvents - Handles all event listeners for ImageLayer
@@ -13,6 +13,14 @@ class ImageLayerEvents {
   constructor(imageLayer) {
     this.layer = imageLayer;
 
+    this.sendLayerEvent = (type, payload = {}) => {
+      ipcRenderer.send(LAYER_EVENT_CHANNEL, {
+        type,
+        layerId: this.layer.id,
+        ...payload,
+      });
+    };
+
     // Setup all event listeners
     this.setupEvents();
   }
@@ -23,8 +31,7 @@ class ImageLayerEvents {
   setupEvents() {
     // Panel focus on click (with Ctrl+click multi-select support)
     this.layer.panel.addEventListener("click", (e) => {
-      const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
-      this.layer.renderer.setCurrentLayer(index, e.ctrlKey);
+      this.sendLayerEvent("select", { ctrlKey: e.ctrlKey });
     });
 
     this.layer.canvas.addEventListener("click", async (e) => {
@@ -60,7 +67,7 @@ class ImageLayerEvents {
     // Delete button
     this.layer.deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      this.layer.renderer.deleteImage();
+      this.sendLayerEvent("delete");
     });
 
     // Name input - prevent panel click event from interfering
@@ -94,7 +101,7 @@ class ImageLayerEvents {
         const color = colorDiv.title;
         if (color && color !== "empty") {
           navigator.clipboard.writeText(color).then(() => {
-            this.layer.renderer.showMessage("copy");
+            ipcRenderer.send("showNotificationREQ", "imgkit-color-copy");
           });
         }
       });
@@ -155,8 +162,7 @@ class ImageLayerEvents {
       e.dataTransfer.setData("text/plain", "panel-swap"); // Mark as panel swap
 
       // Store the index of dragged layer
-      const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
-      e.dataTransfer.setData("layerIndex", index.toString());
+      e.dataTransfer.setData("layerId", this.layer.id);
 
       // Add visual feedback
       this.layer.panel.style.opacity = "0.5";
@@ -189,9 +195,9 @@ class ImageLayerEvents {
     // Drop - swap positions
     this.layer.panel.addEventListener("drop", (e) => {
       // Check if this is a panel swap
-      const layerIndexStr = e.dataTransfer.getData("layerIndex");
+      const layerId = e.dataTransfer.getData("layerId");
 
-      if (layerIndexStr) {
+      if (layerId) {
         // This is a panel swap
         e.preventDefault();
         e.stopPropagation();
@@ -199,13 +205,13 @@ class ImageLayerEvents {
         // Remove visual feedback
         this.layer.panel.style.borderTop = "";
 
-        // Get dragged layer index
-        const fromIndex = parseInt(layerIndexStr);
-        const toIndex = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
+        // Get dragged layer id
+        const fromLayerId = layerId;
+        const toLayerId = this.layer.id;
 
-        if (fromIndex !== toIndex && fromIndex >= 0 && toIndex >= 0) {
-          console.log(`🔄 Swapping panels: ${fromIndex} ↔ ${toIndex}`);
-          this.layer.renderer.swapLayers(fromIndex, toIndex);
+        if (fromLayerId && fromLayerId !== toLayerId) {
+          console.log(`🔄 Swapping panels: ${fromLayerId} ↔ ${toLayerId}`);
+          this.sendLayerEvent("swap", { fromLayerId, toLayerId });
         }
 
         return false;
@@ -223,7 +229,7 @@ class ImageLayerEvents {
 
     this.layer.canvas.addEventListener("dragenter", (e) => {
       e.preventDefault();
-      this.focusCurrentLayer();
+      this.sendLayerEvent("select");
     });
 
     this.layer.canvas.addEventListener("drop", async (e) => {
@@ -232,119 +238,44 @@ class ImageLayerEvents {
 
       if (!files || files.length === 0) return;
 
-      await this.processDroppedFiles(Array.from(files));
+      const payload = await this.collectDroppedFiles(Array.from(files));
+      if (payload.length > 0) {
+        this.sendLayerEvent("drop", { files: payload });
+      }
     });
   }
 
-  /**
-   * Focus this layer when drag enters
-   * @private
-   */
-  focusCurrentLayer() {
-    const index = this.layer.renderer.imageLayerQueue.indexOf(this.layer);
-    this.layer.renderer.setCurrentLayer(index);
-  }
-
-  /**
-   * Process multiple dropped files
-   * @private
-   * @param {File[]} files - Array of dropped files
-   */
-  async processDroppedFiles(files) {
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+  async collectDroppedFiles(files) {
+    const payload = [];
+    for (const file of files) {
       if (!file) continue;
-
-      const targetLayer = this.getTargetLayer(i);
-      await this.loadFileToLayer(file, targetLayer);
+      const entry = await this.fileToPayload(file);
+      if (entry) {
+        payload.push(entry);
+      }
     }
-
-    // Add one more empty layer for next image
-    if (
-      this.layer.renderer.currentIndex ===
-      this.layer.renderer.imageLayerQueue.length - 1
-    ) {
-      this.layer.renderer.createDefaultImage();
-    }
+    return payload;
   }
 
-  /**
-   * Get target layer for file at index
-   * First file goes to current layer, rest to new layers
-   * @private
-   * @param {number} fileIndex - Index of file in dropped files array
-   * @returns {ImageLayer} Target layer
-   */
-  getTargetLayer(fileIndex) {
-    if (fileIndex === 0) {
-      return this.layer;
-    }
-
-    // Create new layer for additional files
-    const newLayer = this.layer.renderer.createDefaultImage();
-    const newIndex = this.layer.renderer.imageLayerQueue.length - 1;
-    this.layer.renderer.setCurrentLayer(newIndex);
-    return newLayer;
-  }
-
-  /**
-   * Load file into target layer
-   * @private
-   * @param {File} file - File to load
-   * @param {ImageLayer} targetLayer - Target layer
-   */
-  async loadFileToLayer(file, targetLayer) {
-    let isOpened = false;
-
+  async fileToPayload(file) {
     if (file.path) {
-      // Desktop file with path
-      isOpened = await targetLayer.openImage(file.path);
-    } else {
-      // Web file or clipboard - read as buffer
-      isOpened = await this.loadFileAsBuffer(file, targetLayer);
+      return { name: file.name, path: file.path };
     }
 
-    if (isOpened) {
-      // Enable panel dragging after successful load
-      targetLayer.panel.draggable = true;
-    }
-  }
-
-  /**
-   * Load file as buffer using FileReader
-   * @private
-   * @param {File} file - File to load
-   * @param {ImageLayer} targetLayer - Target layer
-   * @returns {Promise<boolean>} Success status
-   */
-  async loadFileAsBuffer(file, targetLayer) {
     return new Promise((resolve) => {
       const reader = new FileReader();
 
-      reader.onload = async (evt) => {
+      reader.onload = (evt) => {
         const arrayBuffer = evt.target.result;
-        const buffer = Buffer.from(arrayBuffer);
-
-        // Try to get file path (may not be available)
-        let filePath;
-        try {
-          filePath = webUtils.getPathForFile(file);
-        } catch (err) {
-          console.log("Could not get file path:", err);
-        }
-
-        const isOpened = await targetLayer.openImageBuffer(
-          buffer,
-          file.name,
-          filePath
-        );
-
-        resolve(isOpened);
+        resolve({
+          name: file.name,
+          buffer: Buffer.from(arrayBuffer),
+        });
       };
 
       reader.onerror = () => {
         console.error("FileReader error:", reader.error);
-        resolve(false);
+        resolve(null);
       };
 
       reader.readAsArrayBuffer(file);
@@ -360,13 +291,13 @@ class ImageLayerEvents {
     ipcRenderer.on("imgkit-context-menu-action", (event, action) => {
       switch (action) {
         case "copy":
-          this.layer.renderer.copyImage();
+          this.sendLayerEvent("copy");
           break;
         case "paste":
-          this.layer.renderer.pasteImage();
+          this.sendLayerEvent("paste");
           break;
         case "delete":
-          this.layer.renderer.deleteImage();
+          this.sendLayerEvent("delete");
           break;
         case "undo":
           this.layer.undo();
@@ -401,54 +332,27 @@ class ImageLayerEvents {
     // Note: Alt + M for magnifying glass is handled globally in main_renderer.js
 
     document.addEventListener("keydown", (e) => {
-      // Only handle if this panel is focused
       if (document.activeElement !== this.layer.panel) return;
 
-      const current = this.layer.renderer.getCurrentLayer();
-      if (current !== this.layer) return;
-
-      // Delete: Ctrl+D or Delete key
       if ((e.ctrlKey && e.key === "d") || e.key === "Delete") {
         e.preventDefault();
-        this.layer.renderer.deleteImage();
-      }
-      // Copy: Ctrl+C
-      else if (e.ctrlKey && e.key === "c") {
+        this.sendLayerEvent("delete");
+      } else if (e.ctrlKey && e.key === "c") {
         e.preventDefault();
-        this.layer.renderer.copyImage();
-      }
-      // Paste: Ctrl+V
-      else if (e.ctrlKey && e.key === "v") {
+        this.sendLayerEvent("copy");
+      } else if (e.ctrlKey && e.key === "v") {
         e.preventDefault();
-        this.layer.renderer.pasteImage();
-      }
-      // Watermark: Ctrl+W
-      else if (e.ctrlKey && e.key === "w") {
+        this.sendLayerEvent("paste");
+      } else if (e.ctrlKey && e.key === "w") {
         e.preventDefault();
         this.layer.processImage({ composite: true });
-      }
-      // Navigate: Arrow keys
-      else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-        const currentIdx = this.layer.renderer.currentIndex;
-        let newIdx = currentIdx;
-
-        if (e.ctrlKey && e.key === "ArrowLeft") {
-          newIdx = 0;
-        } else if (e.ctrlKey && e.key === "ArrowRight") {
-          newIdx = this.layer.renderer.imageLayerQueue.length - 1;
-        } else if (e.key === "ArrowLeft" && currentIdx > 0) {
-          newIdx = currentIdx - 1;
-        } else if (
-          e.key === "ArrowRight" &&
-          currentIdx < this.layer.renderer.imageLayerQueue.length - 1
-        ) {
-          newIdx = currentIdx + 1;
-        }
-
-        if (newIdx !== currentIdx) {
-          this.layer.renderer.setCurrentLayer(newIdx);
-          this.layer.renderer.imageLayerQueue[newIdx].panel.focus();
-        }
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        const direction = e.key === "ArrowLeft" ? "left" : "right";
+        this.sendLayerEvent("navigate", {
+          direction,
+          ctrlKey: e.ctrlKey,
+        });
       }
     });
   }

@@ -264,7 +264,7 @@ class ImgKitRenderer {
       if (!entry) continue;
 
       const targetLayer =
-        i === 0 ? this.getLayerById(targetLayerId) : this.createDefaultImage();
+        i === 0 ? this.getLayerById(targetLayerId) : this.createImageLayer(false);
       if (!targetLayer) continue;
 
       let success = false;

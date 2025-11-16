@@ -166,9 +166,10 @@ ipcRenderer.on("colorpickerImgCMD", async (event, res) => {
 
 ipcRenderer.on("padImgCMD", async (event, res) => {
   const currentLayer = imageLayerQueue[imgKitRenderer.currentIndex];
+  var padSize = res;
   if (!currentLayer) return;
   currentLayer.processImage({
-    extend: { top: 1, bottom: 1, left: 1, right: 1 },
+    extend: { top: padSize, bottom: padSize, left: padSize, right: padSize },
   });
 });
 

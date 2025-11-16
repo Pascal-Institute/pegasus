@@ -4,6 +4,7 @@ var rgb = { r: "123", g: "123", b: "123" };
 var drawFlagState = false;
 var colorpickerActive = false;
 var watermarkPreviewImg = document.getElementById("watermarkPreviewImg");
+var padSize = 1;
 // Receive color from color picker
 ipcRenderer.on("colorpickerValueRECV", (event, color, color_name) => {
   if (!color) return;
@@ -76,22 +77,27 @@ document.getElementById("colorpickerBtn").addEventListener("click", () => {
 });
 
 document.getElementById("redValue").addEventListener("input", (event) => {
-  rgb.r = event.target.value; //parseInt(event.target.value, 10).toString(16).padStart(2, "0");
+  rgb.r = event.target.value;
   updateTintBtnBackground(rgb);
 });
 
 document.getElementById("greenValue").addEventListener("input", (event) => {
-  rgb.g = event.target.value; //parseInt(event.target.value, 10).toString(16).padStart(2, "0");
+  rgb.g = event.target.value;
   updateTintBtnBackground(rgb);
 });
 
 document.getElementById("blueValue").addEventListener("input", (event) => {
-  rgb.b = event.target.value; //parseInt(event.target.value, 10).toString(16).padStart(2, "0");
+  rgb.b = event.target.value;
   updateTintBtnBackground(rgb);
 });
 
+document.getElementById("padValue").addEventListener("input", (event) => {
+  const parsed = Number(event.target.value);
+  padSize = Number.isFinite(parsed) ? parsed : 1;
+});
+
 document.getElementById("padBtn").addEventListener("click", () => {
-  ipcRenderer.send("padImgREQ");
+  ipcRenderer.send("padImgREQ", padSize);
 });
 
 function updateTintBtnBackground(rgb) {

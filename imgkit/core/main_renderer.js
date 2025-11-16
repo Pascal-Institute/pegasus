@@ -431,11 +431,7 @@ class ImgKitRenderer {
    * @returns {ImageLayer} Created default layer
    */
   createDefaultImage() {
-    if (this.imageLayerQueue.length > 0) {
-      this.currentIndex++;
-    }
     const layer = this.createImageLayer(true);
-    this.currentIndex = this.imageLayerQueue.length - 1;
     layer.openImage("./assets/addImage.png");
     return layer;
   }

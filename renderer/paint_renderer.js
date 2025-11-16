@@ -93,7 +93,7 @@ document.getElementById("blueValue").addEventListener("input", (event) => {
 
 document.getElementById("padValue").addEventListener("input", (event) => {
   const parsed = Number(event.target.value);
-  padSize = Number.isFinite(parsed) ? parsed : 1;
+  padSize = Number.isFinite(parsed) && parsed >= 1 ? parsed : 1;
 });
 
 document.getElementById("padBtn").addEventListener("click", () => {

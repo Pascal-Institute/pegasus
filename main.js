@@ -203,7 +203,7 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
-  ipcMain.on("cropImgREQ", (event, res) => {
+  ipcMain.on("rectCropImgREQ", (event, res) => {
     mainWindow.webContents.send("cropImgCMD", res);
     mainWindow.webContents.focus();
   });

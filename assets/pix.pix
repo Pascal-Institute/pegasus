@@ -1,0 +1,14 @@
+{
+    "width": 8,
+    "height": 8,
+    "channel": 1,
+    "depth": 8,
+    "compression": {
+        "method": "none"
+    },
+    "hex_data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "label": {
+        "cat": [22, 44],
+        "dog": [100, 103]
+    }
+}

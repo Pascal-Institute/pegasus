@@ -410,6 +410,7 @@ app.whenReady().then(() => {
                     {
                       name: "Image file",
                       extensions: [
+                        "pix",
                         "png",
                         "svg",
                         "jpg",

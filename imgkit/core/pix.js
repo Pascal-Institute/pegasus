@@ -1,0 +1,46 @@
+const jsonfile = require("jsonfile");
+const sharp = require("sharp");
+
+class PIX {
+  static load(path) {
+    try {
+      const data = jsonfile.readFileSync(path);
+      return data;
+    } catch (err) {
+      console.error("Error reading pixData.json:", err);
+      return null;
+    }
+  }
+
+  static loadFromBuffer(buffer) {
+    try {
+      const text = Buffer.isBuffer(buffer) ? buffer.toString("utf-8") : buffer;
+      return JSON.parse(text);
+    } catch (err) {
+      console.error("Error parsing pix buffer:", err);
+      return null;
+    }
+  }
+
+  static async toSharpBuffer(pixData) {
+    const payload = pixData?.data ?? pixData;
+    const { width, height, channel, depth, hex_data } = payload;
+    if (!width || !height || !hex_data) return null;
+
+    const channels = channel ?? 4;
+    const raw = Buffer.from(hex_data, "hex");
+    const bytesPerPixel = Math.ceil(depth / 8) * channels;
+    const expectedLength = width * height * bytesPerPixel;
+    if (raw.length < expectedLength) raw.fill(0, raw.length, expectedLength);
+
+    return sharp(raw, {
+      raw: { width, height, channels, depth: depth ?? 8 },
+    })
+      .png()
+      .toBuffer({ resolveWithObject: true });
+  }
+}
+
+module.exports = {
+  PIX,
+};

@@ -496,7 +496,7 @@ class ImageLayer {
         buffer = Buffer.from(this.svgData, "utf-8");
       } else if (this.extension === "pix") {
         // For PIX format, convert back to PIX buffer
-        const pixData = await PIX.toPIX(this.buffer, this.info);
+        const pixData = await PIX.toPix(this.buffer, this.info);
         PIX.save(pixData, savePath);
         this.filepath = savePath;
         ipcRenderer.send("showNotificationREQ", "imgkit-save");

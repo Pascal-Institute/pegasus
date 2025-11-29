@@ -30,7 +30,7 @@ class PIX {
     }
   }
 
-  static async toSharpBuffer(pixData) {
+  static async toSharp(pixData) {
     const payload = pixData?.data ?? pixData;
     const { width, height, channel, depth, hex_data } = payload;
     if (!width || !height || !hex_data) return null;
@@ -48,7 +48,7 @@ class PIX {
       .toBuffer({ resolveWithObject: true });
   }
 
-  static async toPIX(buffer, info) {
+  static async toPix(buffer, info) {
     const { data, info: rawInfo } = await sharp(buffer)
       .raw()
       .toBuffer({ resolveWithObject: true });

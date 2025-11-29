@@ -82,7 +82,7 @@ class FormatConverter {
       hex_data: hexData,
     };
 
-    const pngResult = await PIX.toSharpBuffer(pixData);
+    const pngResult = await PIX.toSharp(pixData);
 
     return { buffer: pngResult.data, info: metadata };
   }

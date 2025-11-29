@@ -5,7 +5,7 @@ const ico = require("sharp-ico");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { PIX } = require("../core/pix");
+const { Pix } = require("../core/pix");
 
 class FormatConverter {
   static tempFiles = [];
@@ -82,7 +82,7 @@ class FormatConverter {
       hex_data: hexData,
     };
 
-    const pngResult = await PIX.toSharp(pixData);
+    const pngResult = await Pix.toSharp(pixData);
 
     return { buffer: pngResult.data, info: metadata };
   }

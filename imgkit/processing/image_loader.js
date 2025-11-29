@@ -7,7 +7,7 @@ const bmp = require("sharp-bmp");
 const ico = require("sharp-ico");
 const fs = require("fs");
 const path = require("path");
-const { PIX } = require("../core/pix");
+const { Pix } = require("../core/pix");
 
 class ImageLoader {
   static async openImage(filepath) {
@@ -16,9 +16,9 @@ class ImageLoader {
       const filename = path.basename(filepath, path.extname(filepath));
 
       if (extension === "pix") {
-        const pixData = PIX.open(filepath);
+        const pixData = Pix.open(filepath);
         if (!pixData) throw new Error("Invalid PIX data");
-        const { data, info } = await PIX.toSharp(pixData);
+        const { data, info } = await Pix.toSharp(pixData);
         return { buffer: data, info, filename, extension, gifMetadata: null };
       }
 
@@ -52,9 +52,9 @@ class ImageLoader {
       const name = path.basename(filename, path.extname(filename));
 
       if (extension === "pix") {
-        const pixData = PIX.openFromBuffer(buffer);
+        const pixData = Pix.openFromBuffer(buffer);
         if (!pixData) throw new Error("Invalid PIX buffer");
-        const { data, info } = await PIX.toSharp(pixData);
+        const { data, info } = await Pix.toSharp(pixData);
         return {
           buffer: data,
           info,
@@ -105,8 +105,8 @@ class ImageLoader {
 
   static getImageLoader(filepath, extension) {
     if (extension == "pix") {
-      const pixData = PIX.open(filepath);
-      return PIX.toSharp(pixData);
+      const pixData = Pix.open(filepath);
+      return Pix.toSharp(pixData);
     }
     if (["tiff", "tif"].includes(extension)) {
       return sharp(filepath).png();
@@ -126,8 +126,8 @@ class ImageLoader {
 
   static getBufferLoader(buffer, extension) {
     if (extension == "pix") {
-      const pixData = PIX.openFromBuffer(buffer);
-      return PIX.toSharp(pixData);
+      const pixData = Pix.openFromBuffer(buffer);
+      return Pix.toSharp(pixData);
     }
     if (["tiff", "tif"].includes(extension)) {
       return sharp(buffer).png();

@@ -22,7 +22,7 @@ const { ImageLoader } = require("../processing/image_loader");
 const { ModeManager } = require("../features/image_mode");
 const { LayerHistory } = require("../features/layer_history");
 const { GifAnimation } = require("../features/gif_animation");
-const { PIX } = require("./pix");
+const { Pix } = require("./pix");
 
 const LAYER_EVENT_CHANNEL = "imgkit-layer-event";
 let nextLayerId = 1;
@@ -496,8 +496,8 @@ class ImageLayer {
         buffer = Buffer.from(this.svgData, "utf-8");
       } else if (this.extension === "pix") {
         // For PIX format, convert back to PIX buffer
-        const pixData = await PIX.toPix(this.buffer, this.info);
-        PIX.save(pixData, savePath);
+        const pixData = await Pix.toPix(this.buffer, this.info);
+        Pix.save(pixData, savePath);
         this.filepath = savePath;
         ipcRenderer.send("showNotificationREQ", "imgkit-save");
         return;

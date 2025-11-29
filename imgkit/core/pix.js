@@ -1,7 +1,7 @@
 const jsonfile = require("jsonfile");
 const sharp = require("sharp");
 
-class PIX {
+class Pix {
   static open(path) {
     try {
       const data = jsonfile.readFileSync(path);
@@ -64,5 +64,5 @@ class PIX {
 }
 
 module.exports = {
-  PIX,
+  Pix,
 };

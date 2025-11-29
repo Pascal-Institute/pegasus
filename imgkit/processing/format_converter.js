@@ -5,6 +5,7 @@ const ico = require("sharp-ico");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const { PIX } = require("../core/pix");
 
 class FormatConverter {
   static tempFiles = [];
@@ -19,6 +20,9 @@ class FormatConverter {
       }
       if (toExt === "ico") {
         return await FormatConverter.convertToIco(buffer);
+      }
+      if (toExt === "pix") {
+        return await FormatConverter.convertToPix(buffer);
       }
       return await FormatConverter.convertToStandard(buffer, toExt);
     } catch (error) {
@@ -61,6 +65,26 @@ class FormatConverter {
       .png()
       .toBuffer({ resolveWithObject: true });
     return { buffer: pngResult.data, info: pngResult.info };
+  }
+
+  static async convertToPix(buffer) {
+    const image = sharp(buffer);
+    const metadata = await image.metadata();
+    const { data, info } = await image
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const hexData = data.toString("hex");
+    const pixData = {
+      width: info.width,
+      height: info.height,
+      channel: info.channels,
+      depth: info.depth || 8,
+      hex_data: hexData,
+    };
+
+    const pngResult = await PIX.toSharpBuffer(pixData);
+
+    return { buffer: pngResult.data, info: metadata };
   }
 
   static async convertToStandard(buffer, format) {

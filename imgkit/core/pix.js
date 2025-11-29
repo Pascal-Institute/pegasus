@@ -2,7 +2,7 @@ const jsonfile = require("jsonfile");
 const sharp = require("sharp");
 
 class PIX {
-  static load(path) {
+  static open(path) {
     try {
       const data = jsonfile.readFileSync(path);
       return data;
@@ -12,7 +12,7 @@ class PIX {
     }
   }
 
-  static loadFromBuffer(buffer) {
+  static openFromBuffer(buffer) {
     try {
       const text = Buffer.isBuffer(buffer) ? buffer.toString("utf-8") : buffer;
       return JSON.parse(text);

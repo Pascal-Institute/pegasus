@@ -16,7 +16,7 @@ class ImageLoader {
       const filename = path.basename(filepath, path.extname(filepath));
 
       if (extension === "pix") {
-        const pixData = PIX.load(filepath);
+        const pixData = PIX.open(filepath);
         if (!pixData) throw new Error("Invalid PIX data");
         const { data, info } = await PIX.toSharpBuffer(pixData);
         return { buffer: data, info, filename, extension, gifMetadata: null };
@@ -52,7 +52,7 @@ class ImageLoader {
       const name = path.basename(filename, path.extname(filename));
 
       if (extension === "pix") {
-        const pixData = PIX.loadFromBuffer(buffer);
+        const pixData = PIX.openFromBuffer(buffer);
         if (!pixData) throw new Error("Invalid PIX buffer");
         const { data, info } = await PIX.toSharpBuffer(pixData);
         return {
@@ -105,7 +105,7 @@ class ImageLoader {
 
   static getImageLoader(filepath, extension) {
     if (extension == "pix") {
-      const pixData = PIX.load(filepath);
+      const pixData = PIX.open(filepath);
       return PIX.toSharpBuffer(pixData);
     }
     if (["tiff", "tif"].includes(extension)) {
@@ -126,7 +126,7 @@ class ImageLoader {
 
   static getBufferLoader(buffer, extension) {
     if (extension == "pix") {
-      const pixData = PIX.loadFromBuffer(buffer);
+      const pixData = PIX.openFromBuffer(buffer);
       return PIX.toSharpBuffer(pixData);
     }
     if (["tiff", "tif"].includes(extension)) {

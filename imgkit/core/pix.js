@@ -12,6 +12,14 @@ class PIX {
     }
   }
 
+  static save(pixData, path) {
+    try {
+      jsonfile.writeFileSync(path, pixData, { spaces: 2 });
+    } catch (err) {
+      console.error("Error writing pixData.json:", err);
+    }
+  }
+
   static openFromBuffer(buffer) {
     try {
       const text = Buffer.isBuffer(buffer) ? buffer.toString("utf-8") : buffer;
@@ -38,6 +46,20 @@ class PIX {
     })
       .png()
       .toBuffer({ resolveWithObject: true });
+  }
+
+  static async toPIX(buffer, info) {
+    const { data, info: rawInfo } = await sharp(buffer)
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    return {
+      width: info.width,
+      height: info.height,
+      channel: info.channels,
+      depth: info.bitsPerSample || 8,
+      hex_data: data.toString("hex"),
+    };
   }
 }
 

@@ -78,7 +78,7 @@ class FormatConverter {
       width: info.width,
       height: info.height,
       channel: info.channels,
-      depth: info.depth || 8,
+      depth: info.bitsPerSample || 8,
       hex_data: hexData,
     };
 

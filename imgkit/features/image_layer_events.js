@@ -50,6 +50,7 @@ class ImageLayerEvents {
 
         const color_name = await ImageProcessor.getColorName(color);
 
+        navigator.clipboard.writeText(color);
         // Send color to main renderer
         ipcRenderer.send("colorpickerValueSEND", color, color_name);
       }

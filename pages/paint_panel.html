@@ -92,8 +92,16 @@
 
     <div id="wrapperBox">
       <div id="padColorBox"></div>
-      <input id="padValue" type="number" min="1" value="1" step="1" />
-      <span>px</span>
+        <div id="padIndicator">
+          <div>
+            <span>#</span>
+            <input id="padColorValue" type="text" value="000000" />
+          </div>
+          <div>
+            <input id="padValue" type="number" min="1" value="1" step="1" />
+            <span>px</span>
+          </div>
+        </div>
       <button id="padBtn" title="pad">
         <img class="icon" src="../assets/pad.ico" />
       </button>

@@ -51,6 +51,7 @@
   background-color: black;
 }
 
+#padIndicator,
 #colorpickerIndicator {
   display: flex;
   align-items: center;
@@ -64,6 +65,7 @@
   object-fit: contain;
 }
 
+#padColorValue,
 #padValue {
   width: 80px;
   margin-left: 5px;

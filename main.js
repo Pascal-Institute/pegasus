@@ -221,8 +221,8 @@ app.whenReady().then(() => {
     });
   });
 
-  ipcMain.on("padImgREQ", (event, res) => {
-    mainWindow.webContents.send("padImgCMD", res);
+  ipcMain.on("padImgREQ", (event, padSize, color) => {
+    mainWindow.webContents.send("padImgCMD", padSize, color);
     mainWindow.webContents.focus();
   });
 

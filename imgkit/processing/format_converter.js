@@ -24,6 +24,9 @@ class FormatConverter {
       if (toExt === "pix") {
         return await FormatConverter.convertToPix(buffer);
       }
+      if (toExt === "heif" || toExt === "heic") {
+        return await FormatConverter.convertToHeif(buffer);
+      }
       return await FormatConverter.convertToStandard(buffer, toExt);
     } catch (error) {
       throw new Error(`Format conversion failed: ${error.message}`);
@@ -85,6 +88,13 @@ class FormatConverter {
     const pngResult = await Pix.toSharp(pixData);
 
     return { buffer: pngResult.data, info: metadata };
+  }
+
+  static async convertToHeif(buffer) {
+    const result = await sharp(buffer)
+      .heif({ quality: 80, compression: "av1" })
+      .toBuffer({ resolveWithObject: true });
+    return { buffer: result.data, info: result.info };
   }
 
   static async convertToStandard(buffer, format) {

@@ -422,6 +422,8 @@ app.whenReady().then(() => {
                         "tiff",
                         "tif",
                         "avif",
+                        "heif",
+                        "heic",
                       ],
                     },
                   ],

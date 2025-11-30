@@ -66,7 +66,7 @@ npm run build
 ### 4-1. Availiable file extension
 
 ```bash
-png svg jpg jpeg webp gif bmp ico tiff tif avif pix
+png svg jpg jpeg webp gif bmp ico tiff tif avif heif heic pix
 ```
 
 **Note:** Animated GIF files are now supported! When you load an animated GIF, playback controls appear automatically. See [GIF Animation Documentation](docs/GIF_ANIMATION.md) for details.

@@ -58,6 +58,10 @@ class Pix {
       height: info.height,
       channel: info.channels,
       depth: info.bitsPerSample || 8,
+      compression: {
+        method: "none",
+      },
+      label: {},
       hex_data: data.toString("hex"),
     };
   }

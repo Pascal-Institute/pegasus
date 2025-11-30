@@ -100,6 +100,7 @@ document.getElementById("padValue").addEventListener("input", (event) => {
 
 document.getElementById("padColorValue").addEventListener("input", (event) => {
   padColor = event.target.value;
+  document.getElementById("padColorBox").style.backgroundColor = padColor;
 });
 
 document.getElementById("padBtn").addEventListener("click", () => {

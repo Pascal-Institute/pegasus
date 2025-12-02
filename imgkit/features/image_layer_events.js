@@ -48,11 +48,9 @@ class ImageLayerEvents {
           y
         );
 
-        const color_name = await ImageProcessor.getColorName(color);
-
         navigator.clipboard.writeText(color);
         // Send color to main renderer
-        ipcRenderer.send("colorpickerValueSEND", color, color_name);
+        ipcRenderer.send("colorpickerValueSEND", color);
       }
     });
 
@@ -102,6 +100,7 @@ class ImageLayerEvents {
         const color = colorDiv.title;
         if (color && color !== "empty") {
           navigator.clipboard.writeText(color).then(() => {
+            ipcRenderer.send("colorpickerValueSEND", color);
             ipcRenderer.send("showNotificationREQ", "imgkit-color-copy");
           });
         }

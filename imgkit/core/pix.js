@@ -61,8 +61,9 @@ class Pix {
       compression: {
         method: "none",
       },
-      label: {},
       hex_data: data.toString("hex"),
+      label: {},
+      joint: {},
     };
   }
 }

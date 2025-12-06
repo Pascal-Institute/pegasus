@@ -224,16 +224,33 @@ class ImageLayerEvents {
    * Setup drag and drop handlers
    */
   setupDragDrop() {
-    // Prevent default browser behavior
-    this.layer.canvas.addEventListener("dragover", (e) => e.preventDefault());
+    // Prevent default browser behavior and add rotating border effect
+    this.layer.canvas.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      // Add rotating border animation class
+      this.layer.panel.classList.add("drag-border-active");
+    });
 
     this.layer.canvas.addEventListener("dragenter", (e) => {
       e.preventDefault();
       this.sendLayerEvent("select");
+      // Add rotating border animation class
+      this.layer.panel.classList.add("drag-border-active");
+    });
+
+    this.layer.canvas.addEventListener("dragleave", (e) => {
+      // Only remove class if drag actually left the canvas (not moving to child element)
+      // Also handle case where relatedTarget is null (e.g., drag left browser window)
+      if (!e.relatedTarget || !this.layer.canvas.contains(e.relatedTarget)) {
+        this.layer.panel.classList.remove("drag-border-active");
+      }
     });
 
     this.layer.canvas.addEventListener("drop", async (e) => {
       e.preventDefault();
+      // Remove rotating border animation class
+      this.layer.panel.classList.remove("drag-border-active");
+
       const files = e.dataTransfer.files;
 
       if (!files || files.length === 0) return;

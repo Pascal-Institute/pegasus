@@ -239,8 +239,11 @@ class ImageLayerEvents {
     });
 
     this.layer.canvas.addEventListener("dragleave", (e) => {
-      // Remove rotating border animation class
-      this.layer.panel.classList.remove("drag-border-active");
+      // Only remove class if drag actually left the canvas (not moving to child element)
+      // Also handle case where relatedTarget is null (e.g., drag left browser window)
+      if (!e.relatedTarget || !this.layer.canvas.contains(e.relatedTarget)) {
+        this.layer.panel.classList.remove("drag-border-active");
+      }
     });
 
     this.layer.canvas.addEventListener("drop", async (e) => {

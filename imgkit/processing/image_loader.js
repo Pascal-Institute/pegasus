@@ -125,7 +125,7 @@ class ImageLoader {
   }
 
   static getBufferLoader(buffer, extension) {
-    if (extension == "pix") {
+    if (extension === "pix") {
       const pixData = Pix.openFromBuffer(buffer);
       return Pix.toSharp(pixData);
     }

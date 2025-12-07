@@ -5,6 +5,8 @@ var drawFlagState = false;
 var colorpickerActive = false;
 var watermarkPreviewImg = document.getElementById("watermarkPreviewImg");
 var padSize = 1;
+var padColor = "#000000";
+
 // Receive color from color picker
 ipcRenderer.on("colorpickerValueRECV", (event, color, color_name) => {
   if (!color) return;
@@ -96,8 +98,13 @@ document.getElementById("padValue").addEventListener("input", (event) => {
   padSize = Number.isFinite(parsed) && parsed >= 1 ? parsed : 1;
 });
 
+document.getElementById("padColorValue").addEventListener("input", (event) => {
+  padColor = event.target.value;
+  document.getElementById("padColorBox").style.backgroundColor = padColor;
+});
+
 document.getElementById("padBtn").addEventListener("click", () => {
-  ipcRenderer.send("padImgREQ", padSize);
+  ipcRenderer.send("padImgREQ", padSize, padColor);
 });
 
 function updateTintBtnBackground(rgb) {

@@ -4,6 +4,7 @@
 #watermarkBtn:hover,
 #colorpickerBtn:hover,
 #colorpickerBox:hover,
+#padColorBox:hover,
 #padBtn:hover,
 #watermarkUploadBtn:hover {
   cursor: pointer;
@@ -41,6 +42,7 @@
   right: 0px;
 }
 
+#padColorBox,
 #colorpickerBox {
   margin-left: 5px;
   width: 36px;
@@ -49,6 +51,7 @@
   background-color: black;
 }
 
+#padIndicator,
 #colorpickerIndicator {
   display: flex;
   align-items: center;
@@ -62,6 +65,7 @@
   object-fit: contain;
 }
 
+#padColorValue,
 #padValue {
   width: 80px;
   margin-left: 5px;

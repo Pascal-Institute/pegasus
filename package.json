@@ -1,12 +1,13 @@
 {
   "name": "pegasus",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "",
   "main": "main.js",
   "dependencies": {
     "color-namer": "^1.4.0",
     "fs": "^0.0.1-security",
     "imgkit": "file:imgkit",
+    "jsonfile": "^6.2.0",
     "sharp": "^0.34.3",
     "sharp-bmp": "^0.1.5",
     "sharp-ico": "^0.1.5"

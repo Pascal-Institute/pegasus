@@ -11,6 +11,7 @@ const {
   clipboard,
   nativeImage,
 } = electron;
+const { ImageProcessor } = require("./imgkit/processing/image_processor");
 
 //electron refresh (only develop)
 if (process.env.NODE_ENV === "development") {
@@ -203,7 +204,7 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
-  ipcMain.on("cropImgREQ", (event, res) => {
+  ipcMain.on("rectCropImgREQ", (event, res) => {
     mainWindow.webContents.send("cropImgCMD", res);
     mainWindow.webContents.focus();
   });
@@ -213,16 +214,16 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
-  ipcMain.on("colorpickerValueSEND", (event, color, color_name) => {
+  ipcMain.on("colorpickerValueSEND", async (event, color) => {
     const views = mainWindow.getBrowserViews();
-
+    const color_name = await ImageProcessor.getColorName(color);
     views.forEach((view) => {
       view.webContents.send("colorpickerValueRECV", color, color_name);
     });
   });
 
-  ipcMain.on("padImgREQ", (event, res) => {
-    mainWindow.webContents.send("padImgCMD", res);
+  ipcMain.on("padImgREQ", (event, padSize, color) => {
+    mainWindow.webContents.send("padImgCMD", padSize, color);
     mainWindow.webContents.focus();
   });
 
@@ -410,6 +411,7 @@ app.whenReady().then(() => {
                     {
                       name: "Image file",
                       extensions: [
+                        "pix",
                         "png",
                         "svg",
                         "jpg",
@@ -421,6 +423,8 @@ app.whenReady().then(() => {
                         "tiff",
                         "tif",
                         "avif",
+                        "heif",
+                        "heic",
                       ],
                     },
                   ],

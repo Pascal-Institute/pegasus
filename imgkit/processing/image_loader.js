@@ -7,6 +7,7 @@ const bmp = require("sharp-bmp");
 const ico = require("sharp-ico");
 const fs = require("fs");
 const path = require("path");
+const { Pix } = require("../core/pix");
 
 class ImageLoader {
   static async openImage(filepath) {
@@ -14,7 +15,13 @@ class ImageLoader {
       const extension = path.extname(filepath).replace(".", "");
       const filename = path.basename(filepath, path.extname(filepath));
 
-      // For GIF files, first check if they're animated
+      if (extension === "pix") {
+        const pixData = Pix.open(filepath);
+        if (!pixData) throw new Error("Invalid PIX data");
+        const { data, info } = await Pix.toSharp(pixData);
+        return { buffer: data, info, filename, extension, gifMetadata: null };
+      }
+
       let gifMetadata = null;
       if (extension === "gif") {
         try {
@@ -32,7 +39,7 @@ class ImageLoader {
         info: result.info,
         filename,
         extension,
-        gifMetadata, // Include GIF animation metadata if available
+        gifMetadata,
       };
     } catch (error) {
       throw new Error(`Failed to open image: ${error.message}`);
@@ -44,7 +51,19 @@ class ImageLoader {
       const extension = path.extname(filename).replace(".", "");
       const name = path.basename(filename, path.extname(filename));
 
-      // For GIF files, first check if they're animated
+      if (extension === "pix") {
+        const pixData = Pix.openFromBuffer(buffer);
+        if (!pixData) throw new Error("Invalid PIX buffer");
+        const { data, info } = await Pix.toSharp(pixData);
+        return {
+          buffer: data,
+          info,
+          filename: name,
+          extension,
+          gifMetadata: null,
+        };
+      }
+
       let gifMetadata = null;
       if (extension === "gif") {
         try {
@@ -62,7 +81,7 @@ class ImageLoader {
         info: result.info,
         filename: name,
         extension,
-        gifMetadata, // Include GIF animation metadata if available
+        gifMetadata,
       };
     } catch (error) {
       throw new Error(`Failed to open image buffer: ${error.message}`);
@@ -85,6 +104,10 @@ class ImageLoader {
   }
 
   static getImageLoader(filepath, extension) {
+    if (extension === "pix") {
+      const pixData = Pix.open(filepath);
+      return Pix.toSharp(pixData);
+    }
     if (["tiff", "tif"].includes(extension)) {
       return sharp(filepath).png();
     }
@@ -102,6 +125,10 @@ class ImageLoader {
   }
 
   static getBufferLoader(buffer, extension) {
+    if (extension === "pix") {
+      const pixData = Pix.openFromBuffer(buffer);
+      return Pix.toSharp(pixData);
+    }
     if (["tiff", "tif"].includes(extension)) {
       return sharp(buffer).png();
     }

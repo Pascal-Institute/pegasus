@@ -104,7 +104,7 @@ class ImageLoader {
   }
 
   static getImageLoader(filepath, extension) {
-    if (extension == "pix") {
+    if (extension === "pix") {
       const pixData = Pix.open(filepath);
       return Pix.toSharp(pixData);
     }

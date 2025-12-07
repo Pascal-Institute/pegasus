@@ -497,10 +497,9 @@ class ImageLayer {
       } else if (this.extension === "pix") {
         // For PIX format, convert back to PIX buffer
         const pixData = await Pix.toPix(this.buffer, this.info);
-        Pix.save(pixData, savePath);
+        await Pix.save(pixData, savePath);
         this.filepath = savePath;
         ipcRenderer.send("showNotificationREQ", "imgkit-save");
-        return;
       } else {
         // For other formats, extract from canvas
         const base64Data = this.image.src.replace(

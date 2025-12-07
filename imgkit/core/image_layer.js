@@ -500,6 +500,7 @@ class ImageLayer {
         await Pix.save(pixData, savePath);
         this.filepath = savePath;
         ipcRenderer.send("showNotificationREQ", "imgkit-save");
+        return;
       } else {
         // For other formats, extract from canvas
         const base64Data = this.image.src.replace(

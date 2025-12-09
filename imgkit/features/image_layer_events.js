@@ -210,7 +210,6 @@ class ImageLayerEvents {
         const toLayerId = this.layer.id;
 
         if (fromLayerId && fromLayerId !== toLayerId) {
-          console.log(`🔄 Swapping panels: ${fromLayerId} ↔ ${toLayerId}`);
           this.sendLayerEvent("swap", { fromLayerId, toLayerId });
         }
 

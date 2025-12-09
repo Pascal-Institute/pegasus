@@ -144,7 +144,6 @@ class ImgKitRenderer {
       // Activate magnifying glass when both Alt and M are pressed
       if (isAltPressed && isMPressed && this.globalMode !== ImageMode.MAGNIFY) {
         e.preventDefault();
-        console.log("🔍 Magnifying glass ACTIVATED (Alt + M)");
         this.globalMode = ImageMode.MAGNIFY;
 
         // Enable magnify mode on all layers
@@ -167,7 +166,6 @@ class ImgKitRenderer {
         (!isAltPressed || !isMPressed) &&
         this.globalMode === ImageMode.MAGNIFY
       ) {
-        console.log("🔍 Magnifying glass DEACTIVATED");
         this.globalMode = ImageMode.NORMAL;
 
         // Disable magnify on all layers and clear overlays

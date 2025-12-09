@@ -27,7 +27,6 @@
           ? href.replace("./", "imgkit/")
           : `imgkit/${href}`;
         document.head.appendChild(link);
-        console.log(`📄 Loaded CSS: ${link.href}`);
       }
     }
 
@@ -35,7 +34,6 @@
     const bodyMatch = uiContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
     if (bodyMatch && bodyMatch[1]) {
       document.getElementById("imgkit-container").innerHTML = bodyMatch[1];
-      console.log("✅ ImgKit UI loaded successfully");
     } else {
       console.error("❌ Could not extract body content from ImgKit UI");
     }

@@ -26,7 +26,6 @@ class ImageLoader {
       if (extension === "gif") {
         try {
           gifMetadata = await sharp(filepath, { animated: true }).metadata();
-          console.log("GIF metadata:", gifMetadata);
         } catch (error) {
           console.warn("Failed to read GIF metadata:", error);
         }
@@ -68,7 +67,6 @@ class ImageLoader {
       if (extension === "gif") {
         try {
           gifMetadata = await sharp(buffer, { animated: true }).metadata();
-          console.log("GIF metadata from buffer:", gifMetadata);
         } catch (error) {
           console.warn("Failed to read GIF metadata from buffer:", error);
         }

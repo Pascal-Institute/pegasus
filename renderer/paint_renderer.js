@@ -108,12 +108,10 @@ document.getElementById("padBtn").addEventListener("click", () => {
 });
 
 function updateTintBtnBackground(rgb) {
-  console.log(rgb);
   var colorString = `#${parseInt(rgb.r, 10)
     .toString(16)
     .padStart(2, "0")}${parseInt(rgb.g, 10)
     .toString(16)
     .padStart(2, "0")}${parseInt(rgb.b, 10).toString(16).padStart(2, "0")}`;
-  console.log(colorString);
   document.getElementById("tintExecuteBtn").style.backgroundColor = colorString;
 }

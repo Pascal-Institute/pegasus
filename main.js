@@ -12,6 +12,7 @@ const {
   nativeImage,
 } = electron;
 const { ImageProcessor } = require("./imgkit/processing/image_processor");
+const { IPCBridge } = require("./utils/ipc_bridge");
 
 //electron refresh (only develop)
 if (process.env.NODE_ENV === "development") {
@@ -87,6 +88,10 @@ app.whenReady().then(() => {
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 
+  // Initialize IPCBridge instance
+  const ipcBridge = new IPCBridge(ipcMain, mainWindow);
+
+  // Panel loading handlers (custom logic required)
   [
     "resizeImgREQ",
     "cropImgREQ",
@@ -104,127 +109,49 @@ app.whenReady().then(() => {
     });
   });
 
-  ipcMain.on("resizeValueSEND", (event, res) => {
-    mainWindow.webContents.send("resizeImgCMD", res);
-    mainWindow.webContents.focus(); //Do not remove this line because of focus helps instant acttion.
-  });
+  // IPC Forwarders - Register simple forwarding patterns in bulk
+  ipcBridge.registerMultiple([
+    // Resize commands
+    { from: "resizeValueSEND", to: "resizeImgCMD" },
+    { from: "resizePixelValueSEND", to: "resizePixelImgCMD" },
 
-  ipcMain.on("resizePixelValueSEND", (event, res) => {
-    mainWindow.webContents.send("resizePixelImgCMD", res);
-    mainWindow.webContents.focus(); //Do not remove this line because of focus helps instant acttion.
-  });
+    // Filter commands
+    { from: "blurValueSEND", to: "blurImgCMD" },
+    { from: "sharpenValueSEND", to: "sharpenImgCMD" },
+    { from: "normalizeImgREQ", to: "normalizeImgCMD" },
+    { from: "medianValueSEND", to: "medianImgCMD" },
+    { from: "dilateValueSEND", to: "dilateImgCMD" },
+    { from: "erodeValueSEND", to: "erodeImgCMD" },
+    { from: "bitwiseValueSEND", to: "bitwiseImgCMD" },
+    { from: "negativeImgREQ", to: "negativeImgCMD" },
+    { from: "grayScaleImgREQ", to: "grayScaleImgCMD" },
 
-  ipcMain.on("blurValueSEND", (event, res) => {
-    mainWindow.webContents.send("blurImgCMD", res);
-    mainWindow.webContents.focus();
-  });
+    // Rotate commands
+    { from: "rotateValueSEND", to: "rotateImgCMD" },
+    { from: "rotateLeftImgREQ", to: "rotateLeftImgCMD" },
+    { from: "rotateRightImgREQ", to: "rotateRightImgCMD" },
+    { from: "flipImgREQ", to: "flipImgCMD" },
+    { from: "flopImgREQ", to: "flopImgCMD" },
 
-  ipcMain.on("sharpenValueSEND", (event, res) => {
-    mainWindow.webContents.send("sharpenImgCMD", res);
-    mainWindow.webContents.focus();
-  });
+    // Paint commands
+    { from: "tintValueSEND", to: "tintImgCMD" },
+    { from: "colorpickerImgREQ", to: "colorpickerImgCMD" },
+    { from: "watermarkUploadREQ", to: "watermarkUploadCMD" },
+    { from: "watermarkImgREQ", to: "watermarkImgCMD" },
+    { from: "drawImgREQ", to: "drawImgCMD" },
+    { from: "padImgREQ", to: "padImgCMD" },
 
-  ipcMain.on("normalizeImgREQ", (event) => {
-    mainWindow.webContents.send("normalizeImgCMD");
-    mainWindow.webContents.focus();
-  });
+    // Crop commands
+    { from: "rectCropImgREQ", to: "cropImgCMD" },
+  ]);
 
-  ipcMain.on("medianValueSEND", (event, res) => {
-    mainWindow.webContents.send("medianImgCMD", res);
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("dilateValueSEND", (event, res) => {
-    mainWindow.webContents.send("dilateImgCMD", res);
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("erodeValueSEND", (event, res) => {
-    mainWindow.webContents.send("erodeImgCMD", res);
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("rotateValueSEND", (event, res) => {
-    mainWindow.webContents.send("rotateImgCMD", res);
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("tintValueSEND", (event, res) => {
-    mainWindow.webContents.send("tintImgCMD", res);
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("colorpickerImgREQ", (event, res) => {
-    mainWindow.webContents.send("colorpickerImgCMD", res);
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("rotateLeftImgREQ", (event) => {
-    mainWindow.webContents.send("rotateLeftImgCMD");
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("rotateRightImgREQ", (event) => {
-    mainWindow.webContents.send("rotateRightImgCMD");
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("flipImgREQ", (event) => {
-    mainWindow.webContents.send("flipImgCMD");
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("flopImgREQ", (event) => {
-    mainWindow.webContents.send("flopImgCMD");
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("bitwiseValueSEND", (event, res) => {
-    mainWindow.webContents.send("bitwiseImgCMD", res);
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("negativeImgREQ", (event) => {
-    mainWindow.webContents.send("negativeImgCMD");
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("grayScaleImgREQ", (event) => {
-    mainWindow.webContents.send("grayScaleImgCMD");
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("watermarkUploadREQ", (event, filePath) => {
-    mainWindow.webContents.send("watermarkUploadCMD", filePath);
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("watermarkImgREQ", (event) => {
-    mainWindow.webContents.send("watermarkImgCMD");
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("rectCropImgREQ", (event, res) => {
-    mainWindow.webContents.send("cropImgCMD", res);
-    mainWindow.webContents.focus();
-  });
-
-  ipcMain.on("drawImgREQ", (event, res) => {
-    mainWindow.webContents.send("drawImgCMD", res);
-    mainWindow.webContents.focus();
-  });
-
+  // Custom handler - colorpicker requires broadcast to BrowserViews
   ipcMain.on("colorpickerValueSEND", async (event, color) => {
     const views = mainWindow.getBrowserViews();
     const color_name = await ImageProcessor.getColorName(color);
     views.forEach((view) => {
       view.webContents.send("colorpickerValueRECV", color, color_name);
     });
-  });
-
-  ipcMain.on("padImgREQ", (event, padSize, color) => {
-    mainWindow.webContents.send("padImgCMD", padSize, color);
-    mainWindow.webContents.focus();
   });
 
   // Notification Handler - Forward to main window

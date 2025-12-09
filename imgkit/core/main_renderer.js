@@ -337,7 +337,10 @@ class ImgKitRenderer {
         // Remove from body if it was added there by mistake
         try {
           document.body.removeChild(layer.panel);
-        } catch (e) {}
+        } catch (e) {
+          // Panel not in body, which is expected in most cases
+          console.error("Failed to remove panel from body:", e.message);
+        }
 
         // Add to scroll container at correct position
         if (idx >= this.scrollContainer.children.length) {

@@ -9,7 +9,7 @@
 
   try {
     // Load HTML content
-    const uiPath = path.join(__dirname, "index.html");
+    const uiPath = path.join(__dirname, "imgkit", "imgpanel.html");
     const uiContent = fs.readFileSync(uiPath, "utf-8");
 
     // Extract and load CSS from head section

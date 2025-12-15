@@ -1,5 +1,5 @@
 const { ipcRenderer } = require("electron");
-const { imgKitRenderer, createDefaultImage, ImageMode } = require("imgkit");
+const { imgKitRenderer, createDefaultImage, ImageMode } = require("../imgkit/main");
 
 // Get imageLayerQueue from renderer
 const imageLayerQueue = imgKitRenderer.imageLayerQueue;

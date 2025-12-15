@@ -1,10 +1,11 @@
+// @ts-nocheck
 // ImageProcessor - Pure Image Processing Functions
 // Handles image processing operations (resize, crop, color extraction)
 // No longer handles file I/O - use ImageLoader directly for that
 
-const sharp = require("sharp");
-const namer = require("color-namer");
-const { FormatConverter } = require("./format_converter");
+import sharp from "sharp";
+import namer from "color-namer";
+import { FormatConverter } from "./format_converter";
 
 class ImageProcessor {
   static filePath = "";
@@ -312,4 +313,4 @@ class ImageProcessor {
   }
 }
 
-module.exports = { ImageProcessor };
+export { ImageProcessor };

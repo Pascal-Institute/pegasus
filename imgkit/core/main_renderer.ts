@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ImgKit Renderer Process - UI Logic
 // Handles all DOM manipulation, events, and user interactions
 //
@@ -11,9 +12,9 @@
 // - ImageLayer: Each individual image panel with its own canvas, buttons, and data
 // - History: Each layer keeps track of changes for undo/redo functionality
 
-const { ipcRenderer } = require("electron");
-const { ImageLayer } = require("./image_layer.js");
-const { ImageMode } = require("../features/image_mode.js");
+import { ipcRenderer } from "electron";
+import { ImageLayer } from "./image_layer.js";
+import { ImageMode } from "../features/image_mode.js";
 const LAYER_EVENT_CHANNEL = "imgkit-layer-event";
 
 // ============================================================================
@@ -631,19 +632,16 @@ function getCurrentLayer() {
 }
 
 // Export everything
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = {
-    // Main exports
-    ImgKitRenderer,
-    ImageLayer,
-    imgKitRenderer,
+export {
+  // Main exports
+  ImgKitRenderer,
+  ImageLayer,
+  imgKitRenderer,
 
-    // Helper functions
-    createDefaultImage,
-    getCurrentLayer,
+  // Helper functions
+  createDefaultImage,
+  getCurrentLayer,
 
-    // Backward compatibility
-    Parameter,
-    imageLayerQueue: imgKitRenderer ? imgKitRenderer.imageLayerQueue : [],
-  };
-}
+  // Backward compatibility
+  Parameter,
+};

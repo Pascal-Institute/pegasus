@@ -1,13 +1,14 @@
+// @ts-nocheck
 // ImageLoader - Image Loading Operations
 // Handles loading images from files or buffers
 // Supports special formats (BMP, ICO, TIFF)
 
-const sharp = require("sharp");
-const bmp = require("sharp-bmp");
-const ico = require("sharp-ico");
-const fs = require("fs");
-const path = require("path");
-const { Pix } = require("../core/pix");
+import sharp from "sharp";
+import bmp from "sharp-bmp";
+import ico from "sharp-ico";
+import fs from "fs";
+import path from "path";
+import { Pix } from "../core/pix";
 
 class ImageLoader {
   static async openImage(filepath) {
@@ -166,4 +167,4 @@ class ImageLoader {
   }
 }
 
-module.exports = { ImageLoader };
+export { ImageLoader };

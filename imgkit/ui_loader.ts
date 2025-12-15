@@ -3,10 +3,10 @@
  * Dynamically loads ImgKit UI components and styles into the main application
  */
 
-(function loadImgKitUI() {
-  const fs = require("fs");
-  const path = require("path");
+import fs from "fs";
+import path from "path";
 
+(function loadImgKitUI() {
   try {
     // Load HTML content
     const uiPath = path.join(__dirname, "imgkit", "index.html");

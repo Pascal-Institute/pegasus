@@ -1,4 +1,5 @@
-const { ipcRenderer } = require("electron");
+// @ts-nocheck
+import { ipcRenderer } from "electron";
 
 var rgb = { r: "123", g: "123", b: "123" };
 var drawFlagState = false;

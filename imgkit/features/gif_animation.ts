@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GIF Animation Module
  * Handles all GIF animation playback functionality independently
@@ -9,7 +10,7 @@
  * - Auto-play support
  */
 
-const { ImageLoader } = require("../processing/image_loader");
+import { ImageLoader } from "../processing/image_loader";
 
 class GifAnimation {
   /**
@@ -270,4 +271,4 @@ class GifAnimation {
   }
 }
 
-module.exports = { GifAnimation };
+export { GifAnimation };

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ImageModes - Unified mode system for image layer interactions
  *
@@ -5,7 +6,7 @@
  * This makes the code more maintainable and prevents conflicting states.
  */
 
-const path = require("path");
+import path from "path";
 
 /**
  * Available interaction modes for image layers
@@ -152,7 +153,7 @@ class ModeManager {
 // MODULE EXPORTS
 // ============================================================================
 
-module.exports = {
+export {
   ImageMode,
   ModeManager,
 };

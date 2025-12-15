@@ -1,4 +1,5 @@
-const { ipcRenderer } = require("electron");
+// @ts-nocheck
+import { ipcRenderer } from "electron";
 
 var scale = 2;
 var pixelSize = 256;

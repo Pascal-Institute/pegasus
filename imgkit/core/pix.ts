@@ -1,5 +1,6 @@
-const jsonfile = require("jsonfile");
-const sharp = require("sharp");
+// @ts-nocheck
+import jsonfile from "jsonfile";
+import sharp from "sharp";
 
 class Pix {
   static open(path) {
@@ -68,6 +69,6 @@ class Pix {
   }
 }
 
-module.exports = {
+export {
   Pix,
 };

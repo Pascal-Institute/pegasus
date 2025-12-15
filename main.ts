@@ -1,18 +1,10 @@
-const electron = require("electron");
-const pkg = require("./package.json");
-const {
-  app,
-  ipcMain,
-  dialog,
-  BrowserWindow,
-  BrowserView,
-  Menu,
-  MenuItem,
-  clipboard,
-  nativeImage,
-} = electron;
-const { ImageProcessor } = require("./imgkit/processing/image_processor");
-const { IPCBridge } = require("./utils/ipc_bridge");
+// @ts-nocheck
+import { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu, MenuItem, clipboard, nativeImage } from "electron";
+import pkg from "./package.json";
+import { ImageProcessor } from "./imgkit/processing/image_processor";
+import { IPCBridge } from "./utils/ipc_bridge";
+
+let mainWindow: BrowserWindow;
 
 //electron refresh (only develop)
 if (process.env.NODE_ENV === "development") {
@@ -47,9 +39,8 @@ function createMainWindow() {
   return mainWindow;
 }
 
-function createView(type, mainWindow) {
+function createView(type: string, mainWindow: BrowserWindow) {
   const view = new BrowserView({
-    resizable: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

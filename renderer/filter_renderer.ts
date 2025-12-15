@@ -1,4 +1,5 @@
-const { ipcRenderer } = require("electron");
+// @ts-nocheck
+import { ipcRenderer } from "electron";
 
 var blurValue = 1.0;
 var sharpenValue = 1.0;

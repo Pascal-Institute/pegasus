@@ -1,3 +1,4 @@
+// @ts-nocheck
 // LayerHistory - Manages undo/redo history for image layers
 // Handles state management for image buffers, metadata, and extensions
 //
@@ -152,4 +153,4 @@ class LayerHistory {
 // MODULE EXPORTS
 // ============================================================================
 
-module.exports = { LayerHistory };
+export { LayerHistory };

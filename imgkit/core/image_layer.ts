@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ImageLayer - Individual Image Panel Component
 // Handles all operations for a single image panel
 //
@@ -15,14 +16,15 @@
 // - Manage undo/redo history
 // - Bridge UI events to backend operations (via ImageProcessor)
 
-const { ipcRenderer } = require("electron");
-const { ImageLayerEvents } = require("../features/image_layer_events");
-const { ImageProcessor } = require("../processing/image_processor");
-const { ImageLoader } = require("../processing/image_loader");
-const { ModeManager } = require("../features/image_mode");
-const { LayerHistory } = require("../features/layer_history");
-const { GifAnimation } = require("../features/gif_animation");
-const { Pix } = require("./pix");
+import { ipcRenderer } from "electron";
+import fs from "fs";
+import { ImageLayerEvents } from "../features/image_layer_events";
+import { ImageProcessor } from "../processing/image_processor";
+import { ImageLoader } from "../processing/image_loader";
+import { ModeManager } from "../features/image_mode";
+import { LayerHistory } from "../features/layer_history";
+import { GifAnimation } from "../features/gif_animation";
+import { Pix } from "./pix";
 
 const LAYER_EVENT_CHANNEL = "imgkit-layer-event";
 let nextLayerId = 1;
@@ -367,7 +369,6 @@ class ImageLayer {
       // Handle GIF animation data
       if (result.gifMetadata && result.gifMetadata.pages > 1) {
         // Read the original GIF file for frame extraction
-        const fs = require("fs");
         const gifBuffer = await fs.promises.readFile(filepath);
         this.gifAnimation.load(gifBuffer, result.gifMetadata);
       } else {
@@ -575,6 +576,6 @@ class ImageLayer {
 // MODULE EXPORTS
 // ============================================================================
 
-module.exports = {
+export {
   ImageLayer,
 };

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { ipcRenderer } from "electron";
+import path from "path";
 import { ImageProcessor } from "../processing/image_processor";
 const LAYER_EVENT_CHANNEL = "imgkit-layer-event";
 
@@ -85,9 +86,9 @@ class ImageLayerEvents {
         this.layer.filename = newFilename;
         // If we have a filepath, update it with the new filename
         if (this.layer.filepath) {
-          const dir = require("path").dirname(this.layer.filepath);
+          const dir = path.dirname(this.layer.filepath);
           const ext = this.layer.extension;
-          this.layer.filepath = require("path").join(
+          this.layer.filepath = path.join(
             dir,
             `${newFilename}.${ext}`
           );

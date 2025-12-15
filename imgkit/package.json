@@ -2,12 +2,12 @@
   "name": "imgkit",
   "version": "2.0.0",
   "description": "Easy-to-use image processing toolkit for Electron apps",
-  "main": "../dist/imgkit/main.js",
+  "main": "main.js",
   "exports": {
-    ".": "../dist/imgkit/main.js",
-    "./image-processor": "../dist/imgkit/processing/image_processor.js",
-    "./renderer": "../dist/imgkit/core/main_renderer.js",
-    "./image-layer": "../dist/imgkit/core/image_layer.js"
+    ".": "./main.js",
+    "./image-processor": "./processing/image_processor.js",
+    "./renderer": "./core/main_renderer.js",
+    "./image-layer": "./core/image_layer.js"
   },
   "files": [
     "main.js",

@@ -23,7 +23,8 @@
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "compile": "tsc",
+    "compile": "tsc && npm run copy-imgkit",
+    "copy-imgkit": "cp -r dist/imgkit/* imgkit/",
     "watch": "tsc --watch",
     "prestart": "npm run compile",
     "start": "electron .",

@@ -4,3 +4,5 @@ output/
 dist/
 *.js.map
 *.d.ts
+imgkit/**/*.js
+!imgkit/package.json

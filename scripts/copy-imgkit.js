@@ -1,14 +1,11 @@
 #!/usr/bin/env node
 /**
- * Copy compiled imgkit files from dist/imgkit to imgkit folder
- * This ensures the local package dependency works correctly
+ * Copy compiled files from dist to their respective folders
+ * This ensures the HTML can load the compiled JavaScript files
  */
 
 const fs = require('fs');
 const path = require('path');
-
-const sourceDir = path.join(__dirname, '../dist/imgkit');
-const targetDir = path.join(__dirname, '../imgkit');
 
 /**
  * Recursively copy directory contents
@@ -36,18 +33,35 @@ function copyDir(src, dest) {
   }
 }
 
-try {
-  // Check if source directory exists
-  if (!fs.existsSync(sourceDir)) {
-    console.error('Error: Source directory dist/imgkit not found.');
+/**
+ * Copy a specific directory with error checking
+ */
+function safeCopy(name, srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) {
+    console.error(`Error: Source directory ${srcDir} not found.`);
     console.error('Please run TypeScript compilation first: npm run compile');
     process.exit(1);
   }
 
-  console.log('Copying compiled imgkit files...');
-  copyDir(sourceDir, targetDir);
-  console.log('✓ imgkit files copied successfully');
+  console.log(`Copying compiled ${name} files...`);
+  copyDir(srcDir, destDir);
+  console.log(`✓ ${name} files copied successfully`);
+}
+
+try {
+  // Copy imgkit files (for local package dependency)
+  safeCopy('imgkit', 
+    path.join(__dirname, '../dist/imgkit'),
+    path.join(__dirname, '../imgkit')
+  );
+
+  // Copy renderer files (for HTML script tags)
+  safeCopy('renderer',
+    path.join(__dirname, '../dist/renderer'),
+    path.join(__dirname, '../renderer')
+  );
+
 } catch (error) {
-  console.error('Error copying imgkit files:', error.message);
+  console.error('Error copying files:', error.message);
   process.exit(1);
 }

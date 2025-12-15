@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { ipcRenderer } from "electron";
-import { imgKitRenderer, createDefaultImage, ImageMode } from "imgkit";
+import { imgKitRenderer, createDefaultImage, ImageMode } from "../imgkit/main";
 
 // Get imageLayerQueue from renderer
 const imageLayerQueue = imgKitRenderer.imageLayerQueue;

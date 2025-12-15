@@ -4,6 +4,6 @@ output/
 dist/
 *.js.map
 *.d.ts
-imgkit/**/*.js
-!imgkit/package.json
-renderer/**/*.js
+# Generated files copied from dist for HTML loading
+/imgkit/
+/renderer/

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu, MenuItem, clipboard, nativeImage } from "electron";
-import pkg from "./package.json";
+import pkg from "../package.json";
 import { ImageProcessor } from "./imgkit/processing/image_processor";
 import { IPCBridge } from "./utils/ipc_bridge";
 

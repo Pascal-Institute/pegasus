@@ -13,8 +13,8 @@
 // - History: Each layer keeps track of changes for undo/redo functionality
 
 import { ipcRenderer } from "electron";
-import { ImageLayer } from "./image_layer.js";
-import { ImageMode } from "../features/image_mode.js";
+import { ImageLayer } from "./image_layer";
+import { ImageMode } from "../features/image_mode";
 const LAYER_EVENT_CHANNEL = "imgkit-layer-event";
 
 // ============================================================================

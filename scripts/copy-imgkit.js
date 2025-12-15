@@ -37,10 +37,17 @@ function copyDir(src, dest) {
 }
 
 try {
+  // Check if source directory exists
+  if (!fs.existsSync(sourceDir)) {
+    console.error('Error: Source directory dist/imgkit not found.');
+    console.error('Please run TypeScript compilation first: npm run compile');
+    process.exit(1);
+  }
+
   console.log('Copying compiled imgkit files...');
   copyDir(sourceDir, targetDir);
   console.log('✓ imgkit files copied successfully');
 } catch (error) {
-  console.error('Error copying imgkit files:', error);
+  console.error('Error copying imgkit files:', error.message);
   process.exit(1);
 }

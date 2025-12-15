@@ -55,7 +55,7 @@ try {
     path.join(__dirname, '../imgkit')
   );
 
-  // Copy renderer files (for HTML script tags)
+  // Copy renderer files (loaded via require() in HTML)
   safeCopy('renderer',
     path.join(__dirname, '../dist/renderer'),
     path.join(__dirname, '../renderer')

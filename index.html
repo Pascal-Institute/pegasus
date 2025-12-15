@@ -33,9 +33,13 @@
 
     <!-- Load ImgKit UI components -->
     <script>
-      // Load scripts using require() to support CommonJS modules
-      require('./imgkit/ui_loader.js');
-      require('./renderer/main_renderer.js');
+      // Load scripts using require() to support CommonJS modules in Electron
+      try {
+        require('./imgkit/ui_loader.js');
+        require('./renderer/main_renderer.js');
+      } catch (error) {
+        console.error('Failed to load application modules:', error);
+      }
     </script>
   </body>
 </html>

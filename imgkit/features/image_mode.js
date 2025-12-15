@@ -134,12 +134,12 @@ class ModeManager {
         return "zoom-in";
       case ImageMode.DRAWING:
         var cursorPath = path
-          .join(__dirname, "../assets/pencil.png")
+          .join(__dirname, "../../assets/pencil.png")
           .replace(/\\/g, "/");
         return `url('file://${cursorPath}') 0 32, crosshair`;
       case ImageMode.COLORPICKER:
         var cursorPath = path
-          .join(__dirname, "../assets/spoid.png")
+          .join(__dirname, "../../assets/spoid.png")
           .replace(/\\/g, "/");
         return `url('file://${cursorPath}') 0 24, crosshair`;
       default:

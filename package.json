@@ -2,7 +2,7 @@
   "name": "pegasus",
   "version": "1.0.12",
   "description": "",
-  "main": "main.js",
+  "main": "dist/main.js",
   "dependencies": {
     "color-namer": "^1.4.0",
     "fs": "^0.0.1-security",
@@ -12,16 +12,21 @@
     "sharp-ico": "^0.1.5"
   },
   "devDependencies": {
+    "@types/node": "^25.0.2",
     "electron": "^37.3.0",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
-    "electron-reload": "^2.0.0-alpha.1"
+    "electron-reload": "^2.0.0-alpha.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "start": "electron .",
-    "build": "electron-builder",
-    "build:win-store": "electron-builder --win appx",
+    "build:ts": "tsc -p tsconfig.json",
+    "watch:ts": "tsc -w -p tsconfig.json",
+    "dev": "npm run build:ts && electron .",
+    "start": "npm run dev",
+    "build": "npm run build:ts && electron-builder",
+    "build:win-store": "npm run build:ts && electron-builder --win appx",
     "rebuild": "electron-rebuild -f -w sharp"
   },
   "build": {
@@ -54,7 +59,14 @@
       "allowToChangeInstallationDirectory": true
     },
     "files": [
-      "**/*",
+      "dist/**/*",
+      "assets/**/*",
+      "pages/**/*",
+      "css/**/*",
+      "components/**/*",
+      "index.html",
+      "image_kit.js",
+      "package.json",
       "!output"
     ],
     "directories": {

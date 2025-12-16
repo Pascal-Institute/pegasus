@@ -1,27 +1,36 @@
 const { ipcRenderer } = require("electron");
 
-var degree = 45;
+// Simple action buttons
+const actionButtons = [
+  { id: "flipBtn", channel: "flipImgREQ" },
+  { id: "flopBtn", channel: "flopImgREQ" },
+  { id: "rotateLeftBtn", channel: "rotateLeftImgREQ" },
+  { id: "rotateRightBtn", channel: "rotateRightImgREQ" },
+];
 
-document.getElementById("flipBtn").addEventListener("click", () => {
-  ipcRenderer.send("flipImgREQ");
+actionButtons.forEach(({ id, channel }) => {
+  const btn = document.getElementById(id);
+  if (btn) {
+    btn.addEventListener("click", () => {
+      ipcRenderer.send(channel);
+    });
+  }
 });
 
-document.getElementById("flopBtn").addEventListener("click", () => {
-  ipcRenderer.send("flopImgREQ");
-});
+// Value-based rotation
+let degree = 45;
 
-document.getElementById("rotateLeftBtn").addEventListener("click", () => {
-  ipcRenderer.send("rotateLeftImgREQ");
-});
+const rotateValueEl = document.getElementById("rotateValue");
+const rotateExecuteBtn = document.getElementById("rotateExecuteBtn");
 
-document.getElementById("rotateRightBtn").addEventListener("click", () => {
-  ipcRenderer.send("rotateRightImgREQ");
-});
+if (rotateValueEl) {
+  rotateValueEl.addEventListener("input", (event) => {
+    degree = event.target.value;
+  });
+}
 
-document.getElementById("rotateValue").addEventListener("input", (event) => {
-  degree = event.target.value;
-});
-
-document.getElementById("rotateExecuteBtn").addEventListener("click", () => {
-  ipcRenderer.send("rotateValueSEND", degree);
-});
+if (rotateExecuteBtn) {
+  rotateExecuteBtn.addEventListener("click", () => {
+    ipcRenderer.send("rotateValueSEND", degree);
+  });
+}

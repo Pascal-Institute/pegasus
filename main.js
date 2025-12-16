@@ -25,36 +25,30 @@ if (process.env.NODE_ENV === "development") {
   }
 }
 
-function createMainWindow() {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 1024,
-    center: true,
-    icon: `${__dirname}/assets/icon.ico`,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      // devTools: true,
-      //   preload: path.join(__dirname, "preload.js"),
-    },
-  });
+// Configuration for browser window creation
+const WINDOW_CONFIG = {
+  width: 1280,
+  height: 1024,
+  center: true,
+  icon: `${__dirname}/assets/icon.ico`,
+  webPreferences: {
+    nodeIntegration: true,
+    contextIsolation: false,
+  },
+};
 
-  // and load the index.html of the app.
+function createMainWindow() {
+  const mainWindow = new BrowserWindow(WINDOW_CONFIG);
   mainWindow.loadFile("index.html");
-  // Open the DevTools.(only develop)
-  // mainWindow.webContents.openDevTools();
   return mainWindow;
 }
 
-function createView(type, mainWindow) {
+function createPanelView(mainWindow) {
   const view = new BrowserView({
     resizable: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      // devTools: true,
-      //   preload: path.join(__dirname, "preload.js"),
     },
   });
 
@@ -62,50 +56,175 @@ function createView(type, mainWindow) {
   view.setAutoResize({ width: true, height: false });
   view.webContents.loadFile(`./pages/_panel.html`);
   mainWindow.addBrowserView(view);
-  // view.webContents.openDevTools();
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  Menu.setApplicationMenu(null);
-  const mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 1024,
-    center: true,
-    icon: `${__dirname}/assets/icon.ico`,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      // devTools: true,
-      //   preload: path.join(__dirname, "preload.js"),
+// Context menu helper
+function createContextMenu(event, { hasUndo, hasRedo }) {
+  const contextMenuItems = [
+    { label: "Copy", accelerator: "Ctrl+C", action: "copy" },
+    { label: "Paste", accelerator: "Ctrl+V", action: "paste" },
+    { type: "separator" },
+    { label: "Delete", accelerator: "Delete", action: "delete" },
+    { type: "separator" },
+    { label: "Undo", accelerator: "Ctrl+Z", action: "undo", enabled: hasUndo },
+    { label: "Redo", accelerator: "Ctrl+Y", action: "redo", enabled: hasRedo },
+    {
+      label: "Watermark",
+      accelerator: "Ctrl+W",
+      action: "watermark",
+      enabled: true,
     },
+    { type: "separator" },
+    { label: "Hide", accelerator: "Alt + H", action: "hide" },
+  ];
+
+  const menu = new Menu();
+  contextMenuItems.forEach((item) => {
+    if (item.type === "separator") {
+      menu.append(new MenuItem({ type: "separator" }));
+    } else {
+      menu.append(
+        new MenuItem({
+          label: item.label,
+          accelerator: item.accelerator,
+          enabled: item.enabled !== false,
+          click: () => {
+            event.sender.send("imgkit-context-menu-action", item.action);
+          },
+        })
+      );
+    }
   });
 
-  mainWindow.loadFile("index.html");
+  return menu;
+}
 
-  // Open the DevTools.(only develop)
-  // mainWindow.webContents.openDevTools();
+// Application menu helper
+function buildApplicationMenu(event, mainWindow) {
+  const isDev = process.env.NODE_ENV === "development" || !app.isPackaged;
+
+  const IMAGE_EXTENSIONS = [
+    "pix",
+    "png",
+    "svg",
+    "jpg",
+    "jpeg",
+    "webp",
+    "bmp",
+    "gif",
+    "ico",
+    "tiff",
+    "tif",
+    "avif",
+    "heif",
+    "heic",
+  ];
+
+  const template = [
+    {
+      label: "File",
+      submenu: [
+        {
+          label: "Open...",
+          accelerator: "Ctrl+O",
+          click: () => {
+            dialog
+              .showOpenDialog({
+                properties: ["openFile", "multiSelections"],
+                filters: [{ name: "Image file", extensions: IMAGE_EXTENSIONS }],
+              })
+              .then((result) => {
+                event.sender.send("openImgCMD", result.filePaths);
+              });
+          },
+        },
+        {
+          label: "Save",
+          accelerator: "Ctrl+S",
+          click: () => event.sender.send("saveImgCMD"),
+        },
+        {
+          label: "Save As...",
+          accelerator: "Ctrl+Shift+S",
+          click: () => event.sender.send("setExtensionCMD"),
+        },
+      ],
+    },
+    ...(isDev
+      ? [
+          {
+            label: "Debug",
+            submenu: [
+              {
+                label: "Toggle Developer Tools",
+                accelerator: "F12",
+                click: () => {
+                  if (mainWindow && !mainWindow.isDestroyed()) {
+                    mainWindow.webContents.openDevTools();
+                  }
+                },
+              },
+              {
+                label: "Toggle BrowserView Developer Tools",
+                accelerator: "Ctrl+Shift+I",
+                click: () => {
+                  if (mainWindow && !mainWindow.isDestroyed()) {
+                    const views = mainWindow.getBrowserViews();
+                    if (views.length > 0) {
+                      views[0].webContents.openDevTools();
+                    }
+                  }
+                },
+              },
+            ],
+          },
+        ]
+      : []),
+    {
+      label: "Help",
+      submenu: [
+        {
+          label: "About",
+          click: () => {
+            dialog.showMessageBox({
+              title: "About",
+              buttons: ["Ok"],
+              message: `Author : ${pkg.author.name}\nEmail : ${pkg.author.email}\nVersion : v${pkg.version}\nLicense : ${pkg.license}\n`,
+            });
+          },
+        },
+      ],
+    },
+  ];
+
+  return Menu.buildFromTemplate(template);
+}
+
+// This method will be called when Electron has finished initialization
+app.whenReady().then(() => {
+  Menu.setApplicationMenu(null);
+
+  const mainWindow = createMainWindow();
 
   // Initialize IPCBridge instance
   const ipcBridge = new IPCBridge(ipcMain, mainWindow);
 
-  // Panel loading handlers (custom logic required)
-  [
+  // Panel loading handlers - load panel for various image operations
+  const PANEL_OPERATIONS = [
     "resizeImgREQ",
     "cropImgREQ",
     "filterImgREQ",
     "rotateImgREQ",
     "paintImgREQ",
     "image_analysisImgREQ",
-  ].forEach((item, index, arr) => {
-    ipcMain.on(item, (event) => {
+  ];
+
+  PANEL_OPERATIONS.forEach((operation) => {
+    ipcMain.on(operation, () => {
+      const panelName = operation.replace("ImgREQ", "");
       mainWindow
         .getBrowserViews()[0]
-        .webContents.loadFile(
-          `./pages/${item.replace("ImgREQ", "")}_panel.html`
-        );
+        .webContents.loadFile(`./pages/${panelName}_panel.html`);
     });
   });
 
@@ -156,105 +275,12 @@ app.whenReady().then(() => {
 
   // Notification Handler - Forward to main window
   ipcMain.on("showNotificationREQ", (event, notificationId) => {
-    // Send to main window renderer
     mainWindow.webContents.send("showNotificationCMD", notificationId);
   });
 
   // ImgKit Context Menu Handler
   ipcMain.on("show-imgkit-context-menu", (event, options) => {
-    const { hasUndo, hasRedo } = options;
-    const menu = new Menu();
-
-    // Copy
-    menu.append(
-      new MenuItem({
-        label: "Copy",
-        accelerator: "Ctrl+C",
-        click: () => {
-          event.sender.send("imgkit-context-menu-action", "copy");
-        },
-      })
-    );
-
-    // Paste
-    menu.append(
-      new MenuItem({
-        label: "Paste",
-        accelerator: "Ctrl+V",
-        click: () => {
-          event.sender.send("imgkit-context-menu-action", "paste");
-        },
-      })
-    );
-
-    // Separator
-    menu.append(new MenuItem({ type: "separator" }));
-
-    // Delete
-    menu.append(
-      new MenuItem({
-        label: "Delete",
-        accelerator: "Delete",
-        click: () => {
-          event.sender.send("imgkit-context-menu-action", "delete");
-        },
-      })
-    );
-
-    // Separator
-    menu.append(new MenuItem({ type: "separator" }));
-
-    // Undo
-    menu.append(
-      new MenuItem({
-        label: "Undo",
-        accelerator: "Ctrl+Z",
-        enabled: hasUndo,
-        click: () => {
-          event.sender.send("imgkit-context-menu-action", "undo");
-        },
-      })
-    );
-
-    // Redo
-    menu.append(
-      new MenuItem({
-        label: "Redo",
-        accelerator: "Ctrl+Y",
-        enabled: hasRedo,
-        click: () => {
-          event.sender.send("imgkit-context-menu-action", "redo");
-        },
-      })
-    );
-
-    // Watermark
-    menu.append(
-      new MenuItem({
-        label: "Watermark",
-        accelerator: "Ctrl+W",
-        enabled: true,
-        click: () => {
-          event.sender.send("imgkit-context-menu-action", "watermark");
-        },
-      })
-    );
-
-    // Separator
-    menu.append(new MenuItem({ type: "separator" }));
-
-    // Hide
-    menu.append(
-      new MenuItem({
-        label: "Hide",
-        accelerator: "Alt + H",
-        click: () => {
-          event.sender.send("imgkit-context-menu-action", "hide");
-        },
-      })
-    );
-
-    // Show menu at cursor position
+    const menu = createContextMenu(event, options);
     menu.popup({ window: BrowserWindow.fromWebContents(event.sender) });
   });
 
@@ -320,119 +346,11 @@ app.whenReady().then(() => {
     event.sender.send("deleteImgCMD");
   });
 
-  // main
+  // Show application menu
   ipcMain.on("showMenuREQ", (event) => {
-    const isDev = process.env.NODE_ENV === "development" || !app.isPackaged;
-    const template = [
-      {
-        label: "File",
-        submenu: [
-          {
-            label: "Open...",
-            accelerator: "Ctrl+O",
-            click: () => {
-              dialog
-                .showOpenDialog({
-                  properties: ["openFile", "multiSelections"],
-                  filters: [
-                    {
-                      name: "Image file",
-                      extensions: [
-                        "pix",
-                        "png",
-                        "svg",
-                        "jpg",
-                        "jpeg",
-                        "webp",
-                        "bmp",
-                        "gif",
-                        "ico",
-                        "tiff",
-                        "tif",
-                        "avif",
-                        "heif",
-                        "heic",
-                      ],
-                    },
-                  ],
-                })
-                .then((result) => {
-                  event.sender.send("openImgCMD", result.filePaths);
-                });
-            },
-          },
-          {
-            label: "Save",
-            accelerator: "Ctrl+S",
-            click: () => {
-              event.sender.send("saveImgCMD");
-            },
-          },
-          {
-            label: "Save As...",
-            accelerator: "Ctrl+Shift+S",
-            click: () => {
-              event.sender.send("setExtensionCMD");
-            },
-          },
-        ],
-      },
-      ...(isDev
-        ? [
-            {
-              label: "Debug",
-              submenu: [
-                {
-                  label: "Toggle Developer Tools",
-                  accelerator: "F12",
-                  click: () => {
-                    if (mainWindow && !mainWindow.isDestroyed()) {
-                      mainWindow.webContents.openDevTools();
-                    } else {
-                      console.error(
-                        "Main window is not available or has been destroyed."
-                      );
-                    }
-                  },
-                },
-                {
-                  label: "Toggle BrowserView Developer Tools",
-                  accelerator: "Ctrl+Shift+I",
-                  click: () => {
-                    if (mainWindow && !mainWindow.isDestroyed()) {
-                      const views = mainWindow.getBrowserViews();
-                      if (views.length > 0) {
-                        views[0].webContents.openDevTools();
-                      } else {
-                        console.error("No BrowserView available.");
-                      }
-                    }
-                  },
-                },
-              ],
-            },
-          ]
-        : []),
-      {
-        label: "Help",
-        submenu: [
-          {
-            label: "About",
-            click: () => {
-              dialog.showMessageBox({
-                title: "About",
-                buttons: ["Ok"],
-                message: `Author : ${pkg.author.name}\nEmail : ${pkg.author.email}\nVersion : v${pkg.version}\nLicense : ${pkg.license}\n`,
-              });
-            },
-          },
-        ],
-      },
-    ];
-
-    const menu = Menu.buildFromTemplate(template);
+    const menu = buildApplicationMenu(event, mainWindow);
     Menu.setApplicationMenu(menu);
-    createView("", mainWindow);
+    createPanelView(mainWindow);
   });
 
   app.on("activate", function () {

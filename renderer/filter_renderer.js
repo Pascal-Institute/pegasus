@@ -1,54 +1,56 @@
-const { ipcRenderer } = require("electron");
-
-var blurValue = 1.0;
-var sharpenValue = 1.0;
-var medianValue = 5;
-var bitwiseValue = 128;
-
-document.getElementById("blurValue").addEventListener("input", (event) => {
-  blurValue = event.target.value;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const electron_1 = require("electron");
+let blurValue = 1.0;
+let sharpenValue = 1.0;
+let medianValue = 5;
+let bitwiseValue = 128;
+const blurValueInput = document.getElementById("blurValue");
+blurValueInput?.addEventListener("input", (event) => {
+    blurValue = parseFloat(event.target.value);
 });
-
-document.getElementById("blurBtn").addEventListener("click", () => {
-  ipcRenderer.send("blurValueSEND", Number(blurValue));
+const blurBtn = document.getElementById("blurBtn");
+blurBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("blurValueSEND", Number(blurValue));
 });
-
-document.getElementById("sharpenValue").addEventListener("input", (event) => {
-  sharpenValue = event.target.value;
+const sharpenValueInput = document.getElementById("sharpenValue");
+sharpenValueInput?.addEventListener("input", (event) => {
+    sharpenValue = parseFloat(event.target.value);
 });
-
-document.getElementById("sharpenBtn").addEventListener("click", () => {
-  ipcRenderer.send("sharpenValueSEND", Number(sharpenValue));
+const sharpenBtn = document.getElementById("sharpenBtn");
+sharpenBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("sharpenValueSEND", Number(sharpenValue));
 });
-
-document.getElementById("medianValue").addEventListener("input", (event) => {
-  medianValue = event.target.value;
+const medianValueInput = document.getElementById("medianValue");
+medianValueInput?.addEventListener("input", (event) => {
+    medianValue = parseInt(event.target.value);
 });
-
-document.getElementById("medianBtn").addEventListener("click", () => {
-  ipcRenderer.send("medianValueSEND", Number(medianValue));
+const medianBtn = document.getElementById("medianBtn");
+medianBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("medianValueSEND", Number(medianValue));
 });
-
-document.getElementById("bitwiseValue").addEventListener("input", (event) => {
-  bitwiseValue = event.target.value;
+const bitwiseValueInput = document.getElementById("bitwiseValue");
+bitwiseValueInput?.addEventListener("input", (event) => {
+    bitwiseValue = parseInt(event.target.value);
 });
-
-document.getElementById("bitwiseBtn").addEventListener("click", () => {
-  ipcRenderer.send("bitwiseValueSEND", Number(bitwiseValue));
+const bitwiseBtn = document.getElementById("bitwiseBtn");
+bitwiseBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("bitwiseValueSEND", Number(bitwiseValue));
 });
-
-document.getElementById("negativeBtn").addEventListener("click", () => {
-  ipcRenderer.send("negativeImgREQ");
+const negativeBtn = document.getElementById("negativeBtn");
+negativeBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("negativeImgREQ");
 });
-
-document.getElementById("normalizeBtn").addEventListener("click", () => {
-  ipcRenderer.send("normalizeImgREQ");
+const normalizeBtn = document.getElementById("normalizeBtn");
+normalizeBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("normalizeImgREQ");
 });
-
-document.getElementById("dilateBtn").addEventListener("click", () => {
-  ipcRenderer.send("dilateValueSEND", Number(1));
+const dilateBtn = document.getElementById("dilateBtn");
+dilateBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("dilateValueSEND", Number(1));
 });
-
-document.getElementById("erodeBtn").addEventListener("click", () => {
-  ipcRenderer.send("erodeValueSEND", Number(1));
+const erodeBtn = document.getElementById("erodeBtn");
+erodeBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("erodeValueSEND", Number(1));
 });
+//# sourceMappingURL=filter_renderer.js.map

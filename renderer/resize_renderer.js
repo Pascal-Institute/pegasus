@@ -1,24 +1,22 @@
-const { ipcRenderer } = require("electron");
-
-var scale = 2;
-var pixelSize = 256;
-
-document.getElementById("resizeValue").addEventListener("input", (event) => {
-  scale = event.target.value;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const electron_1 = require("electron");
+let scale = 2;
+let pixelSize = 256;
+const resizeValue = document.getElementById("resizeValue");
+resizeValue?.addEventListener("input", (event) => {
+    scale = parseFloat(event.target.value);
 });
-
-document.getElementById("resizeExecuteBtn").addEventListener("click", () => {
-  ipcRenderer.send("resizeValueSEND", scale);
+const resizeExecuteBtn = document.getElementById("resizeExecuteBtn");
+resizeExecuteBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("resizeValueSEND", scale);
 });
-
-document
-  .getElementById("resizePixelValue")
-  .addEventListener("input", (event) => {
-    pixelSize = event.target.value;
-  });
-
-document
-  .getElementById("resizePixelExecuteBtn")
-  .addEventListener("click", () => {
-    ipcRenderer.send("resizePixelValueSEND", pixelSize);
-  });
+const resizePixelValue = document.getElementById("resizePixelValue");
+resizePixelValue?.addEventListener("input", (event) => {
+    pixelSize = parseInt(event.target.value);
+});
+const resizePixelExecuteBtn = document.getElementById("resizePixelExecuteBtn");
+resizePixelExecuteBtn?.addEventListener("click", () => {
+    electron_1.ipcRenderer.send("resizePixelValueSEND", pixelSize);
+});
+//# sourceMappingURL=resize_renderer.js.map

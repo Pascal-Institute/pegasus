@@ -1,29 +1,33 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const electron_1 = require("electron");
-let degree = 45;
+import { ipcRenderer } from "electron";
+
+let degree: number = 45;
+
 const flipBtn = document.getElementById("flipBtn");
 flipBtn?.addEventListener("click", () => {
-    electron_1.ipcRenderer.send("flipImgREQ");
+  ipcRenderer.send("flipImgREQ");
 });
+
 const flopBtn = document.getElementById("flopBtn");
 flopBtn?.addEventListener("click", () => {
-    electron_1.ipcRenderer.send("flopImgREQ");
+  ipcRenderer.send("flopImgREQ");
 });
+
 const rotateLeftBtn = document.getElementById("rotateLeftBtn");
 rotateLeftBtn?.addEventListener("click", () => {
-    electron_1.ipcRenderer.send("rotateLeftImgREQ");
+  ipcRenderer.send("rotateLeftImgREQ");
 });
+
 const rotateRightBtn = document.getElementById("rotateRightBtn");
 rotateRightBtn?.addEventListener("click", () => {
-    electron_1.ipcRenderer.send("rotateRightImgREQ");
+  ipcRenderer.send("rotateRightImgREQ");
 });
-const rotateValue = document.getElementById("rotateValue");
+
+const rotateValue = document.getElementById("rotateValue") as HTMLInputElement;
 rotateValue?.addEventListener("input", (event) => {
-    degree = parseFloat(event.target.value);
+  degree = parseFloat((event.target as HTMLInputElement).value);
 });
+
 const rotateExecuteBtn = document.getElementById("rotateExecuteBtn");
 rotateExecuteBtn?.addEventListener("click", () => {
-    electron_1.ipcRenderer.send("rotateValueSEND", degree);
+  ipcRenderer.send("rotateValueSEND", degree);
 });
-//# sourceMappingURL=rotate_renderer.js.map

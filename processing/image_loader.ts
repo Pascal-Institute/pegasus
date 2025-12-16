@@ -24,7 +24,7 @@ export class ImageLoader {
         if (!pixData) throw new Error("Invalid PIX data");
         const result = await Pix.toSharp(pixData);
         if (!result) throw new Error("Failed to convert PIX data");
-        return { buffer: result.data, info: result.info, filename, extension, gifMetadata: null };
+        return { buffer: result.data, info: result.info as unknown as sharp.Metadata, filename, extension, gifMetadata: null };
       }
 
       let gifMetadata: sharp.Metadata | null = null;
@@ -40,7 +40,7 @@ export class ImageLoader {
       const result = await loader.toBuffer({ resolveWithObject: true });
       return {
         buffer: result.data,
-        info: result.info,
+        info: result.info as any,
         filename,
         extension,
         gifMetadata,
@@ -62,7 +62,7 @@ export class ImageLoader {
         if (!result) throw new Error("Failed to convert PIX buffer");
         return {
           buffer: result.data,
-          info: result.info,
+          info: result.info as unknown as sharp.Metadata,
           filename: name,
           extension,
           gifMetadata: null,
@@ -82,7 +82,7 @@ export class ImageLoader {
       const result = await loader.toBuffer({ resolveWithObject: true });
       return {
         buffer: result.data,
-        info: result.info,
+        info: result.info as any,
         filename: name,
         extension,
         gifMetadata,
@@ -116,10 +116,10 @@ export class ImageLoader {
       return sharp(filepath).png();
     }
     if (extension === "ico") {
-      return ico.sharpsFromIco(filepath)[0].png();
+      return (ico.sharpsFromIco(filepath)[0] as any).png();
     }
     if (extension === "bmp") {
-      return bmp.sharpFromBmp(filepath).png();
+      return (bmp.sharpFromBmp(filepath) as any).png();
     }
     if (extension === "gif") {
       // For GIF, extract first frame as PNG
@@ -137,10 +137,10 @@ export class ImageLoader {
       return sharp(buffer).png();
     }
     if (extension === "ico") {
-      return ico.sharpsFromIco(buffer)[0].png();
+      return (ico.sharpsFromIco(buffer)[0] as any).png();
     }
     if (extension === "bmp") {
-      return bmp.sharpFromBmp(buffer).png();
+      return (bmp.sharpFromBmp(buffer) as any).png();
     }
     if (extension === "gif") {
       // For GIF, extract first frame as PNG

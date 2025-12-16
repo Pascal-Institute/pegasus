@@ -45,7 +45,7 @@ export class FormatConverter {
     const pngResult = await sharp(resultBuffer)
       .png()
       .toBuffer({ resolveWithObject: true });
-    return { buffer: pngResult.data, info: pngResult.info };
+    return { buffer: pngResult.data, info: pngResult.info as any };
   }
 
   static async convertToSvg(buffer: Buffer): Promise<ConversionResult> {
@@ -61,7 +61,7 @@ export class FormatConverter {
   <image width="${metadata.width}" height="${metadata.height}" 
          xlink:href="data:image/png;base64,${base64Data}"/>
 </svg>`;
-    return { buffer: pngBuffer, info: metadata, svgData: svgContent };
+    return { buffer: pngBuffer, info: metadata as any, svgData: svgContent };
   }
 
   static async convertToIco(buffer: Buffer): Promise<ConversionResult> {
@@ -69,10 +69,10 @@ export class FormatConverter {
     await ico.sharpsToIco([sharp(buffer)], tempPath);
     const resultBuffer = await fs.promises.readFile(tempPath);
     const sharpList = ico.sharpsFromIco(resultBuffer);
-    const pngResult = await sharpList[0]
+    const pngResult = await (sharpList[0] as any)
       .png()
       .toBuffer({ resolveWithObject: true });
-    return { buffer: pngResult.data, info: pngResult.info };
+    return { buffer: pngResult.data, info: pngResult.info as any };
   }
 
   static async convertToPix(buffer: Buffer): Promise<ConversionResult> {
@@ -86,27 +86,27 @@ export class FormatConverter {
       width: info.width,
       height: info.height,
       channel: info.channels,
-      depth: info.bitsPerSample || 8,
+      depth: (info as any).bitsPerSample || 8,
       hex_data: hexData,
     };
 
     const pngResult = await Pix.toSharp(pixData);
 
-    return { buffer: pngResult!.data, info: metadata };
+    return { buffer: pngResult!.data, info: metadata as any };
   }
 
   static async convertToHeif(buffer: Buffer): Promise<ConversionResult> {
     const result = await sharp(buffer)
       .heif({ quality: 80, compression: "av1" })
       .toBuffer({ resolveWithObject: true });
-    return { buffer: result.data, info: result.info };
+    return { buffer: result.data, info: result.info as any };
   }
 
   static async convertToStandard(buffer: Buffer, format: string): Promise<ConversionResult> {
     const result = await sharp(buffer)
       .toFormat(format as any)
       .toBuffer({ resolveWithObject: true });
-    return { buffer: result.data, info: result.info };
+    return { buffer: result.data, info: result.info as any };
   }
 
   static createTempFile(buffer: Buffer, filename: string): string {

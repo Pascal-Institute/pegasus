@@ -56,7 +56,7 @@ export class Pix {
     if (raw.length < expectedLength) raw.fill(0, raw.length, expectedLength);
 
     return sharp(raw, {
-      raw: { width, height, channels, depth: depth ?? 8 },
+      raw: { width, height, channels: channels as any } as any,
     })
       .png()
       .toBuffer({ resolveWithObject: true });

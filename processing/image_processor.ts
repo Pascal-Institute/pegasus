@@ -77,7 +77,7 @@ export class ImageProcessor {
 
       // Apply normalize if specified
       if (options.normalize) {
-        pipeline = pipeline.normalize(options.normalize);
+        pipeline = pipeline.normalize();
       }
 
       // Apply median if specified

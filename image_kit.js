@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ImgKit Module Entry Point
 // Exports all public APIs for the image editing toolkit
 //

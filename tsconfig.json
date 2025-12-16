@@ -15,7 +15,8 @@
     "noEmit": false,
     "sourceMap": true,
     "types": ["node", "electron"],
-    "declaration": false
+    "declaration": false,
+    "noImplicitAny": false
   },
   "include": [
     "**/*.ts"

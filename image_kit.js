@@ -10,7 +10,7 @@
 // - getCurrentLayer: Helper function
 
 const { ImageProcessor } = require("./processing/image_processor");
-const { imgKitRenderer, createDefaultImage } = require("./core/main_renderer");
+const { imgKitRenderer, createDefaultImage } = require("./core/image_renderer");
 const { ImageMode, ModeManager } = require("./features/image_mode");
 
 // Export only what's actually used in the project

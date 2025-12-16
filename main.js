@@ -11,7 +11,7 @@ const {
   clipboard,
   nativeImage,
 } = electron;
-const { ImageProcessor } = require("./imgkit/processing/image_processor");
+const { ImageProcessor } = require("./processing/image_processor");
 const { IPCBridge } = require("./utils/ipc_bridge");
 
 //electron refresh (only develop)

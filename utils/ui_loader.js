@@ -9,7 +9,8 @@
 
   try {
     // Load HTML content
-    const uiPath = path.join(__dirname, "imgkit", "index.html");
+    // Use process.cwd() to get the application root directory
+    const uiPath = path.join(process.cwd(), "components", "imgpanel.html");
     const uiContent = fs.readFileSync(uiPath, "utf-8");
 
     // Extract and load CSS from head section
@@ -22,10 +23,8 @@
         const href = match[1];
         const link = document.createElement("link");
         link.rel = "stylesheet";
-        // Adjust path relative to imgkit folder
-        link.href = href.startsWith("./")
-          ? href.replace("./", "imgkit/")
-          : `imgkit/${href}`;
+        // Use href as-is since CSS is now in css/ folder
+        link.href = href.startsWith("./") ? href : `./${href}`;
         document.head.appendChild(link);
       }
     }

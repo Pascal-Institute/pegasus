@@ -12,10 +12,13 @@
     "sharp-ico": "^0.1.5"
   },
   "devDependencies": {
+    "@types/electron": "^1.4.38",
+    "@types/node": "^25.0.3",
     "electron": "^37.3.0",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
-    "electron-reload": "^2.0.0-alpha.1"
+    "electron-reload": "^2.0.0-alpha.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",

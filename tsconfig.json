@@ -12,6 +12,7 @@
     "sourceMap": true,
     "removeComments": false,
     "declaration": false,
+    "noEmitOnError": false,
     
     /* Interop Constraints */
     "esModuleInterop": true,

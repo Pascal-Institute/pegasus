@@ -21,7 +21,7 @@
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "compile": "tsc",
+    "compile": "bash compile-ts.sh",
     "prestart": "npm run compile",
     "start": "electron .",
     "build": "npm run compile && electron-builder",

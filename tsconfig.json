@@ -7,10 +7,11 @@
     "moduleResolution": "node",
     
     /* Emit */
-    "outDir": "./dist",
+    "outDir": "./",
     "rootDir": "./",
     "sourceMap": true,
     "removeComments": false,
+    "declaration": false,
     
     /* Interop Constraints */
     "esModuleInterop": true,
@@ -33,8 +34,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "**/*.ts",
-    "**/*.js"
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules",

@@ -13,101 +13,80 @@ import { IpcRenderer } from 'electron';
  * IPC channel names for type safety
  * Used for communication between main and renderer processes
  */
-export const IPCChannels = {
-  // Panel operations
-  RESIZE_IMG_REQ: 'resizeImgREQ',
-  CROP_IMG_REQ: 'cropImgREQ',
-  FILTER_IMG_REQ: 'filterImgREQ',
-  ROTATE_IMG_REQ: 'rotateImgREQ',
-  PAINT_IMG_REQ: 'paintImgREQ',
-  IMAGE_ANALYSIS_IMG_REQ: 'image_analysisImgREQ',
-
-  // Resize commands
-  RESIZE_IMG_CMD: 'resizeImgCMD',
-  RESIZE_PIXEL_IMG_CMD: 'resizePixelImgCMD',
-  RESIZE_VALUE_SEND: 'resizeValueSEND',
-  RESIZE_PIXEL_VALUE_SEND: 'resizePixelValueSEND',
-
-  // Filter commands
-  BLUR_IMG_CMD: 'blurImgCMD',
-  BLUR_VALUE_SEND: 'blurValueSEND',
-  SHARPEN_IMG_CMD: 'sharpenImgCMD',
-  SHARPEN_VALUE_SEND: 'sharpenValueSEND',
-  NORMALIZE_IMG_REQ: 'normalizeImgREQ',
-  NORMALIZE_IMG_CMD: 'normalizeImgCMD',
-  MEDIAN_IMG_CMD: 'medianImgCMD',
-  MEDIAN_VALUE_SEND: 'medianValueSEND',
-  DILATE_IMG_CMD: 'dilateImgCMD',
-  DILATE_VALUE_SEND: 'dilateValueSEND',
-  ERODE_IMG_CMD: 'erodeImgCMD',
-  ERODE_VALUE_SEND: 'erodeValueSEND',
-  BITWISE_IMG_CMD: 'bitwiseImgCMD',
-  BITWISE_VALUE_SEND: 'bitwiseValueSEND',
-  NEGATIVE_IMG_REQ: 'negativeImgREQ',
-  NEGATIVE_IMG_CMD: 'negativeImgCMD',
-  GRAYSCALE_IMG_REQ: 'grayScaleImgREQ',
-  GRAYSCALE_IMG_CMD: 'grayScaleImgCMD',
-
-  // Rotate commands
-  ROTATE_IMG_CMD: 'rotateImgCMD',
-  ROTATE_VALUE_SEND: 'rotateValueSEND',
-  ROTATE_LEFT_IMG_REQ: 'rotateLeftImgREQ',
-  ROTATE_LEFT_IMG_CMD: 'rotateLeftImgCMD',
-  ROTATE_RIGHT_IMG_REQ: 'rotateRightImgREQ',
-  ROTATE_RIGHT_IMG_CMD: 'rotateRightImgCMD',
-  FLIP_IMG_REQ: 'flipImgREQ',
-  FLIP_IMG_CMD: 'flipImgCMD',
-  FLOP_IMG_REQ: 'flopImgREQ',
-  FLOP_IMG_CMD: 'flopImgCMD',
-
-  // Paint commands
-  TINT_IMG_CMD: 'tintImgCMD',
-  TINT_VALUE_SEND: 'tintValueSEND',
-  COLORPICKER_IMG_REQ: 'colorpickerImgREQ',
-  COLORPICKER_IMG_CMD: 'colorpickerImgCMD',
-  COLORPICKER_VALUE_SEND: 'colorpickerValueSEND',
-  COLORPICKER_VALUE_RECV: 'colorpickerValueRECV',
-  WATERMARK_UPLOAD_REQ: 'watermarkUploadREQ',
-  WATERMARK_UPLOAD_CMD: 'watermarkUploadCMD',
-  WATERMARK_IMG_REQ: 'watermarkImgREQ',
-  WATERMARK_IMG_CMD: 'watermarkImgCMD',
-  DRAW_IMG_REQ: 'drawImgREQ',
-  DRAW_IMG_CMD: 'drawImgCMD',
-  PAD_IMG_REQ: 'padImgREQ',
-  PAD_IMG_CMD: 'padImgCMD',
-
-  // Crop commands
-  RECT_CROP_IMG_REQ: 'rectCropImgREQ',
-  CROP_IMG_CMD: 'cropImgCMD',
-
-  // File operations
-  OPEN_IMG_CMD: 'openImgCMD',
-  SAVE_IMG_REQ: 'saveImgREQ',
-  SAVE_IMG_CMD: 'saveImgCMD',
-  SAVE_AS_IMG_CMD: 'saveAsImgCMD',
-  SET_EXTENSION_CMD: 'setExtensionCMD',
-  EXTENSION_VALUE_SEND: 'extensionValueSEND',
-  DELETE_IMG_REQ: 'deleteImgREQ',
-  DELETE_IMG_CMD: 'deleteImgCMD',
-
-  // System commands
-  SHOW_MENU_REQ: 'showMenuREQ',
-  FULLSCREEN_REQ: 'FullScreenREQ',
-  DEFAULT_SCREEN_REQ: 'DefaultScreenREQ',
-  SHOW_NOTIFICATION_REQ: 'showNotificationREQ',
-  SHOW_NOTIFICATION_CMD: 'showNotificationCMD',
-
-  // Context menu
-  SHOW_IMGKIT_CONTEXT_MENU: 'show-imgkit-context-menu',
-  IMGKIT_CONTEXT_MENU_ACTION: 'imgkit-context-menu-action',
-
-  // Layer events
-  IMGKIT_LAYER_EVENT: 'imgkit-layer-event',
-
-  // Clipboard
-  COPY_IMAGE_TO_CLIPBOARD: 'copy-image-to-clipboard',
-  PASTE_IMAGE_FROM_CLIPBOARD: 'paste-image-from-clipboard',
-} as const;
+export declare const IPCChannels: {
+  readonly RESIZE_IMG_REQ: 'resizeImgREQ';
+  readonly CROP_IMG_REQ: 'cropImgREQ';
+  readonly FILTER_IMG_REQ: 'filterImgREQ';
+  readonly ROTATE_IMG_REQ: 'rotateImgREQ';
+  readonly PAINT_IMG_REQ: 'paintImgREQ';
+  readonly IMAGE_ANALYSIS_IMG_REQ: 'image_analysisImgREQ';
+  readonly RESIZE_IMG_CMD: 'resizeImgCMD';
+  readonly RESIZE_PIXEL_IMG_CMD: 'resizePixelImgCMD';
+  readonly RESIZE_VALUE_SEND: 'resizeValueSEND';
+  readonly RESIZE_PIXEL_VALUE_SEND: 'resizePixelValueSEND';
+  readonly BLUR_IMG_CMD: 'blurImgCMD';
+  readonly BLUR_VALUE_SEND: 'blurValueSEND';
+  readonly SHARPEN_IMG_CMD: 'sharpenImgCMD';
+  readonly SHARPEN_VALUE_SEND: 'sharpenValueSEND';
+  readonly NORMALIZE_IMG_REQ: 'normalizeImgREQ';
+  readonly NORMALIZE_IMG_CMD: 'normalizeImgCMD';
+  readonly MEDIAN_IMG_CMD: 'medianImgCMD';
+  readonly MEDIAN_VALUE_SEND: 'medianValueSEND';
+  readonly DILATE_IMG_CMD: 'dilateImgCMD';
+  readonly DILATE_VALUE_SEND: 'dilateValueSEND';
+  readonly ERODE_IMG_CMD: 'erodeImgCMD';
+  readonly ERODE_VALUE_SEND: 'erodeValueSEND';
+  readonly BITWISE_IMG_CMD: 'bitwiseImgCMD';
+  readonly BITWISE_VALUE_SEND: 'bitwiseValueSEND';
+  readonly NEGATIVE_IMG_REQ: 'negativeImgREQ';
+  readonly NEGATIVE_IMG_CMD: 'negativeImgCMD';
+  readonly GRAYSCALE_IMG_REQ: 'grayScaleImgREQ';
+  readonly GRAYSCALE_IMG_CMD: 'grayScaleImgCMD';
+  readonly ROTATE_IMG_CMD: 'rotateImgCMD';
+  readonly ROTATE_VALUE_SEND: 'rotateValueSEND';
+  readonly ROTATE_LEFT_IMG_REQ: 'rotateLeftImgREQ';
+  readonly ROTATE_LEFT_IMG_CMD: 'rotateLeftImgCMD';
+  readonly ROTATE_RIGHT_IMG_REQ: 'rotateRightImgREQ';
+  readonly ROTATE_RIGHT_IMG_CMD: 'rotateRightImgCMD';
+  readonly FLIP_IMG_REQ: 'flipImgREQ';
+  readonly FLIP_IMG_CMD: 'flipImgCMD';
+  readonly FLOP_IMG_REQ: 'flopImgREQ';
+  readonly FLOP_IMG_CMD: 'flopImgCMD';
+  readonly TINT_IMG_CMD: 'tintImgCMD';
+  readonly TINT_VALUE_SEND: 'tintValueSEND';
+  readonly COLORPICKER_IMG_REQ: 'colorpickerImgREQ';
+  readonly COLORPICKER_IMG_CMD: 'colorpickerImgCMD';
+  readonly COLORPICKER_VALUE_SEND: 'colorpickerValueSEND';
+  readonly COLORPICKER_VALUE_RECV: 'colorpickerValueRECV';
+  readonly WATERMARK_UPLOAD_REQ: 'watermarkUploadREQ';
+  readonly WATERMARK_UPLOAD_CMD: 'watermarkUploadCMD';
+  readonly WATERMARK_IMG_REQ: 'watermarkImgREQ';
+  readonly WATERMARK_IMG_CMD: 'watermarkImgCMD';
+  readonly DRAW_IMG_REQ: 'drawImgREQ';
+  readonly DRAW_IMG_CMD: 'drawImgCMD';
+  readonly PAD_IMG_REQ: 'padImgREQ';
+  readonly PAD_IMG_CMD: 'padImgCMD';
+  readonly RECT_CROP_IMG_REQ: 'rectCropImgREQ';
+  readonly CROP_IMG_CMD: 'cropImgCMD';
+  readonly OPEN_IMG_CMD: 'openImgCMD';
+  readonly SAVE_IMG_REQ: 'saveImgREQ';
+  readonly SAVE_IMG_CMD: 'saveImgCMD';
+  readonly SAVE_AS_IMG_CMD: 'saveAsImgCMD';
+  readonly SET_EXTENSION_CMD: 'setExtensionCMD';
+  readonly EXTENSION_VALUE_SEND: 'extensionValueSEND';
+  readonly DELETE_IMG_REQ: 'deleteImgREQ';
+  readonly DELETE_IMG_CMD: 'deleteImgCMD';
+  readonly SHOW_MENU_REQ: 'showMenuREQ';
+  readonly FULLSCREEN_REQ: 'FullScreenREQ';
+  readonly DEFAULT_SCREEN_REQ: 'DefaultScreenREQ';
+  readonly SHOW_NOTIFICATION_REQ: 'showNotificationREQ';
+  readonly SHOW_NOTIFICATION_CMD: 'showNotificationCMD';
+  readonly SHOW_IMGKIT_CONTEXT_MENU: 'show-imgkit-context-menu';
+  readonly IMGKIT_CONTEXT_MENU_ACTION: 'imgkit-context-menu-action';
+  readonly IMGKIT_LAYER_EVENT: 'imgkit-layer-event';
+  readonly COPY_IMAGE_TO_CLIPBOARD: 'copy-image-to-clipboard';
+  readonly PASTE_IMAGE_FROM_CLIPBOARD: 'paste-image-from-clipboard';
+};
 
 export type IPCChannelName = typeof IPCChannels[keyof typeof IPCChannels];
 
@@ -343,7 +322,7 @@ export interface IPCChannelMapping {
  * Menu item configuration
  */
 export interface MenuItemConfig {
-  label: string;
+  label?: string;
   accelerator?: string;
   action?: string;
   enabled?: boolean;

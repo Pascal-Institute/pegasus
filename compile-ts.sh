@@ -9,7 +9,8 @@ find . -name "*.ts" -not -name "*.d.ts" -not -path "./node_modules/*" -not -path
     # Check if .ts file was modified more recently than .js or if .js doesn't exist
     if [ ! -f "$jsfile" ] || [ "$tsfile" -nt "$jsfile" ]; then
         echo "Compiling: $tsfile"
-        npx tsc "$tsfile" --outDir . --sourceMap --skipLibCheck --module commonjs --target ES2020 --esModuleInterop --allowSyntheticDefaultImports --forceConsistentCasingInFileNames --resolveJsonModule --allowJs --strict false --noImplicitAny false 2>/dev/null
+        # Use tsconfig.json settings with just the specific file
+        npx tsc "$tsfile" 2>/dev/null
     fi
 done
 

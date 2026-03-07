@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * IPCBridge - Utility class to simplify IPC communication
  *

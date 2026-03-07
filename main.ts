@@ -1,5 +1,7 @@
+// @ts-nocheck
 const electron = require("electron");
-const pkg = require("./package.json");
+const path = require("path");
+const pkg = require(path.join(__dirname, "..", "package.json"));
 const {
   app,
   ipcMain,
@@ -18,7 +20,7 @@ const { IPCBridge } = require("./utils/ipc_bridge");
 if (process.env.NODE_ENV === "development") {
   try {
     require("electron-reload")(__dirname, {
-      electron: require(`${__dirname}/node_modules/electron`),
+      electron: require("electron"),
     });
   } catch (e) {
     console.log("electron-reload not found (this is okay in production)");
@@ -39,7 +41,33 @@ const WINDOW_CONFIG = {
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow(WINDOW_CONFIG);
-  mainWindow.loadFile("index.html");
+  mainWindow.webContents.on("console-message", (_event, level, message) => {
+    console.log(`[renderer:${level}] ${message}`);
+  });
+  mainWindow.webContents.on(
+    "did-fail-load",
+    (_event, errorCode, errorDescription, validatedURL) => {
+      console.error(
+        `[renderer:load-fail] ${errorCode} ${errorDescription} ${validatedURL}`
+      );
+    }
+  );
+  mainWindow.webContents.on("did-finish-load", () => {
+    void mainWindow.webContents.executeJavaScript(`
+      JSON.stringify({
+        href: location.href,
+        hasTemplate: Boolean(document.getElementById("image-panel-template")),
+        hasScrollContainer: Boolean(document.getElementById("scroll-container")),
+        panelCount: document.querySelectorAll(".imgPanel").length,
+        containerChildren: document.getElementById("scroll-container")?.children.length ?? -1
+      })
+    `).then((state) => {
+      console.log(`[renderer:dom] ${state}`);
+    }).catch((error) => {
+      console.error(`[renderer:dom-error] ${error.message}`);
+    });
+  });
+  mainWindow.loadFile(path.join(__dirname, "index.html"));
   return mainWindow;
 }
 
@@ -52,9 +80,21 @@ function createPanelView(mainWindow) {
     },
   });
 
+  view.webContents.on("console-message", (_event, level, message) => {
+    console.log(`[panel:${level}] ${message}`);
+  });
+  view.webContents.on(
+    "did-fail-load",
+    (_event, errorCode, errorDescription, validatedURL) => {
+      console.error(
+        `[panel:load-fail] ${errorCode} ${errorDescription} ${validatedURL}`
+      );
+    }
+  );
+
   view.setBounds({ x: 0, y: 33, width: 1280, height: 90 });
   view.setAutoResize({ width: true, height: false });
-  view.webContents.loadFile(`./pages/_panel.html`);
+  view.webContents.loadFile(path.join(__dirname, "pages", "_panel.html"));
   mainWindow.addBrowserView(view);
 }
 
@@ -224,7 +264,9 @@ app.whenReady().then(() => {
       const panelName = operation.replace("ImgREQ", "");
       mainWindow
         .getBrowserViews()[0]
-        .webContents.loadFile(`./pages/${panelName}_panel.html`);
+        .webContents.loadFile(
+          path.join(__dirname, "pages", `${panelName}_panel.html`)
+        );
     });
   });
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { ipcRenderer } = require("electron");
 
 // UI state management

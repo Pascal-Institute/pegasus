@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ImageLayer - Individual Image Panel Component
 // Handles all operations for a single image panel
 //

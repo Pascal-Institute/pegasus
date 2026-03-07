@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { ipcRenderer } = require("electron");
 const { ImageProcessor } = require("../processing/image_processor");
 const LAYER_EVENT_CHANNEL = "imgkit-layer-event";

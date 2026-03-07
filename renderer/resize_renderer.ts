@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { ipcRenderer } = require("electron");
 
 // Resize operations configuration

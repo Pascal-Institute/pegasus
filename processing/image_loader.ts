@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ImageLoader - Image Loading Operations
 // Handles loading images from files or buffers
 // Supports special formats (BMP, ICO, TIFF)

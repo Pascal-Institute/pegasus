@@ -1,3 +1,4 @@
+// @ts-nocheck
 // FormatConverter - Image Format Conversion
 const sharp = require("sharp");
 const bmp = require("sharp-bmp");

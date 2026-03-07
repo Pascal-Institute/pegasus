@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GIF Animation Module
  * Handles all GIF animation playback functionality independently

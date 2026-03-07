@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ImgKit Renderer Process - UI Logic
 // Handles all DOM manipulation, events, and user interactions
 //

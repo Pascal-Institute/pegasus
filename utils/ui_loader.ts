@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ImgKit UI Loader
  * Dynamically loads ImgKit UI components and styles into the main application
@@ -9,8 +10,7 @@
 
   try {
     // Load HTML content
-    // Use process.cwd() to get the application root directory
-    const uiPath = path.join(process.cwd(), "components", "imgpanel.html");
+    const uiPath = path.join(__dirname, "..", "components", "imgpanel.html");
     const uiContent = fs.readFileSync(uiPath, "utf-8");
 
     // Extract and load CSS from head section

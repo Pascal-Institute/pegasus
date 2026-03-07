@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ImageProcessor - Pure Image Processing Functions
 // Handles image processing operations (resize, crop, color extraction)
 // No longer handles file I/O - use ImageLoader directly for that

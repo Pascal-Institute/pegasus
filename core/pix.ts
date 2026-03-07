@@ -1,3 +1,4 @@
+// @ts-nocheck
 const jsonfile = require("jsonfile");
 const sharp = require("sharp");
 

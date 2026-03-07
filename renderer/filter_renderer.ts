@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { ipcRenderer } = require("electron");
 
 // Value-based filter configurations

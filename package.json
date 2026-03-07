@@ -2,7 +2,7 @@
   "name": "pegasus",
   "version": "1.0.12",
   "description": "",
-  "main": "main.js",
+  "main": "dist/main.js",
   "dependencies": {
     "color-namer": "^1.4.0",
     "fs": "^0.0.1-security",
@@ -15,13 +15,16 @@
     "electron": "^37.3.0",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
-    "electron-reload": "^2.0.0-alpha.1"
+    "electron-reload": "^2.0.0-alpha.1",
+    "typescript": "^5.8.2",
+    "@types/node": "^22.13.14"
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "start": "electron .",
-    "build": "electron-builder",
-    "build:win-store": "electron-builder --win appx",
+    "build:ts": "tsc -p tsconfig.json && node scripts/copy-static.cjs",
+    "start": "npm run build:ts && electron .",
+    "build": "npm run build:ts && electron-builder",
+    "build:win-store": "npm run build:ts && electron-builder --win appx",
     "rebuild": "electron-rebuild -f -w sharp"
   },
   "build": {

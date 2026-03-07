@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { ipcRenderer } = require("electron");
 
 // Simple action buttons
